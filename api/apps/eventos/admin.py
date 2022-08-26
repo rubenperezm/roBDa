@@ -1,3 +1,8 @@
 from django.contrib import admin
+#from apps.base.models import MejoresValoradas
+from apps.base.models import Evento
 
-# Register your models here.
+
+
+#admin.site.register(MejoresValoradas)
+admin.site.register(Evento)

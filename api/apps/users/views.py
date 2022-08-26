@@ -11,6 +11,17 @@ from rest_framework.permissions import AllowAny
 from apps.users.api.serializers import UserSerializer, PasswordSerializer
 
 
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token['username'] = user.username
+        return token
+
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
+
 class Register(GenericAPIView):
     permission_classes = [AllowAny,]
     def post(self, request):
@@ -22,7 +33,7 @@ class Register(GenericAPIView):
         serializer.create(serializer.validated_data)
         return Response({'message': 'Usuario registrado correctamente.'}, status = status.HTTP_201_CREATED)
 
-
+'''
 class Login(TokenObtainPairView):
     serializer_class = TokenObtainPairSerializer
 
@@ -42,6 +53,7 @@ class Login(TokenObtainPairView):
                     'message': 'Inicio de Sesión Existoso'
                 })
         return Response({'error': 'Contraseña o nombre de usuario incorrectos'}, status=status.HTTP_400_BAD_REQUEST)
+'''
 
 class Logout(GenericAPIView):
     def post(self, request):

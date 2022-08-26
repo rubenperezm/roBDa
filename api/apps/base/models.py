@@ -95,7 +95,7 @@ class Opcion(models.Model):
         verbose_name = 'Opción'
         verbose_name_plural = 'Opciones'
     
-    pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta")
+    pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta", related_name="Opciones")
     texto = models.CharField('Texto', max_length = 400)
     esCorrecta = models.BooleanField('Es correcta')
 

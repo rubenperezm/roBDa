@@ -1,3 +1,9 @@
 from django.contrib import admin
+#from apps.base.models import Pregunta
+from apps.base.models import Tema
 
-# Register your models here.
+
+
+#admin.site.register(Pregunta)
+admin.site.register(Tema)
+
