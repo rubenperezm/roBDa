@@ -14,8 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+from apps.preguntas.api.views.preguntas_viewsets import PreguntaAleatoria
 from apps.users.api.api import *
+from django.views.static import serve
+from django.conf import settings
 
 from apps.users.views import *
 from apps.eventos.api.routers import *
@@ -34,6 +37,14 @@ urlpatterns = [
     path('users/set-password/', set_password, name = 'change_password'),
     path('eventos/', include('apps.eventos.api.routers')),
     path('preguntas/', include('apps.preguntas.api.routers')),
+    path('pregunta-aleatoria/', PreguntaAleatoria.as_view(), name='aleatoria'),
+
     #path('partidas/', include('apps.partidas.api.routers')),
     #TODO path('stats/', include('apps.stats.api.routers')),
+]
+
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {
+        'document_root': settings.MEDIA_ROOT,
+    })
 ]

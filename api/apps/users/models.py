@@ -25,7 +25,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
-    
+
     username = models.CharField('Nombre de Usuario', max_length = 30, unique = True)
     email = models.EmailField('Correo Electrónico', max_length = 50, unique = True)
     is_active = models.BooleanField('Está activo',default = True)
