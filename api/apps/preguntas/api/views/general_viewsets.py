@@ -1,17 +1,21 @@
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
 
-from apps.base.models import Tema
-from apps.preguntas.api.serializers.general_serializers import TemaSerializer
+from apps.base.models import Tema, Imagen
+from apps.base.permissions import esProfeOSoloLectura
+from apps.preguntas.api.serializers.general_serializers import TemaSerializer, ImagenSerializer
 
 class TemaViewSet(ModelViewSet):
-    permission_classes = [IsAdminUser,]
-    permission_class_per_method = {
-        "list": [IsAuthenticated],
-        #TODO considerar si es necesario el metodo get
-        "get": [IsAuthenticated],
-    }
+    permission_classes = [esProfeOSoloLectura,]
+
     serializer_class = TemaSerializer
     model = Tema
+
+    queryset = model.objects.all()
+
+class ImagenViewSet(ModelViewSet):
+    permission_classes = [esProfeOSoloLectura,]
+
+    serializer_class = ImagenSerializer
+    model = Imagen
 
     queryset = model.objects.all()

@@ -12,12 +12,15 @@ from apps.users.api.serializers import UserSerializer, PasswordSerializer
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
 
         token['username'] = user.username
+        token['esProfesor'] = user.is_staff
         return token
+
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer

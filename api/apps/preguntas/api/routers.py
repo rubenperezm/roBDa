@@ -1,9 +1,12 @@
 from rest_framework.routers import DefaultRouter
+from apps.preguntas.api.views.preguntas_viewsets import PreguntaViewSet
 
-from apps.preguntas.api.views.general_viewsets import TemaViewSet
+from apps.preguntas.api.views.general_viewsets import ImagenViewSet, TemaViewSet
 
 router = DefaultRouter()
 
+router.register('', PreguntaViewSet, basename="preguntas")
 router.register('temas', TemaViewSet, basename="temas")
-#TODO imagenes, preguntas, etc.
+router.register('imagenes', ImagenViewSet, basename="imagenes")
+
 urlpatterns = router.urls

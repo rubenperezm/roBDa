@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 
 from apps.users.models import User
 
@@ -40,10 +41,11 @@ class Imagen(models.Model):
         verbose_name_plural = 'Imágenes'
 
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema")
-    path = models.ImageField('Fichero', upload_to='img/', unique = True)
+    path = models.ImageField('Imagen Pregunta', upload_to='img/', unique = True)
 
     def __str__(self):
         return str(self.id)
+
 
 class Evento(BaseModel):
     class Meta:
@@ -59,7 +61,7 @@ class Evento(BaseModel):
     #nPreguntas = models.IntegerField('Número de preguntas')
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema")
     idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, default = 1)
-    terminada = models.BooleanField('Evento terminado', default = 0)
+    terminada = models.BooleanField('Evento terminado', default = False)
 
     def __str__(self):
         return self.name
@@ -69,6 +71,7 @@ class Pregunta(BaseModel):
         verbose_name = 'Pregunta'
         verbose_name_plural = 'Preguntas'
     
+    # TODO considerar si puede cambiarse por un booleano enEvento
     class EstadoPregunta(models.Choices):
         EN_EVENTO = 1 # Pregunta en evento
         SIN_ELIMINAR = 2 # Pregunta fuera de evento, esté o no reportada
@@ -95,7 +98,7 @@ class Opcion(models.Model):
         verbose_name = 'Opción'
         verbose_name_plural = 'Opciones'
     
-    pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta", related_name="Opciones")
+    pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta", related_name="opciones")
     texto = models.CharField('Texto', max_length = 400)
     esCorrecta = models.BooleanField('Es correcta')
 
@@ -178,7 +181,7 @@ class MejoresValoradas(models.Model):
     class Meta:
         verbose_name = "Pregunta mejor valorada"
         verbose_name_plural = "Preguntas mejor valoradas"
-        unique_together = ('evento', 'usuario', 'pregunta')
+        unique_together = ('evento', 'usuario')
 
     evento = models.ForeignKey(Evento, on_delete = models.CASCADE, verbose_name = "Evento")
     usuario = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name = "Usuario")
@@ -199,6 +202,7 @@ class Report(BaseModel):
         VALIDADO = 2
         INVALIDADO = 3
 
+    # TODO pensar si seria mejor FK de User y de Pregunta en vez de la del Log
     log = models.ForeignKey(AnswerLogs, on_delete = models.CASCADE, verbose_name = "Log")
     motivo = models.SmallIntegerField('Motivo', choices = MotivoReport.choices)
     descripcion = models.CharField('Descripción', max_length= 400)
