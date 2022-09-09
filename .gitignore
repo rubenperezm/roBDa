@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 #Media
-/media/*
-/static/*
+/api/media/*
+/api/static/*
