@@ -10,7 +10,10 @@ class TemaViewSet(ModelViewSet):
     serializer_class = TemaSerializer
     model = Tema
 
-    queryset = model.objects.all()
+    def get_queryset(self, pk=None):
+        if pk is None:
+            return self.model.objects.all()
+        return self.model.objects.filter(id=pk).first()
 
 class ImagenViewSet(ModelViewSet):
     permission_classes = [esProfeOSoloLectura,]
@@ -18,4 +21,7 @@ class ImagenViewSet(ModelViewSet):
     serializer_class = ImagenSerializer
     model = Imagen
 
-    queryset = model.objects.all()
+    def get_queryset(self, pk=None):
+        if pk is None:
+            return self.model.objects.all()
+        return self.model.objects.filter(id=pk).first()

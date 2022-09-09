@@ -26,7 +26,7 @@ class isNotStaff(permissions.BasePermission):
     message = 'Esta acción solo está disponible para alumnos'
 
     def has_permission(self, request, view):
-        return not permissions.IsAdminUser
+        return not permissions.IsAdminUser.has_permission(self, request, view)
 
 class reportPermission(permissions.BasePermission):
     message = 'Los report solo puede crearlos un alumno en la tercera fase de una competición'
@@ -34,3 +34,4 @@ class reportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # TODO hacer lo que sea necesario
         return True
+

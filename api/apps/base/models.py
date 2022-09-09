@@ -29,8 +29,8 @@ class BaseModel(models.Model):
         abstract = True
     
     id = models.AutoField(primary_key = True)
-    created_date = models.DateField('Fecha de Creación', auto_now=False, auto_now_add=True)
-    modified_date = models.DateField('Fecha de Modificación', auto_now=True, auto_now_add=False)
+    created_date = models.DateTimeField('Fecha de Creación', auto_now=False, auto_now_add=True)
+    modified_date = models.DateTimeField('Fecha de Modificación', auto_now=True, auto_now_add=False)
 
 # ---------------------------------------------------------------------------------------------------
 
@@ -97,6 +97,7 @@ class Opcion(models.Model):
     class Meta:
         verbose_name = 'Opción'
         verbose_name_plural = 'Opciones'
+        unique_together  = ('pregunta', 'texto')
     
     pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta", related_name="opciones")
     texto = models.CharField('Texto', max_length = 400)
@@ -116,13 +117,9 @@ class Partida(BaseModel):
         DUELO = 3
 
     usuario = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name = "Usuario")
-    preguntas = models.ManyToManyField(Pregunta, through = 'AnswerLogs',
-                                        through_fields=('partida','pregunta'),
-                                      )
     modoJuego = models.SmallIntegerField('Modo de juego', choices = ModoJuego.choices)
-    tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema")
+    tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema", null = True)
     idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, default = 1)
-    inicio = models.DateTimeField('Inicio de la partida', auto_now_add=True)
     # TODO dispositivo = ...
 
     def __str__(self):
@@ -132,12 +129,12 @@ class AnswerLogs(models.Model):
     class Meta:
         verbose_name = "Respuesta individual"
         verbose_name_plural = "Respuestas individuales"
-        unique_together = ('partida', 'pregunta')
+        #unique_together = ('partida', 'pregunta') # No permitiria el cuestionario de repaso
 
-    partida = models.ForeignKey(Partida, on_delete = models.CASCADE, verbose_name = "Partida")
+    partida = models.ForeignKey(Partida, on_delete = models.CASCADE, verbose_name = "Partida", related_name = 'preguntas')
     pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta")
     respuesta_user = models.ForeignKey(Opcion, on_delete = models.CASCADE, null = True, verbose_name = "Respuesta del usuario")
-    timeIni = models.DateTimeField('Hora de inicio de la pregunta', auto_now_add = True) #debe ser auto_add_now?
+    timeIni = models.DateTimeField('Hora de inicio de la pregunta', auto_now_add = True)
     timeFin = models.DateTimeField('Hora de finalización de la pregunta', null = True)
     acierto = models.BooleanField('Es acierto', null = True)
 
@@ -191,6 +188,7 @@ class Report(BaseModel):
     class Meta:
         verbose_name = "Pregunta reportada"
         verbose_name_plural = "Preguntas reportadas"
+        unique_together = ('reporter', 'pregunta')
 
     class MotivoReport(models.Choices):
         INCORRECTO = 1
@@ -203,7 +201,8 @@ class Report(BaseModel):
         INVALIDADO = 3
 
     # TODO pensar si seria mejor FK de User y de Pregunta en vez de la del Log
-    log = models.ForeignKey(AnswerLogs, on_delete = models.CASCADE, verbose_name = "Log")
+    reporter = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name="Usuario que reporta")
+    pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta")
     motivo = models.SmallIntegerField('Motivo', choices = MotivoReport.choices)
     descripcion = models.CharField('Descripción', max_length= 400)
     estado = models.SmallIntegerField('Estado', choices = EstadoReport.choices, default = 1)

@@ -20,6 +20,7 @@ class OpcionSerializer(serializers.ModelSerializer):
 
 class PreguntaSerializer(serializers.ModelSerializer):
     opciones = OpcionSerializer(many=True, read_only=False)
+
     tema = serializers.SlugRelatedField(
         slug_field='nombre',
         queryset=Tema.objects.all()
@@ -35,7 +36,7 @@ class PreguntaSerializer(serializers.ModelSerializer):
             nCorrectas += opcion['esCorrecta']
 
         if nCorrectas != 1:
-            raise serializers.ValidationError("Sólo debe haber una respuesta correcta")
+            raise serializers.ValidationError("Debe haber exactamente una respuesta correcta")
         elif len(value) != 4:
             raise serializers.ValidationError("Sólo debe haber cuatro opciones")
         else:
