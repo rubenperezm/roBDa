@@ -1,3 +1,5 @@
+from datetime import datetime
+from tabnanny import verbose
 from django.db import models
 from django.utils.text import slugify
 
@@ -44,7 +46,7 @@ class Imagen(models.Model):
     path = models.ImageField('Imagen Pregunta', upload_to='img/', unique = True)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.path)
 
 
 class Evento(BaseModel):
@@ -66,6 +68,20 @@ class Evento(BaseModel):
     def __str__(self):
         return self.name
 
+    @property
+    def fase_actual(self):
+        now = datetime.now().timestamp()
+        if now < self.fechaInicio.timestamp():
+            return 'No ha comenzado'
+        elif now < self.finFase1.timestamp():
+            return 'Crear preguntas'
+        elif now < self.finFase2.timestamp():
+            return 'Realizar test'
+        elif now < self.finFase3.timestamp():
+            return 'Ver resultados test'
+        elif not self.terminada:
+            return 'Esperando corrección del profesor'
+        return 'Finalizada'
 class Pregunta(BaseModel):
     class Meta:
         verbose_name = 'Pregunta'
@@ -76,12 +92,13 @@ class Pregunta(BaseModel):
         EN_EVENTO = 1 # Pregunta en evento
         SIN_ELIMINAR = 2 # Pregunta fuera de evento, esté o no reportada
         ELIMINADA = 3 # Pregunta eliminada
+        REPORTADA = 4 # TODO las preguntas reportadas deben seguir mostrandose en pregunta_aleatoria?
 
     creador = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name = "Creador de la pregunta")
     imagen = models.ForeignKey(Imagen, on_delete = models.CASCADE, null = True, verbose_name = "Imagen")
 
     enunciado = models.CharField('Enunciado', max_length = 400)
-    evento = models.ForeignKey(Evento, on_delete = models.CASCADE, null = True, verbose_name = 'Evento en el que fue creada')
+    evento = models.ForeignKey(Evento, related_name = 'evento', on_delete = models.CASCADE, null = True, verbose_name = 'Evento en el que fue creada')
     estado = models.SmallIntegerField('Estado', choices = EstadoPregunta.choices, default = 1)
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema")
     idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, default = 1)
@@ -111,15 +128,8 @@ class Partida(BaseModel):
         verbose_name = 'Partida'
         verbose_name_plural = 'Partidas'
     
-    class ModoJuego(models.Choices):
-        REPASO = 1
-        EVENTO = 2
-        DUELO = 3
-
-    usuario = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name = "Usuario")
-    modoJuego = models.SmallIntegerField('Modo de juego', choices = ModoJuego.choices)
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema", null = True)
-    idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, default = 1)
+    idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, null = True)
     # TODO dispositivo = ...
 
     def __str__(self):
@@ -136,11 +146,16 @@ class AnswerLogs(models.Model):
     respuesta_user = models.ForeignKey(Opcion, on_delete = models.CASCADE, null = True, verbose_name = "Respuesta del usuario")
     timeIni = models.DateTimeField('Hora de inicio de la pregunta', auto_now_add = True)
     timeFin = models.DateTimeField('Hora de finalización de la pregunta', null = True)
-    acierto = models.BooleanField('Es acierto', null = True)
 
     def __str__(self):
         return f'Registro {self.id}'
 
+    @property
+    def acierto(self):
+        if not self.respuesta_user:
+            return None
+        return self.respuesta_user == Opcion.objects.get(pregunta = self.pregunta.id, esCorrecta=True)
+                
 class Duelos(BaseModel):
     class Meta:
         verbose_name = "Duelo"
@@ -151,12 +166,14 @@ class Duelos(BaseModel):
         FINALIZADA = 2
         RECHAZADA = 3
 
-    partidaUser1 = models.ForeignKey(Partida, related_name = 'Partida_retador', on_delete = models.CASCADE, verbose_name = "Partida del retador")
-    partidaUser2 = models.ForeignKey(Partida, related_name = 'Partida_retado', on_delete = models.CASCADE, null = True, verbose_name = "Partida del retado")
+    partidaUser1 = models.OneToOneField(Partida, related_name = 'partida_retador', on_delete = models.CASCADE, verbose_name = "Partida del retador")
+    partidaUser2 = models.OneToOneField(Partida, related_name = 'partida_retado', on_delete = models.CASCADE, null = True, verbose_name = "Partida del retado")
+    user1 = models.ForeignKey(User, related_name = 'retador', on_delete = models.CASCADE, verbose_name = 'Usuario retador')
+    user2 = models.ForeignKey(User, related_name = 'retado', on_delete = models.CASCADE, verbose_name = 'Usuario retado')
     estado = models.SmallIntegerField('Estado', choices = EstadoDuelo.choices, default = 1)
 
     def __str__(self):
-        return f'Duelo {self.id}'
+        return f'Duelo {self.id}: {self.user1.id} vs. {self.user2.id}'
 
 class UserComp(models.Model):
 
@@ -164,16 +181,29 @@ class UserComp(models.Model):
         verbose_name = "Participación en evento"
         verbose_name_plural = "Participaciones en eventos"
 
-    partida = models.ForeignKey(Partida, on_delete = models.CASCADE, verbose_name = "Partida")
+    partida = models.OneToOneField(Partida, related_name = 'participacion',on_delete = models.CASCADE, verbose_name = "Partida", primary_key = True)
+    user = models.ForeignKey(User, related_name = 'participante', on_delete = models.CASCADE, verbose_name = 'Usuario')
     evento = models.ForeignKey(Evento, on_delete = models.CASCADE, verbose_name = "Evento")
     score_f1 = models.PositiveIntegerField('Puntuación de la fase de creación de pregunta', default = 0)
     score_f2 = models.PositiveIntegerField('Puntuación de la fase de cuestionario', default = 0)
     score_f3 = models.PositiveIntegerField('Puntuación de la fase de reportar', default = 0)
     valoracion = models.SmallIntegerField('Valoración', null = True)
 
+    @property
+    def score(self):
+        return self.score_f1 + self.score_f2 + self.score_f3
+    
     def __str__(self):
         return f'Participación {self.partida}'
 
+class Repaso(models.Model):
+    class Meta:
+        verbose_name = "Repaso"
+        verbose_name_plural = "Repasos"
+
+    partida = models.OneToOneField(Partida, related_name = 'repaso',on_delete = models.CASCADE, verbose_name = "Partida", primary_key = True)
+    user = models.ForeignKey(User, related_name = 'usuario', on_delete = models.CASCADE, verbose_name = 'Usuario')
+    
 class MejoresValoradas(models.Model):
     class Meta:
         verbose_name = "Pregunta mejor valorada"
@@ -200,7 +230,7 @@ class Report(BaseModel):
         VALIDADO = 2
         INVALIDADO = 3
 
-    # TODO pensar si seria mejor FK de User y de Pregunta en vez de la del Log
+    # se necesita saber en que evento se reporta
     reporter = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name="Usuario que reporta")
     pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta")
     motivo = models.SmallIntegerField('Motivo', choices = MotivoReport.choices)

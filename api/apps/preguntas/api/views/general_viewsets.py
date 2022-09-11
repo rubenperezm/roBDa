@@ -1,5 +1,4 @@
 from rest_framework.viewsets import ModelViewSet
-
 from apps.base.models import Tema, Imagen
 from apps.base.permissions import esProfeOSoloLectura
 from apps.preguntas.api.serializers.general_serializers import TemaSerializer, ImagenSerializer

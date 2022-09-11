@@ -34,9 +34,8 @@ urlpatterns = [
     path('register/', Register.as_view(), name = 'register'),
     path('users/', UserAPIView.as_view(), name = 'profile'),
     path('users/set-password/', set_password, name = 'change_password'),
-    path('eventos/', include('apps.eventos.api.routers')),
+    path('eventos/', include('apps.eventos.api.urls')),
     path('preguntas/', include('apps.preguntas.api.urls')),
-    # TODO comprobar si es necesario un router o url (tipo /preguntas/aleatoria)
     path('partidas/', include('apps.partidas.api.urls')),
     #TODO path('stats/', include('apps.stats.api.routers')),
 ]

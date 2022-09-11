@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.base.models import Opcion, Pregunta, Tema
+from apps.base.models import Idioma, Imagen, Opcion, Pregunta, Tema
 
 
 
@@ -49,3 +49,25 @@ class PreguntaSerializer(serializers.ModelSerializer):
             Opcion.objects.create(pregunta=pregunta, **option)
 
         return pregunta
+
+class PreguntaResueltaSerializer(PreguntaSerializer):
+    opciones = OpcionSolucionSerializer(many=True, read_only=False)
+    tema = None
+    class Meta:
+        model = Pregunta
+        exclude = ('id', 'created_date', 'modified_date', 'estado', 'evento', 'creador', 'tema', 'idioma')
+
+class PreguntaListSerializer(PreguntaResueltaSerializer):
+    enunciado = serializers.StringRelatedField()
+    creador = serializers.StringRelatedField()
+    tema = serializers.StringRelatedField()
+    class Meta:
+        model = Pregunta
+        fields = ('id', 'creador', 'enunciado', 'tema', 'idioma', 'estado', 'created_date', 'modified_date')
+
+class PreguntaRetrieveSerializer(PreguntaListSerializer):
+    imagen = serializers.StringRelatedField()
+    evento = serializers.StringRelatedField()
+    class Meta:
+        model = Pregunta
+        fields = '__all__'
