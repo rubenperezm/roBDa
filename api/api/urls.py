@@ -37,7 +37,7 @@ urlpatterns = [
     path('eventos/', include('apps.eventos.api.urls')),
     path('preguntas/', include('apps.preguntas.api.urls')),
     path('partidas/', include('apps.partidas.api.urls')),
-    #TODO path('stats/', include('apps.stats.api.routers')),
+    # TODO path('stats/', include('apps.stats.api.routers')),
 ]
 
 urlpatterns += [

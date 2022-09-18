@@ -59,8 +59,6 @@ class Evento(BaseModel):
     finFase1 = models.DateTimeField('Fin de la fase de creación de pregunta')
     finFase2 = models.DateTimeField('Fin de la fase de cuestionarios')
     finFase3 = models.DateTimeField('Fin de la fase de reportar')
-    #tiempoTest = models.DurationField('Tiempo de duración del cuestionario')
-    #nPreguntas = models.IntegerField('Número de preguntas')
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema")
     idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, default = 1)
     terminada = models.BooleanField('Evento terminado', default = False)
@@ -82,12 +80,12 @@ class Evento(BaseModel):
         elif not self.terminada:
             return 'Esperando corrección del profesor'
         return 'Finalizada'
+
 class Pregunta(BaseModel):
     class Meta:
         verbose_name = 'Pregunta'
         verbose_name_plural = 'Preguntas'
     
-    # TODO considerar si puede cambiarse por un booleano enEvento
     class EstadoPregunta(models.Choices):
         EN_EVENTO = 1 # Pregunta en evento
         SIN_ELIMINAR = 2 # Pregunta fuera de evento, esté o no reportada
@@ -180,10 +178,12 @@ class UserComp(models.Model):
     class Meta:
         verbose_name = "Participación en evento"
         verbose_name_plural = "Participaciones en eventos"
+        unique_together = ('evento', 'user')
 
     partida = models.OneToOneField(Partida, related_name = 'participacion',on_delete = models.CASCADE, verbose_name = "Partida", primary_key = True)
     user = models.ForeignKey(User, related_name = 'participante', on_delete = models.CASCADE, verbose_name = 'Usuario')
     evento = models.ForeignKey(Evento, on_delete = models.CASCADE, verbose_name = "Evento")
+    # TODO considerar hacer @property las puntuaciones de las tres fases
     score_f1 = models.PositiveIntegerField('Puntuación de la fase de creación de pregunta', default = 0)
     score_f2 = models.PositiveIntegerField('Puntuación de la fase de cuestionario', default = 0)
     score_f3 = models.PositiveIntegerField('Puntuación de la fase de reportar', default = 0)
@@ -230,7 +230,6 @@ class Report(BaseModel):
         VALIDADO = 2
         INVALIDADO = 3
 
-    # se necesita saber en que evento se reporta
     reporter = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name="Usuario que reporta")
     pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta")
     motivo = models.SmallIntegerField('Motivo', choices = MotivoReport.choices)

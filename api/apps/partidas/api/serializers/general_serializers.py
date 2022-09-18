@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer, StringRelatedField, ReadOnlyField
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaResueltaSerializer
-from apps.base.models import AnswerLogs, Partida, Repaso
+from apps.base.models import AnswerLogs, Partida
 
 class AnswerLogsSerializer(ModelSerializer):
     pregunta = PreguntaResueltaSerializer()
@@ -36,22 +36,3 @@ class PartidaListSerializer(ModelSerializer):
             'idioma': instance.get_idioma_display() if instance.idioma else 'Esp Ing',
             'tema': instance.tema.nombre if instance.tema else 'Todos'
         }
-
-class RepasoSerializer(ModelSerializer):
-    partida = PartidaSerializer()
-    class Meta:
-        model = Repaso
-        fields = '__all__'
-
-class RepasoListSerializer(RepasoSerializer):
-    partida = PartidaListSerializer()
-    class Meta:
-        model = Repaso
-        fields = '__all__'
-
-class RepasoReviewSerializer(RepasoSerializer):
-    usuario = StringRelatedField()
-    partida = PartidaReviewSerializer()
-    class Meta:
-        model = Repaso
-        fields = '__all__'

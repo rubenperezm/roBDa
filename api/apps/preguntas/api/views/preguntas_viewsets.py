@@ -1,3 +1,4 @@
+from cgitb import lookup
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
@@ -6,19 +7,31 @@ from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from django_filters.rest_framework.backends import DjangoFilterBackend
+from django_filters.rest_framework.filterset import FilterSet
+from django_filters import CharFilter, NumberFilter, ChoiceFilter
 from random import choice
 from datetime import datetime
 from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
-from apps.base.models import Evento, Imagen, Pregunta, Tema
+from apps.base.models import Evento, Idioma, Imagen, Pregunta, Tema
 from apps.base.permissions import esProfeOSoloLectura, isNotStaff
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaListSerializer, PreguntaResueltaSerializer, PreguntaRetrieveSerializer, PreguntaSerializer
 
-# TODO cambiar para que no haga falta usar permission_classes (usar ifs en los metodos)
+class PreguntaFilter(FilterSet):
+    creador = CharFilter(field_name='creador__username', lookup_expr='contains')
+    tema = NumberFilter(field_name='tema__id')
+    idioma = ChoiceFilter(choices=Idioma.choices)
+    evento = CharFilter(field_name='evento__name', lookup_expr='contains')
+    class Meta:
+        model = Pregunta
+        fields = ['creador', 'evento', 'tema', 'idioma']
+
 class PreguntaViewSet(ModelViewSet):
-    #permission_classes = [preguntaPermission, IsAuthenticated]
     serializer_class = PreguntaSerializer
     serializer_class_list = PreguntaListSerializer
     serializer_class_retrieve = PreguntaRetrieveSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PreguntaFilter
     model = Pregunta
 
     def get_queryset(self, pk=None):
@@ -27,9 +40,8 @@ class PreguntaViewSet(ModelViewSet):
         return self.model.objects.filter(id=pk).exclude(estado=3).first()
 
     def list(self, request):
-        # TODO listado personalizado segun parametros??? (para los profesores)
         if request.user.is_staff:
-            preguntas = self.filter_queryset(self.get_queryset())
+            preguntas = self.filter_queryset(self.get_queryset()).order_by("-modified_date")
             page = self.paginate_queryset(preguntas)
             if page is not None:
                 preguntas_serial = self.serializer_class_list(page, many = True)
