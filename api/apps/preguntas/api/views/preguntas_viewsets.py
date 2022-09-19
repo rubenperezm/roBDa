@@ -1,21 +1,15 @@
-from cgitb import lookup
-from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
 from rest_framework import status
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from django_filters.rest_framework.filterset import FilterSet
 from django_filters import CharFilter, NumberFilter, ChoiceFilter
 from random import choice
 from datetime import datetime
-from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
-from apps.base.models import Evento, Idioma, Imagen, Pregunta, Tema
-from apps.base.permissions import esProfeOSoloLectura, isNotStaff
-from apps.preguntas.api.serializers.preguntas_serializers import PreguntaListSerializer, PreguntaResueltaSerializer, PreguntaRetrieveSerializer, PreguntaSerializer
+from apps.base.models import Evento, Idioma, Pregunta, Report
+from apps.preguntas.api.serializers.preguntas_serializers import PreguntaListSerializer, PreguntaSerializer, PregutaConReportsSerializer, ReportSerializer
 
 class PreguntaFilter(FilterSet):
     creador = CharFilter(field_name='creador__username', lookup_expr='contains')
@@ -29,7 +23,7 @@ class PreguntaFilter(FilterSet):
 class PreguntaViewSet(ModelViewSet):
     serializer_class = PreguntaSerializer
     serializer_class_list = PreguntaListSerializer
-    serializer_class_retrieve = PreguntaRetrieveSerializer
+    serializer_class_retrieve = PregutaConReportsSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PreguntaFilter
     model = Pregunta
@@ -41,6 +35,7 @@ class PreguntaViewSet(ModelViewSet):
 
     def list(self, request):
         if request.user.is_staff:
+            # TODO para obtener los datos separados en EN_EVENTO, REPORTADA y SIN_ELIMINAR, simplemente filtrar por estado
             preguntas = self.filter_queryset(self.get_queryset()).order_by("-modified_date")
             page = self.paginate_queryset(preguntas)
             if page is not None:
@@ -90,3 +85,22 @@ class PreguntaViewSet(ModelViewSet):
                 return Response({'message':'Pregunta eliminada correctamente'}, status=status.HTTP_200_OK)
             return Response({'error':'No existe pregunta con estos datos'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Los alumnos no pueden borrar preguntas."}, status=status.HTTP_403_FORBIDDEN)
+
+@api_view(['POST'])
+def reportar(request, pk=None):
+    if request.user.is_staff:
+        data = {
+            'reporter': request.user,
+            'evento': Evento.objects.get(pk=request.data.get('evento', None)),
+            'pregunta': Pregunta.objects.get(pk=pk),
+            'motivo': request.data.get('motivo', None),
+            'descripcion': request.data.get('descripcion', None),
+            # TODO dispositivo...
+        }
+
+        report_serial = ReportSerializer(data=data)
+        if report_serial.is_valid():
+            report_serial.save()
+            return Response({'detail': report_serial.data}, status=status.HTTP_201_CREATED)
+        return Response({'error': report_serial.errors}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({"error": "Solamente los alumnos pueden reportar preguntas."}, status=status.HTTP_400_BAD_REQUEST)

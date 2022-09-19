@@ -6,7 +6,6 @@ from random import choice
 from datetime import datetime
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
-from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
 from apps.base.models import AnswerLogs, Opcion, Partida, Pregunta, Repaso
 from apps.partidas.api.serializers.repasos_serializers import RepasoListSerializer, RepasoReviewSerializer, RepasoSerializer
 from apps.partidas.api.serializers.general_serializers import AnswerLogsSerializer
@@ -76,7 +75,7 @@ class PartidaRepasoViewSet(GenericViewSet):
             partida.save()
             repaso = self.model(user = request.user, partida = partida)
             repaso.save()
-            return Response(self.serializer_class(repaso).data)
+            return Response(self.serializer_class(repaso).data, status = status.HTTP_201_CREATED)
         return Response({"error": "Los profesores no pueden crear partidas."}, status=status.HTTP_403_FORBIDDEN)
 
     # Añado una pregunta mas a la partida, y la devuelvo al cliente

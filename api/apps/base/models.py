@@ -1,7 +1,5 @@
 from datetime import datetime
-from tabnanny import verbose
 from django.db import models
-from django.utils.text import slugify
 
 from apps.users.models import User
 
@@ -19,6 +17,12 @@ class Idioma(models.IntegerChoices):
     ''' Clase de idiomas (a modo de enum) '''
     ESP = 1
     ING = 2
+
+class Dispositivo(models.IntegerChoices):
+    ''' Clase de dispositivos (a modo de enum) '''
+    PC = 1
+    MOVIL = 2
+    TABLET = 3
 
 class BaseModel(models.Model):
     """
@@ -96,11 +100,11 @@ class Pregunta(BaseModel):
     imagen = models.ForeignKey(Imagen, on_delete = models.CASCADE, null = True, verbose_name = "Imagen")
 
     enunciado = models.CharField('Enunciado', max_length = 400)
-    evento = models.ForeignKey(Evento, related_name = 'evento', on_delete = models.CASCADE, null = True, verbose_name = 'Evento en el que fue creada')
+    evento = models.ForeignKey(Evento, related_name = 'pregunta', on_delete = models.CASCADE, null = True, verbose_name = 'Evento en el que fue creada')
     estado = models.SmallIntegerField('Estado', choices = EstadoPregunta.choices, default = 1)
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema")
     idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, default = 1)
-    # TODO dispositivo = ...
+    dispositivo = models.SmallIntegerField('Dispositivo', choices = Dispositivo.choices, default = 1)
 
     def __str__(self):
         if len(self.enunciado) > 50:
@@ -128,7 +132,7 @@ class Partida(BaseModel):
     
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema", null = True)
     idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, null = True)
-    # TODO dispositivo = ...
+    dispositivo = models.SmallIntegerField('Dispositivo', choices = Dispositivo.choices, default = 1)
 
     def __str__(self):
         return f'Partida {self.id}'
@@ -160,15 +164,25 @@ class Duelos(BaseModel):
         verbose_name_plural = "Duelos"
 
     class EstadoDuelo(models.Choices):
-        PENDIENTE = 1
-        FINALIZADA = 2
-        RECHAZADA = 3
+        EN_CREACION = 1
+        PENDIENTE = 2
+        FINALIZADA = 3
+        RECHAZADA = 4
 
     partidaUser1 = models.OneToOneField(Partida, related_name = 'partida_retador', on_delete = models.CASCADE, verbose_name = "Partida del retador")
     partidaUser2 = models.OneToOneField(Partida, related_name = 'partida_retado', on_delete = models.CASCADE, null = True, verbose_name = "Partida del retado")
     user1 = models.ForeignKey(User, related_name = 'retador', on_delete = models.CASCADE, verbose_name = 'Usuario retador')
     user2 = models.ForeignKey(User, related_name = 'retado', on_delete = models.CASCADE, verbose_name = 'Usuario retado')
     estado = models.SmallIntegerField('Estado', choices = EstadoDuelo.choices, default = 1)
+
+
+    @property
+    def score1(self):
+        return self.partidaUser1.preguntas.filter(acierto = True).count()
+    
+    @property
+    def score2(self):
+        return self.partidaUser2.preguntas.filter(acierto = True).count() if self.partidaUser2 else 0
 
     def __str__(self):
         return f'Duelo {self.id}: {self.user1.id} vs. {self.user2.id}'
@@ -184,15 +198,32 @@ class UserComp(models.Model):
     user = models.ForeignKey(User, related_name = 'participante', on_delete = models.CASCADE, verbose_name = 'Usuario')
     evento = models.ForeignKey(Evento, on_delete = models.CASCADE, verbose_name = "Evento")
     # TODO considerar hacer @property las puntuaciones de las tres fases
-    score_f1 = models.PositiveIntegerField('Puntuación de la fase de creación de pregunta', default = 0)
-    score_f2 = models.PositiveIntegerField('Puntuación de la fase de cuestionario', default = 0)
-    score_f3 = models.PositiveIntegerField('Puntuación de la fase de reportar', default = 0)
+    #score_f1 = models.PositiveIntegerField('Puntuación de la fase de creación de pregunta', default = 0)
+    #score_f2 = models.PositiveIntegerField('Puntuación de la fase de cuestionario', default = 0)
+    #score_f3 = models.PositiveIntegerField('Puntuación de la fase de reportar', default = 0)
     valoracion = models.SmallIntegerField('Valoración', null = True)
 
+    # @property
+    # def score(self):
+    #     return self.score_f1 + self.score_f2 + self.score_f3
     @property
-    def score(self):
-        return self.score_f1 + self.score_f2 + self.score_f3
+    def score_f1(self):
+        if self.pregunta and (self.pregunta.estado == 1 or self.pregunta.estado == 2):
+            if self.pregunta.imagen:
+                return 50
+            else:
+                return 40
+        else:
+            return 0
     
+    @property
+    def score_f2(self):
+        return 10*self.partida.preguntas.filter(acierto = True).count()
+
+    @property
+    def score_f3(self):
+        return 15*self.user.user_reports.filter(estado = 2).count()
+
     def __str__(self):
         return f'Participación {self.partida}'
 
@@ -230,12 +261,13 @@ class Report(BaseModel):
         VALIDADO = 2
         INVALIDADO = 3
 
-    reporter = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name="Usuario que reporta")
-    pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta")
+    reporter = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name="Usuario que reporta", related_name="user_reports")
+    pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta", related_name = "reports")
+    evento = models.ForeignKey(Evento, on_delete=models.CASCADE, verbose_name="Evento", null = True)
     motivo = models.SmallIntegerField('Motivo', choices = MotivoReport.choices)
     descripcion = models.CharField('Descripción', max_length= 400)
     estado = models.SmallIntegerField('Estado', choices = EstadoReport.choices, default = 1)
-    # TODO dispositivo = ...
+    dispositivo = models.SmallIntegerField('Dispositivo', choices = Dispositivo.choices, default = 1)
 
     def __str__(self):
         return f'Report {self.id}'

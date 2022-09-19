@@ -27,4 +27,4 @@ class UserCompReviewSerializer(UserCompSerializer):
 
     class Meta:
         model = UserComp
-        fields = ('user', 'evento', 'partida', 'score', 'score_f1', 'score_f2', 'score_f3', 'valoracion')
+        fields = ('user', 'evento', 'partida', 'score_f1', 'score_f2', 'score_f3', 'valoracion')

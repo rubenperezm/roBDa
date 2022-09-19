@@ -34,10 +34,10 @@ def terminar_evento(request, pk=None):
         if request.user.is_staff:
             evento = Evento.objects.get(pk=pk)
             preguntas = Pregunta.objects.filter(evento = pk, estado = 4)
-            print(preguntas)
             if evento.fase_actual == 'Esperando corrección del profesor' and not preguntas:
                 evento.terminada = True
                 evento.save()
+                Pregunta.objects.filter(evento = pk, estado = 1).update(estado = 2)
                 return Response({'message': f'\'{evento.name}\' ha terminado. Los resultados estarán disponibles para los alumnos.'})
             return Response({'error': 'Para terminar el evento debe estar en la última fase y no haber preguntas reportadas relacionadas con el mismo.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Acción no disponible para el alumnado."}, status=status.HTTP_403_FORBIDDEN)
