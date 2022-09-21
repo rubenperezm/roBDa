@@ -2,15 +2,15 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import status
 from django.conf import settings
+from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from random import choice
-from datetime import datetime, timedelta
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
 from apps.base.models import AnswerLogs, Evento, Opcion, Partida, Pregunta
 from apps.partidas.api.serializers.user_comps_serializers import *
 from apps.partidas.api.serializers.general_serializers import AnswerLogsSerializer
-from apps.partidas.api.views.utils import preguntaToJSON
+from apps.partidas.api.views.utils import esAcierto, preguntaToJSON
 
 class PartidaEventoViewSet(GenericViewSet):
     serializer_class = UserCompSerializer
@@ -18,7 +18,7 @@ class PartidaEventoViewSet(GenericViewSet):
     serializer_class_list = UserCompListSerializer
     pregunta_serializer = PreguntaSerializer
     model = UserComp
-    # TODO sacar de la clase si necesito crear otra clase para los eventos
+    
     def pregunta_aleatoria(self, usercomp):
         filters = {
             "evento": usercomp.evento,
@@ -67,7 +67,7 @@ class PartidaEventoViewSet(GenericViewSet):
         return Response({"error": "No tienes acceso al informe de esta partida."}, status=status.HTTP_403_FORBIDDEN)
 
     def create(self, request):
-        if not request.user.is_staff:
+        if not request.user.is_staff and request.user.is_active:
             event = get_object_or_404(Evento, pk = request.data.get('evento',None))
             pregunta_propia = Pregunta.objects.filter(evento = event, creador = request.user)
             partida_previa = UserComp.objects.filter(evento = event, user = request.user)
@@ -88,7 +88,7 @@ class PartidaEventoViewSet(GenericViewSet):
     def update(self, request, pk=None):
         usercomp = self.get_object()
         if usercomp.user == request.user:
-            if datetime.now() < usercomp.partida.created_date + timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
+            if timezone.now() < usercomp.partida.created_date + timezone.timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
                 try:
                     pk_preg = self.pregunta_aleatoria(usercomp)
                 except Exception as e:
@@ -106,13 +106,14 @@ class PartidaEventoViewSet(GenericViewSet):
     def partial_update(self, request, pk=None):
         log = get_object_or_404(AnswerLogs, pk=pk)
         if log.partida.participacion.user == request.user:
-            now = datetime.now()
-            if log.respuesta_user == None and now < log.partida.created_date + timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
+            now = timezone.now()
+            if log.respuesta_user == None and now < log.partida.created_date + timezone.timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
                 respuesta = request.data.get('respuesta')
                 opcion = get_object_or_404(Opcion, texto=respuesta, pregunta=log.pregunta.id)
                 data = {
                     "timeFin": now,
                     "respuesta_user": opcion.id,
+                    "acierto": esAcierto(log, respuesta),
                 }
                 a_l_serializer = AnswerLogsSerializer(log, data = data, partial = True)
                 if a_l_serializer.is_valid():

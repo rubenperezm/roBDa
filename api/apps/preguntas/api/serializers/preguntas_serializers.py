@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.base.models import Idioma, Imagen, Opcion, Pregunta, Report, Tema
+from apps.base.models import Opcion, Pregunta, Report, Tema
 
 
 

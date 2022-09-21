@@ -3,13 +3,13 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from random import choice
-from datetime import datetime
+from django.utils import timezone
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
 from apps.base.models import AnswerLogs, Opcion, Partida, Pregunta, Repaso
 from apps.partidas.api.serializers.repasos_serializers import RepasoListSerializer, RepasoReviewSerializer, RepasoSerializer
 from apps.partidas.api.serializers.general_serializers import AnswerLogsSerializer
-from apps.partidas.api.views.utils import preguntaToJSON
+from apps.partidas.api.views.utils import esAcierto, preguntaToJSON
 
 class PartidaRepasoViewSet(GenericViewSet):
     serializer_class = RepasoSerializer
@@ -30,21 +30,20 @@ class PartidaRepasoViewSet(GenericViewSet):
         if idioma: filters['idioma'] = idioma
 
         preguntas = Pregunta.objects.filter(**filters)
-        
         pks = preguntas.values_list('pk', flat = True)
-        if len(pks) == 0:
+        print(pks)
+        if len(pks) <= 1:
             raise({'error': "No existen preguntas suficientes."})
-        pk = choice(pks)
+
         preguntas_contestadas = list(partida.preguntas.values_list('pregunta', flat=True))
         if len(pks) > 15:
-            last_questions = preguntas_contestadas[max(-15, -len(preguntas_contestadas)):]
-            while pk in last_questions:
-                pk = choice(pks)
+            preguntas_contestadas = preguntas_contestadas[max(-15, -len(preguntas_contestadas)):]
         else:
-            last_questions = preguntas_contestadas[max(-len(pks)+1, -len(preguntas_contestadas)):]
-            while pk in last_questions:
-                pk = choice(pks)
-        return pk
+            preguntas_contestadas = preguntas_contestadas[max(-len(pks)+1, -len(preguntas_contestadas)):]
+
+        pks = preguntas.exclude(pk__in=preguntas_contestadas).values_list('pk', flat = True)
+
+        return choice(pks)
 
     def get_queryset(self, pk=None):
         if pk is None:
@@ -70,7 +69,7 @@ class PartidaRepasoViewSet(GenericViewSet):
         return Response({"error": "No tiene acceso al informe de esta partida."}, status=status.HTTP_403_FORBIDDEN)
 
     def create(self, request):
-        if not request.user.is_staff:
+        if not request.user.is_staff and request.user.is_active:
             partida = Partida(tema = request.data.get('tema', None), idioma = request.data.get('idioma', None))
             partida.save()
             repaso = self.model(user = request.user, partida = partida)
@@ -94,12 +93,13 @@ class PartidaRepasoViewSet(GenericViewSet):
         log = get_object_or_404(AnswerLogs, pk=pk)
         if log.partida.repaso.user == request.user:
             if log.respuesta_user == None:
-                respuesta = request.data.get('respuesta')
+                respuesta = request.data.get('respuesta', None)
                 correcta = get_object_or_404(Opcion, pregunta = log.pregunta.id, esCorrecta=True)
                 opcion = get_object_or_404(Opcion, texto=respuesta, pregunta=log.pregunta.id)
                 data = {
-                    "timeFin": datetime.now(),
+                    "timeFin": timezone.now(),
                     "respuesta_user": opcion.id,
+                    "acierto": esAcierto(log, respuesta),
                 }
                 a_l_serializer = AnswerLogsSerializer(log, data = data, partial = True)
                 if a_l_serializer.is_valid():

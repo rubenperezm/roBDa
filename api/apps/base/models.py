@@ -1,4 +1,4 @@
-from datetime import datetime
+from django.utils import timezone
 from django.db import models
 
 from apps.users.models import User
@@ -72,7 +72,7 @@ class Evento(BaseModel):
 
     @property
     def fase_actual(self):
-        now = datetime.now().timestamp()
+        now = timezone.now().timestamp()
         if now < self.fechaInicio.timestamp():
             return 'No ha comenzado'
         elif now < self.finFase1.timestamp():
@@ -141,22 +141,17 @@ class AnswerLogs(models.Model):
     class Meta:
         verbose_name = "Respuesta individual"
         verbose_name_plural = "Respuestas individuales"
-        #unique_together = ('partida', 'pregunta') # No permitiria el cuestionario de repaso
 
     partida = models.ForeignKey(Partida, on_delete = models.CASCADE, verbose_name = "Partida", related_name = 'preguntas')
     pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta")
     respuesta_user = models.ForeignKey(Opcion, on_delete = models.CASCADE, null = True, verbose_name = "Respuesta del usuario")
     timeIni = models.DateTimeField('Hora de inicio de la pregunta', auto_now_add = True)
     timeFin = models.DateTimeField('Hora de finalización de la pregunta', null = True)
+    acierto = models.BooleanField('Acierto', null = True)
 
     def __str__(self):
         return f'Registro {self.id}'
 
-    @property
-    def acierto(self):
-        if not self.respuesta_user:
-            return None
-        return self.respuesta_user == Opcion.objects.get(pregunta = self.pregunta.id, esCorrecta=True)
                 
 class Duelos(BaseModel):
     class Meta:
@@ -202,14 +197,13 @@ class UserComp(models.Model):
     #score_f2 = models.PositiveIntegerField('Puntuación de la fase de cuestionario', default = 0)
     #score_f3 = models.PositiveIntegerField('Puntuación de la fase de reportar', default = 0)
     valoracion = models.SmallIntegerField('Valoración', null = True)
+    score = models.PositiveIntegerField('Puntuación', null = True)
 
-    # @property
-    # def score(self):
-    #     return self.score_f1 + self.score_f2 + self.score_f3
     @property
     def score_f1(self):
-        if self.pregunta and (self.pregunta.estado == 1 or self.pregunta.estado == 2):
-            if self.pregunta.imagen:
+        pregunta = Pregunta.objects.get(creador=self.user, evento=self.evento)
+        if pregunta and (pregunta.estado == 1 or pregunta.estado == 2):
+            if pregunta.imagen:
                 return 50
             else:
                 return 40

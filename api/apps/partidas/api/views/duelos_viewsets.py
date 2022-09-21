@@ -1,19 +1,18 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework import status
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from random import choice
-from datetime import datetime, timedelta
+from django.utils import timezone
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
-from apps.base.models import AnswerLogs, Evento, Opcion, Partida, Pregunta, Duelos
+from apps.base.models import AnswerLogs, Opcion, Partida, Pregunta, Duelos
 from apps.partidas.api.serializers.duelos_serializers import *
 from apps.partidas.api.serializers.general_serializers import AnswerLogsSerializer
-from apps.partidas.api.views.utils import preguntaToJSON
+from apps.partidas.api.views.utils import esAcierto, preguntaToJSON
 
 class PartidaDueloViewSet(GenericViewSet):
     serializer_class = DuelosSerializer
@@ -80,7 +79,7 @@ class PartidaDueloViewSet(GenericViewSet):
         return Response({"error": "No tienes acceso al informe de esta partida."}, status=status.HTTP_403_FORBIDDEN)
 
     def create(self, request):
-        if not request.user.is_staff:
+        if not request.user.is_staff and request.user.is_active:
             if request.user != request.data.get('oponente', None):
                 partida = Partida(tema = request.data.get('tema', None), idioma = request.data.get('idioma', None))
                 partida.save()
@@ -94,7 +93,7 @@ class PartidaDueloViewSet(GenericViewSet):
     def update(self, request, pk=None):
         duelo = self.get_object()
         if duelo.user1 == request.user:
-            if datetime.now() < duelo.partida1.created_date + timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
+            if timezone.now() < duelo.partida1.created_date + timezone.timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
                 try:
                     pk_preg = self.pregunta_aleatoria(duelo)
                 except Exception as e:
@@ -107,7 +106,7 @@ class PartidaDueloViewSet(GenericViewSet):
                 return Response(data)
             return Response({"error": "No se ha podido registrar la respuesta."}, status=status.HTTP_403_FORBIDDEN)
         elif duelo.user2 == request.user:
-            if datetime.now() < duelo.partida2.created_date + timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
+            if timezone.now() < duelo.partida2.created_date + timezone.timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
                 try:
                     pk_preg = self.siguiente_pregunta_user2(duelo)
                 except Exception as e:
@@ -126,13 +125,14 @@ class PartidaDueloViewSet(GenericViewSet):
         log = get_object_or_404(AnswerLogs, pk=pk)
         if (log.partida.partida_retador and log.partida.partida_retador.user1 == request.user or 
             log.partida.partida_retado and log.partida.partida_retado.user2 == request.user):
-            now = datetime.now()
-            if log.respuesta_user == None and now < log.partida.created_date + timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
+            now = timezone.now()
+            if log.respuesta_user == None and now < log.partida.created_date + timezone.timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
                 respuesta = request.data.get('respuesta')
                 opcion = get_object_or_404(Opcion, texto=respuesta, pregunta=log.pregunta.id)
                 data = {
                     "timeFin": now,
                     "respuesta_user": opcion.id,
+                    "acierto": esAcierto(log, respuesta),
                 }
                 a_l_serializer = AnswerLogsSerializer(log, data = data, partial = True)
                 if a_l_serializer.is_valid():

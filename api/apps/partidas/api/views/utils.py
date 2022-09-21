@@ -1,4 +1,4 @@
-from apps.base.models import Pregunta, Imagen
+from apps.base.models import Opcion, Pregunta, Imagen
 from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
 
@@ -16,3 +16,7 @@ def preguntaToJSON(pk, pk_log):
         except:
             pass
         return data
+
+def esAcierto(log, respuesta):
+    if respuesta:
+        return respuesta == Opcion.objects.get(pregunta = log.pregunta.id, esCorrecta=True).texto

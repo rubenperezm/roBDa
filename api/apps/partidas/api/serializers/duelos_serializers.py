@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, StringRelatedField, SlugRelatedField
+from rest_framework.serializers import ModelSerializer, SlugRelatedField
 
 from apps.users.models import User
 from apps.base.models import Duelos

@@ -1,3 +1,4 @@
+from django.utils import timezone
 from rest_framework import serializers
 
 from apps.base.models import Evento, Tema
@@ -10,7 +11,15 @@ class EventoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evento
         exclude = ('created_date', 'modified_date')
-    
+
+    def validate(self, data):
+        now = timezone.now()
+        if now < data['fechaInicio'] < data['finFase1'] < data['finFase2'] < data['finFase3']:
+            return data
+        raise serializers.ValidationError(
+            {'fechas':'Las fechas deben ser coherentes.'}
+        )
+        
     def to_representation(self, instance):
         return {
             'id': instance.id,

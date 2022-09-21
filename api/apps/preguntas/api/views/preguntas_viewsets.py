@@ -6,9 +6,9 @@ from rest_framework import status
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from django_filters.rest_framework.filterset import FilterSet
 from django_filters import CharFilter, NumberFilter, ChoiceFilter
-from random import choice
-from datetime import datetime
-from apps.base.models import Evento, Idioma, Pregunta, Report
+
+from django.utils import timezone
+from apps.base.models import Evento, Idioma, Pregunta
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaListSerializer, PreguntaSerializer, PregutaConReportsSerializer, ReportSerializer
 
 class PreguntaFilter(FilterSet):
@@ -58,7 +58,7 @@ class PreguntaViewSet(ModelViewSet):
         event = get_object_or_404(Evento, pk=request.data.get('evento', None))
         if event:
             pregunta = Pregunta.objects.filter(creador=request.user.id, evento=event.id)
-        if request.user.is_staff or ((datetime.now().timestamp() <= event.finFase1.timestamp()) and not pregunta):
+        if request.user.is_staff or ((timezone.now().timestamp() <= event.finFase1.timestamp()) and not pregunta):
             data = request.data.copy()
             data["creador"] = request.user.id  
             data["imagen"] = request.data.get('imagen', None)
@@ -89,14 +89,16 @@ class PreguntaViewSet(ModelViewSet):
 @api_view(['POST'])
 def reportar(request, pk=None):
     if request.user.is_staff:
+        pregunta = get_object_or_404(Pregunta, pk=pk)
         data = {
             'reporter': request.user,
-            'evento': Evento.objects.get(pk=request.data.get('evento', None)),
-            'pregunta': Pregunta.objects.get(pk=pk),
+            'pregunta': pregunta,
             'motivo': request.data.get('motivo', None),
             'descripcion': request.data.get('descripcion', None),
             # TODO dispositivo...
         }
+        if pregunta.estado == 1: # EN_EVENTO
+            data['evento'] = pregunta.evento
 
         report_serial = ReportSerializer(data=data)
         if report_serial.is_valid():

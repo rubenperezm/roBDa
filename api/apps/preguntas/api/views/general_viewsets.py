@@ -22,5 +22,6 @@ class ImagenViewSet(ModelViewSet):
 
     def get_queryset(self, pk=None):
         if pk is None:
+            print(self.model.objects.all)
             return self.model.objects.all()
         return self.model.objects.filter(id=pk).first()

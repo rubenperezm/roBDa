@@ -14,4 +14,4 @@ class ImagenSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = Imagen
-        fields = ('__all__')
+        fields = '__all__'
