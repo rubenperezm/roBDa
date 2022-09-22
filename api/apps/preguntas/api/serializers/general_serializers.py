@@ -5,7 +5,7 @@ from apps.base.models import Tema, Imagen
 class TemaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tema
-        fields = ('nombre',)
+        fields = '__all__'
 
 class ImagenSerializer(serializers.ModelSerializer):
     tema = serializers.SlugRelatedField(

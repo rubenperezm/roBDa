@@ -70,6 +70,7 @@ class PreguntaViewSet(ModelViewSet):
             else:
                 data["idioma"] = request.data.get('idioma', None)
                 data["tema"] = request.data.get('tema', None)
+                data["estado"] = 2
             
             preg_serial = self.serializer_class(data=data)
             if preg_serial.is_valid():
@@ -78,13 +79,13 @@ class PreguntaViewSet(ModelViewSet):
             return Response({'error': preg_serial.errors}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'error': "Sólo puede crearse una pregunta por evento, y debe de hacerse en la primera fase"}, status=status.HTTP_403_FORBIDDEN)
 
-    def destroy(self, request, pk=None):
+    def destroy(self, request, *args, **kwargs):
         if request.user.is_staff:
-            pregunta = self.get_queryset().filter(id=pk).first()       
+            pregunta = self.get_object()      
             if pregunta:
                 pregunta.estado = 3
                 pregunta.save()
-                return Response({'message':'Pregunta eliminada correctamente'}, status=status.HTTP_200_OK)
+                return Response(status=status.HTTP_204_NO_CONTENT)
             return Response({'error':'No existe pregunta con estos datos'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Los alumnos no pueden borrar preguntas."}, status=status.HTTP_403_FORBIDDEN)
 
@@ -100,7 +101,10 @@ def reportar(request, pk=None):
             # TODO dispositivo...
         }
         if pregunta.estado == 1: # EN_EVENTO
-            data['evento'] = pregunta.evento
+            if pregunta.evento.fase_actual == 'Ver resultados test':
+                data['evento'] = pregunta.evento
+            else:
+                return Response({'error': 'Solo puede reportarse preguntas en eventos en la tercera fase.'}, status=status.HTTP_403_FORBIDDEN)
 
         report_serial = ReportSerializer(data=data)
         if report_serial.is_valid():

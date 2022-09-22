@@ -14,6 +14,7 @@ class EventoViewSet(ModelViewSet):
     serializer_class_list = EventoListSerializer
     model = Evento
 
+    # TODO mostrar solo los eventos del curso actual (created_date__gte=07/02/(year_actual if today > 07/02 else year_actual+1))
     def get_queryset(self, pk=None):
         if pk is None:
             return self.model.objects.all()
@@ -21,6 +22,7 @@ class EventoViewSet(ModelViewSet):
 
     def list(self, request):
         if request.user.is_staff:
+            # TODO crear filtro para filtrar por idioma o tema ? 
             eventos = self.filter_queryset(self.get_queryset())
             page = self.paginate_queryset(eventos)
             if page is not None:
@@ -29,6 +31,15 @@ class EventoViewSet(ModelViewSet):
             eventos_serial = self.serializer_class_list(eventos, many = True)
             return Response(eventos_serial.data)
         return Response({"error": "Listado no disponible para el alumnado."}, status=status.HTTP_403_FORBIDDEN)
+
+    def destroy(self, request, *args, **kwargs):
+        if request.user.is_staff:
+            instance = self.get_object()
+            if instance.fase_actual != 'Finalizada':
+                self.perform_destroy(instance)
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({'error': 'No se puede eliminar un evento finalizado.'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Los alumnos no pueden borrar preguntas."}, status=status.HTTP_403_FORBIDDEN)
 
 @api_view(['PUT'])
 def terminar_evento(request, pk=None):

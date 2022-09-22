@@ -52,6 +52,7 @@ class PartidaRepasoViewSet(GenericViewSet):
 
     def list(self, request):
         if request.user.is_staff:
+            # TODO filter by created_date (CURSO)(lo mismo para user_comp y para duelos)
             repasos = self.filter_queryset(self.get_queryset()).order_by("-partida__modified_date")
             page = self.paginate_queryset(repasos)
             if page is not None:

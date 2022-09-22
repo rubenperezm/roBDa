@@ -37,6 +37,7 @@ class PreguntaSerializer(serializers.ModelSerializer):
         queryset=Tema.objects.all()
     )
 
+
     class Meta:
         model = Pregunta
         fields = '__all__'
@@ -56,17 +57,29 @@ class PreguntaSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         options_data = validated_data.pop('opciones')
         pregunta = self.Meta.model.objects.create(**validated_data)
+        
+        for option in options_data:
+            Opcion.objects.create(pregunta=pregunta, **option)
+
+        return pregunta
+
+    def update(self, instance, validated_data):
+        options_data = validated_data.pop('opciones')
+        pregunta = super().update(instance, validated_data)
+        instance.opciones.all().delete()
+
         for option in options_data:
             Opcion.objects.create(pregunta=pregunta, **option)
 
         return pregunta
 
 class PreguntaResueltaSerializer(PreguntaSerializer):
-    opciones = OpcionSolucionSerializer(many=True, read_only=False) # TODO es necesario el read_only al final?
+    opciones = OpcionSolucionSerializer(many=True)
     tema = None
     class Meta:
         model = Pregunta
         exclude = ('created_date', 'modified_date', 'estado', 'evento', 'creador', 'tema', 'idioma', 'dispositivo')
+
 
 class PreguntaListSerializer(PreguntaResueltaSerializer):
     tema = serializers.StringRelatedField()
@@ -86,8 +99,9 @@ class PreguntaListSerializer(PreguntaResueltaSerializer):
             'veces_reportada': instance.reports.count(),
         }
 
-class PregutaConReportsSerializer(PreguntaListSerializer):
+class PregutaConReportsSerializer(PreguntaResueltaSerializer):
     reports = ReportReviewSerializer(many = True)
+    tema = serializers.StringRelatedField()
     imagen = serializers.StringRelatedField()
     evento = serializers.StringRelatedField()
     class Meta:
