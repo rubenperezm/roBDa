@@ -31,7 +31,7 @@ class PartidaRepasoViewSet(GenericViewSet):
 
         preguntas = Pregunta.objects.filter(**filters)
         pks = preguntas.values_list('pk', flat = True)
-        print(pks)
+        
         if len(pks) <= 1:
             raise({'error': "No existen preguntas suficientes."})
 

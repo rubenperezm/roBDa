@@ -70,7 +70,7 @@ class PreguntaViewSet(ModelViewSet):
             else:
                 data["idioma"] = request.data.get('idioma', None)
                 data["tema"] = request.data.get('tema', None)
-            print(data)
+            
             preg_serial = self.serializer_class(data=data)
             if preg_serial.is_valid():
                 preg_serial.save()

@@ -26,8 +26,9 @@ class MyTokenObtainPairView(TokenObtainPairView):
 
 class Register(GenericAPIView):
     permission_classes = [AllowAny,]
+    serializer_class = UserSerializer
     def post(self, request):
-        serializer = UserSerializer(data = request.data)
+        serializer = self.serializer_class(data = request.data)
         serializer.is_valid(raise_exception = True)
         psswd_serializer = PasswordSerializer(data = request.data)
         psswd_serializer.is_valid(raise_exception = True)
@@ -37,6 +38,7 @@ class Register(GenericAPIView):
 
 
 class Logout(GenericAPIView):
+    serializer_class = UserSerializer
     def post(self, request):
         try:
             token = RefreshToken(request.data.get('refresh', ''))
