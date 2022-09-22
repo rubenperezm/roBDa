@@ -55,14 +55,16 @@ class PreguntaViewSet(ModelViewSet):
         
     def create(self, request):
         pregunta = None
-        event = get_object_or_404(Evento, pk=request.data.get('evento', None))
-        if event:
+        pk_evento = request.data.get('evento', None)
+        if pk_evento:
+            event = get_object_or_404(Evento, pk=pk_evento)
             pregunta = Pregunta.objects.filter(creador=request.user.id, evento=event.id)
         if request.user.is_staff or ((timezone.now().timestamp() <= event.finFase1.timestamp()) and not pregunta):
             data = request.data.copy()
             data["creador"] = request.user.id  
             data["imagen"] = request.data.get('imagen', None)
-            if request.data.get('evento'):
+            # TODO data["dispositivo"] = request.data.get('dispositivo, None)
+            if pk_evento:
                 data["idioma"] = event.idioma
                 data["tema"] = event.tema
             else:

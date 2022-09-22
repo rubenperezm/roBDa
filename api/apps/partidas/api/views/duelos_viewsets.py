@@ -61,7 +61,7 @@ class PartidaDueloViewSet(GenericViewSet):
 
     def list(self, request):
         if request.user.is_staff:
-            duelos = self.filter_queryset(self.get_queryset()).order_by("-partida__modified_date")
+            duelos = self.filter_queryset(self.get_queryset()).filter(Q(estado=3)|Q(estado=4)).order_by("-partida__modified_date")
         else:
             duelos = self.filter_queryset(self.get_queryset()).filter(Q(user1 = request.user) | Q(user2 = request.user))
         page = self.paginate_queryset(duelos)
@@ -81,6 +81,7 @@ class PartidaDueloViewSet(GenericViewSet):
     def create(self, request):
         if not request.user.is_staff and request.user.is_active:
             if request.user != request.data.get('oponente', None):
+                # TODO partida -> dispositivo
                 partida = Partida(tema = request.data.get('tema', None), idioma = request.data.get('idioma', None))
                 partida.save()
                 duelo = self.model(user1 = request.user, partidaUser1 = partida, user2 = request.data.get('oponente', None))

@@ -17,12 +17,12 @@ class PartidaRepasoViewSet(GenericViewSet):
     serializer_class_list = RepasoListSerializer
     pregunta_serializer = PreguntaSerializer
     model = Repaso
-    # TODO sacar de la clase si necesito crear otra clase para los eventos
+    
     def pregunta_aleatoria(self, partida):
         filters = {
             "estado": 2
         }
-        # TODO el evento hay que tomarlo desde user-comp
+        
         tema = partida.tema
         idioma = partida.idioma 
         
@@ -70,6 +70,7 @@ class PartidaRepasoViewSet(GenericViewSet):
 
     def create(self, request):
         if not request.user.is_staff and request.user.is_active:
+            # TODO Partida -> dispositivo
             partida = Partida(tema = request.data.get('tema', None), idioma = request.data.get('idioma', None))
             partida.save()
             repaso = self.model(user = request.user, partida = partida)

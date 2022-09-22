@@ -21,7 +21,7 @@ class DuelosListSerializer(DuelosSerializer):
     class Meta:
         model = Duelos
         fields = '__all__'
-    # TODO solo mostrar los duelos ya finalizados / rechazados
+    
     def to_representation(self, instance):
         return {
             'id': instance.id,

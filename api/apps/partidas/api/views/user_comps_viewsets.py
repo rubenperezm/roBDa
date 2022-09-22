@@ -74,6 +74,7 @@ class PartidaEventoViewSet(GenericViewSet):
             if pregunta_propia:
                 if not partida_previa:
                     if event.fase_actual == 'Realizar test':
+                        # TODO Partida -> dispositivo
                         partida = Partida(tema = request.data.get('tema', None), idioma = request.data.get('idioma', None))
                         partida.save()
                         usercomp = self.model(user = request.user, partida = partida, evento = event)

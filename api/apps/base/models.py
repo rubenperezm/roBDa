@@ -94,7 +94,7 @@ class Pregunta(BaseModel):
         EN_EVENTO = 1 # Pregunta en evento
         SIN_ELIMINAR = 2 # Pregunta fuera de evento, esté o no reportada
         ELIMINADA = 3 # Pregunta eliminada
-        REPORTADA = 4 # TODO las preguntas reportadas deben seguir mostrandose en pregunta_aleatoria?
+        REPORTADA = 4 # Pregunta reportada
 
     creador = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name = "Creador de la pregunta")
     imagen = models.ForeignKey(Imagen, on_delete = models.CASCADE, null = True, verbose_name = "Imagen")
