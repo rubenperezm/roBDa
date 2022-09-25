@@ -6,8 +6,6 @@ from apps.partidas.api.serializers.general_serializers import PartidaSerializer,
 
 
 class DuelosSerializer(ModelSerializer):
-    partida = PartidaSerializer()
-    # Cambiar como el tutorial
     user2 = SlugRelatedField(
         slug_field='username',
         queryset=User.objects.all()
@@ -16,8 +14,24 @@ class DuelosSerializer(ModelSerializer):
         model = Duelos
         fields = '__all__'
 
+class DuelosListStudentSerializer(DuelosSerializer):
+    class Meta:
+        model = Duelos
+        fields = '__all__'
+    
+    def to_representation(self, instance):
+        data = {
+            'id': instance.id,
+            'user1': instance.user1.username,
+            'tema': instance.partidaUser1.tema.nombre if instance.partidaUser1.tema else 'Todos',
+            'idioma': instance.partidaUser2.get_idioma_display() if instance.partidaUser1.idioma else 'Esp Ing',
+            'estado': instance.get_estado_display()
+        }
+        if instance.estado == 3:
+            data['resultado'] = instance.resultado
+        return data
+
 class DuelosListSerializer(DuelosSerializer):
-    partida = PartidaListSerializer()
     class Meta:
         model = Duelos
         fields = '__all__'
@@ -27,15 +41,31 @@ class DuelosListSerializer(DuelosSerializer):
             'id': instance.id,
             'user1': instance.user1.username,
             'user2': instance.user2.username,
-            'partidaUser1': instance.partidaUser1,
-            'partidaUser2': instance.partidaUser2,
+            'tema': instance.partidaUser1.tema.nombre if instance.partidaUser1.tema else 'Todos',
+            'idioma': instance.partidaUser2.get_idioma_display() if instance.partidaUser1.idioma else 'Esp Ing',
             'score1': instance.score1,
             'score2': instance.score2,
             'estado': instance.get_estado_display(),
         }
 
-class DuelosReviewSerializer(DuelosListSerializer):
-    partida = PartidaReviewSerializer()
+class DuelosReviewSerializer(DuelosSerializer):
+
     class Meta:
         model = Duelos
         fields = '__all__'
+
+    def to_representation(self, instance):
+        partida1 = PartidaReviewSerializer(instance.partidaUser1).data
+        partida2 = PartidaReviewSerializer(instance.partidaUser2).data
+        return {
+            'id': instance.id,
+            'user1': instance.user1.username,
+            'user2': instance.user2.username,
+            'tema': instance.partidaUser1.tema.nombre if instance.partidaUser1.tema else 'Todos',
+            'idioma': instance.partidaUser2.get_idioma_display() if instance.partidaUser1.idioma else 'Esp Ing',
+            'partidaUser1': partida1,
+            'partidaUser2': partida2,
+            'score1': instance.score1,
+            'score2': instance.score2,
+            'estado': instance.get_estado_display(),
+        }

@@ -161,8 +161,9 @@ class Duelos(BaseModel):
     class EstadoDuelo(models.Choices):
         EN_CREACION = 1
         PENDIENTE = 2
-        FINALIZADA = 3
-        RECHAZADA = 4
+        FINALIZADO = 3
+        RECHAZADO = 4
+        ACEPTADO = 5
 
     partidaUser1 = models.OneToOneField(Partida, related_name = 'partida_retador', on_delete = models.CASCADE, verbose_name = "Partida del retador")
     partidaUser2 = models.OneToOneField(Partida, related_name = 'partida_retado', on_delete = models.CASCADE, null = True, verbose_name = "Partida del retado")
@@ -179,6 +180,15 @@ class Duelos(BaseModel):
     def score2(self):
         return self.partidaUser2.preguntas.filter(acierto = True).count() if self.partidaUser2 else 0
 
+    @property
+    def resultado(self):
+        if self.score1 > self.score2:
+            return 'VICTORIA'
+        elif self.score1 == self.score2:
+            return 'EMPATE'
+        else:
+            return 'DERROTA'
+            
     def __str__(self):
         return f'Duelo {self.id}: {self.user1.id} vs. {self.user2.id}'
 

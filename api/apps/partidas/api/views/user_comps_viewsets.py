@@ -4,13 +4,13 @@ from rest_framework import status
 from django.conf import settings
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from random import choice
+from random import sample
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
 from apps.base.models import AnswerLogs, Evento, Opcion, Partida, Pregunta
 from apps.partidas.api.serializers.user_comps_serializers import *
 from apps.partidas.api.serializers.general_serializers import AnswerLogsSerializer
-from apps.partidas.api.views.utils import esAcierto, preguntaToJSON
+from apps.partidas.api.views.utils import esAcierto, preguntaToJSON, preguntas_usercomp, pregunta_aleatoria
 
 class PartidaEventoViewSet(GenericViewSet):
     serializer_class = UserCompSerializer
@@ -18,30 +18,6 @@ class PartidaEventoViewSet(GenericViewSet):
     serializer_class_list = UserCompListSerializer
     pregunta_serializer = PreguntaSerializer
     model = UserComp
-    
-    def pregunta_aleatoria(self, usercomp):
-        filters = {
-            "evento": usercomp.evento,
-        }
-
-        preguntas_contestadas = list(usercomp.partida.preguntas.values_list('pregunta', flat=True))
-
-        if len(preguntas_contestadas) == settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
-            raise({"error": "Ya se ha completado el cuestionario."})
-
-        preguntas = Pregunta.objects.exclude(creador = usercomp.user).exclude(id__in = preguntas_contestadas)
-        preguntas_evento = preguntas.filter(**filters)
-
-        pks = preguntas_evento.values_list('pk', flat = True)
-
-        if len(preguntas) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO - len(preguntas_contestadas):
-            raise({'error': "No existen preguntas suficientes."})
-        # Tomar preguntas del mazo 'bueno'
-        elif len(pks) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO - len(preguntas_contestadas):
-            otras_preguntas =  preguntas.filter(tema = usercomp.evento.tema, idioma = usercomp.evento.idioma).exclude(estado = 1, evento = usercomp.evento) # TODO es necesario evento?
-            pks +=  otras_preguntas.values_list('pk', flat = True)
-   
-        return choice(pks)
 
     def get_queryset(self, pk=None):
         if pk is None:
@@ -79,7 +55,10 @@ class PartidaEventoViewSet(GenericViewSet):
                         partida.save()
                         usercomp = self.model(user = request.user, partida = partida, evento = event)
                         usercomp.save()
-                        return Response(self.serializer_class(usercomp).data, status = status.HTTP_201_CREATED)
+                        uc = self.model.objects.get(pk=usercomp.data['id'])
+                        respuesta = usercomp.data
+                        respuesta["preguntas"] = preguntas_usercomp(uc.partida)
+                        return Response(respuesta, status = status.HTTP_201_CREATED)
                     return Response({"error": "No se puede crear la partida en esta fase del evento."}, status=status.HTTP_403_FORBIDDEN)
                 return Response({"error": "Ya has creado una partida para este evento."}, status=status.HTTP_403_FORBIDDEN)
             return Response({"error": "El usuario no participó en la primera fase."}, status=status.HTTP_403_FORBIDDEN)
@@ -91,9 +70,9 @@ class PartidaEventoViewSet(GenericViewSet):
         if usercomp.user == request.user:
             if timezone.now() < usercomp.partida.created_date + timezone.timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
                 try:
-                    pk_preg = self.pregunta_aleatoria(usercomp)
+                    pk_preg = pregunta_aleatoria(usercomp)
                 except Exception as e:
-                    return Response(e, status=status.HTTP_400_BAD_REQUEST)
+                    return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
                 log = AnswerLogs(pregunta=Pregunta.objects.get(pk=pk_preg), partida=usercomp.partida)
                 log.save()

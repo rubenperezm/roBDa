@@ -33,7 +33,7 @@ class PartidaRepasoViewSet(GenericViewSet):
         pks = preguntas.values_list('pk', flat = True)
         
         if len(pks) <= 1:
-            raise({'error': "No existen preguntas suficientes."})
+            raise Exception("No existen preguntas suficientes.")
 
         preguntas_contestadas = list(partida.preguntas.values_list('pregunta', flat=True))
         if len(pks) > 15:
