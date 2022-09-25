@@ -1,9 +1,9 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from apps.base.models import Evento, Pregunta, UserComp
+from apps.base.models import Evento, Pregunta, Report, UserComp
 from apps.base.permissions import esProfeOSoloLectura
 from apps.eventos.api.serializers.eventos_serializers import EventoListSerializer, EventoSerializer
 
@@ -41,18 +41,20 @@ class EventoViewSet(ModelViewSet):
             return Response({'error': 'No se puede eliminar un evento finalizado.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Los alumnos no pueden borrar preguntas."}, status=status.HTTP_403_FORBIDDEN)
 
-@api_view(['PUT'])
-def terminar_evento(request, pk=None):
-        if request.user.is_staff:
-            evento = get_object_or_404(Evento, pk=pk)
-            preguntas = Pregunta.objects.filter(evento = pk, estado = 4)
-            if evento.fase_actual == 'Esperando corrección del profesor' and not preguntas:
-                Pregunta.objects.filter(evento = pk, estado = 1).update(estado = 2)
-                for obj in UserComp.objects.filter(evento = pk):
-                    obj.score = obj.score_f1 + obj.score_f2 + obj.score_f3
-                    obj.save()
-                evento.terminada = True
-                evento.save()
-                return Response({'message': f'\'{evento.name}\' ha terminado. Los resultados estarán disponibles para los alumnos.'})
-            return Response({'error': 'Para terminar el evento debe estar en la última fase y no haber preguntas reportadas relacionadas con el mismo.'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"error": "Acción no disponible para el alumnado."}, status=status.HTTP_403_FORBIDDEN)
+
+class terminar_evento(APIView):
+    model = Evento
+    def put(self, request, pk=None):
+            if request.user.is_staff:
+                evento = get_object_or_404(self.model, pk=pk)
+                reports_evento = Report.objects.filter(evento = pk, estado = 1)
+                if evento.fase_actual == 'Esperando corrección del profesor' and not reports_evento:
+                    Pregunta.objects.filter(evento = pk, estado = 1).update(estado = 2)
+                    for obj in UserComp.objects.filter(evento = pk):
+                        obj.score = obj.score_f1 + obj.score_f2 + obj.score_f3
+                        obj.save()
+                    evento.terminada = True
+                    evento.save()
+                    return Response({'message': f'\'{evento.name}\' ha terminado. Los resultados estarán disponibles para los alumnos.'})
+                return Response({'error': 'Para terminar el evento debe estar en la última fase y no haber preguntas reportadas relacionadas con el mismo.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Acción no disponible para el alumnado."}, status=status.HTTP_403_FORBIDDEN)

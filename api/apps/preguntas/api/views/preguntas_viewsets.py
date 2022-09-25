@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework import status
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from django_filters.rest_framework.filterset import FilterSet
@@ -54,30 +54,30 @@ class PreguntaViewSet(ModelViewSet):
 
         
     def create(self, request):
-        pregunta = None
-        pk_evento = request.data.get('evento', None)
-        if pk_evento:
+        data = request.data.copy()
+        data["creador"] = request.user.id  
+        data["imagen"] = request.data.get('imagen', None)
+        # TODO data["dispositivo"] = request.data.get('dispositivo, None)
+        if request.user.is_staff:
+            data["idioma"] = request.data.get('idioma', None)
+            data["tema"] = request.data.get('tema', None)
+            data["estado"] = 2
+        else:
+            pk_evento = request.data.get('evento', None)
             event = get_object_or_404(Evento, pk=pk_evento)
             pregunta = Pregunta.objects.filter(creador=request.user.id, evento=event.id)
-        if request.user.is_staff or ((timezone.now().timestamp() <= event.finFase1.timestamp()) and not pregunta):
-            data = request.data.copy()
-            data["creador"] = request.user.id  
-            data["imagen"] = request.data.get('imagen', None)
-            # TODO data["dispositivo"] = request.data.get('dispositivo, None)
-            if pk_evento:
+            if ((timezone.now().timestamp() <= event.finFase1.timestamp()) and not pregunta):
                 data["idioma"] = event.idioma
                 data["tema"] = event.tema
             else:
-                data["idioma"] = request.data.get('idioma', None)
-                data["tema"] = request.data.get('tema', None)
-                data["estado"] = 2
-            
-            preg_serial = self.serializer_class(data=data)
-            if preg_serial.is_valid():
-                preg_serial.save()
-                return Response({'detail': preg_serial.data}, status=status.HTTP_201_CREATED)
-            return Response({'error': preg_serial.errors}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'error': "Sólo puede crearse una pregunta por evento, y debe de hacerse en la primera fase"}, status=status.HTTP_403_FORBIDDEN)
+                return Response({'error': "Sólo puede crearse una pregunta por evento, y debe de hacerse en la primera fase"}, status=status.HTTP_403_FORBIDDEN)
+
+        preg_serial = self.serializer_class(data=data)
+        if preg_serial.is_valid():
+            preg_serial.save()
+            return Response({'message': preg_serial.data}, status=status.HTTP_201_CREATED)
+        return Response({'error': preg_serial.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
 
     def destroy(self, request, *args, **kwargs):
         if request.user.is_staff:
@@ -89,26 +89,27 @@ class PreguntaViewSet(ModelViewSet):
             return Response({'error':'No existe pregunta con estos datos'}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Los alumnos no pueden borrar preguntas."}, status=status.HTTP_403_FORBIDDEN)
 
-@api_view(['POST'])
-def reportar(request, pk=None):
-    if request.user.is_staff:
-        pregunta = get_object_or_404(Pregunta, pk=pk)
-        data = {
-            'reporter': request.user,
-            'pregunta': pregunta,
-            'motivo': request.data.get('motivo', None),
-            'descripcion': request.data.get('descripcion', None),
-            # TODO dispositivo...
-        }
-        if pregunta.estado == 1: # EN_EVENTO
-            if pregunta.evento.fase_actual == 'Ver resultados test':
-                data['evento'] = pregunta.evento
-            else:
-                return Response({'error': 'Solo puede reportarse preguntas en eventos en la tercera fase.'}, status=status.HTTP_403_FORBIDDEN)
+class reportar(APIView):
+    model = Pregunta
+    def post(self, request):
+        if not request.user.is_staff:
+            pregunta = get_object_or_404(self.model, pk=request.data.get('pregunta', None))
+            data = {
+                'reporter': request.user.id,
+                'pregunta': pregunta.id,
+                'motivo': request.data.get('motivo', None),
+                'descripcion': request.data.get('descripcion', None),
+                # TODO dispositivo...
+            }
+            if pregunta.estado == 1 and pregunta.evento: # EN_EVENTO
+                if pregunta.evento.fase_actual == 'Ver resultados test':
+                    data['evento'] = pregunta.evento
+                else:
+                    return Response({'error': 'Solo puede reportarse preguntas en eventos en la tercera fase.'}, status=status.HTTP_403_FORBIDDEN)
 
-        report_serial = ReportSerializer(data=data)
-        if report_serial.is_valid():
-            report_serial.save()
-            return Response({'detail': report_serial.data}, status=status.HTTP_201_CREATED)
-        return Response({'error': report_serial.errors}, status=status.HTTP_400_BAD_REQUEST)
-    return Response({"error": "Solamente los alumnos pueden reportar preguntas."}, status=status.HTTP_400_BAD_REQUEST)
+            report_serial = ReportSerializer(data=data)
+            if report_serial.is_valid():
+                report_serial.save()
+                return Response({'message': report_serial.data}, status=status.HTTP_201_CREATED)
+            return Response({'error': report_serial.errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Solamente los alumnos pueden reportar preguntas."}, status=status.HTTP_400_BAD_REQUEST)

@@ -212,11 +212,11 @@ class UserComp(models.Model):
     
     @property
     def score_f2(self):
-        return 10*self.partida.preguntas.filter(acierto = True).count()
+        return self.partida.preguntas.filter(acierto = True).count() * 10
 
     @property
     def score_f3(self):
-        return 15*self.user.user_reports.filter(estado = 2).count()
+        return self.user.user_reports.filter(evento = self.pk, estado = 2).count() * 15
 
     def __str__(self):
         return f'Participación {self.partida}'

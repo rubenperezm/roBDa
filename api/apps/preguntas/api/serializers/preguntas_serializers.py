@@ -28,6 +28,14 @@ class ReportReviewSerializer(serializers.ModelSerializer):
         model = Report
         exclude = ('dispositivo', 'estado', 'pregunta')
 
+    def to_representation(self, instance):
+        return {
+            'id': instance.id,
+            'user': instance.reporter.username,
+            'motivo': instance.get_motivo_display(),
+            'descripcion': instance.descripcion,
+        }
+
 
 class PreguntaSerializer(serializers.ModelSerializer):
     opciones = OpcionSerializer(many=True, read_only=False)
@@ -96,14 +104,25 @@ class PreguntaListSerializer(PreguntaResueltaSerializer):
             'idioma': instance.get_idioma_display(),
             'creada': instance.created_date,
             'modificada': instance.modified_date,
-            'veces_reportada': instance.reports.count(),
+            'notificaciones': instance.reports.filter(estado = 1).count(),
         }
 
 class PregutaConReportsSerializer(PreguntaResueltaSerializer):
-    reports = ReportReviewSerializer(many = True)
-    tema = serializers.StringRelatedField()
-    imagen = serializers.StringRelatedField()
-    evento = serializers.StringRelatedField()
     class Meta:
         model = Pregunta
-        fields = ('id', 'creador', 'imagen', 'enunciado', 'evento', 'estado', 'tema', 'idioma', 'dispositivo', 'reports')
+        fields = ('id', 'creador', 'imagen', 'enunciado', 'tema', 'idioma')
+    
+    def to_representation(self, instance):
+        reports = instance.reports.filter(estado = 1)
+        reports_serial = ReportReviewSerializer(reports, many = True)
+        return {
+            'id': instance.id,
+            'creador': instance.creador.username,
+            'imagen': instance.imagen.path if instance.imagen else None,
+            'enunciado': instance.enunciado,
+            'tema': instance.tema.nombre,
+            'idioma': instance.get_idioma_display(),
+            'creada': instance.created_date,
+            'modificada': instance.modified_date,
+            'notificaciones': reports_serial.data,
+        }

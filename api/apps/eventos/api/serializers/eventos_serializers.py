@@ -13,13 +13,20 @@ class EventoSerializer(serializers.ModelSerializer):
         exclude = ('created_date', 'modified_date')
 
     def validate(self, data):
-        now = timezone.now()
-        if now < data['fechaInicio'] < data['finFase1'] < data['finFase2'] < data['finFase3']:
+        if data['fechaInicio'] < data['finFase1'] < data['finFase2'] < data['finFase3']:
             return data
         raise serializers.ValidationError(
             {'fechas':'Las fechas deben ser coherentes.'}
         )
-        
+    
+    def create(self, validated_data):
+        if timezone.now() < validated_data.get('fechaInicio'):
+            evento = super().create(validated_data)
+            return evento
+        raise serializers.ValidationError(
+            {'fechas':'Las fechas deben ser coherentes.'}
+        )
+
     def to_representation(self, instance):
         return {
             'id': instance.id,

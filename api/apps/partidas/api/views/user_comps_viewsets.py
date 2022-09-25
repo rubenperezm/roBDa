@@ -38,7 +38,7 @@ class PartidaEventoViewSet(GenericViewSet):
             raise({'error': "No existen preguntas suficientes."})
         # Tomar preguntas del mazo 'bueno'
         elif len(pks) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO - len(preguntas_contestadas):
-            otras_preguntas =  preguntas.filter(tema = usercomp.evento.tema, idioma = usercomp.evento.idioma).exclude(evento = usercomp.evento) 
+            otras_preguntas =  preguntas.filter(tema = usercomp.evento.tema, idioma = usercomp.evento.idioma).exclude(estado = 1, evento = usercomp.evento) # TODO es necesario evento?
             pks +=  otras_preguntas.values_list('pk', flat = True)
    
         return choice(pks)
