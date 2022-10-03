@@ -4,7 +4,6 @@ from rest_framework import status
 from django.conf import settings
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
-from random import sample
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
 from apps.base.models import AnswerLogs, Evento, Opcion, Partida, Pregunta
@@ -67,20 +66,23 @@ class PartidaEventoViewSet(GenericViewSet):
     # Añado una pregunta mas a la partida, y la devuelvo al cliente
     def update(self, request, pk=None):
         usercomp = self.get_object()
-        if usercomp.user == request.user:
-            if timezone.now() < usercomp.partida.created_date + timezone.timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
-                try:
-                    pk_preg = pregunta_aleatoria(usercomp)
-                except Exception as e:
-                    return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        preguntas = request.data.get('preguntas', None)
+        if preguntas:
+            if usercomp.user == request.user:
+                if timezone.now() < usercomp.partida.created_date + timezone.timedelta(minutes=settings.MINUTOS_POR_CUESTIONARIO):
+                    try:
+                        pk_preg = pregunta_aleatoria(usercomp)
+                    except Exception as e:
+                        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-                log = AnswerLogs(pregunta=Pregunta.objects.get(pk=pk_preg), partida=usercomp.partida)
-                log.save()
-                data = preguntaToJSON(pk_preg, log.pk)
-                # TODO considerar si tengo que mandar el temporizador a cada rato
-                return Response(data)
-            return Response({"error": "No se ha podido registrar la respuesta."}, status=status.HTTP_403_FORBIDDEN)
-        return Response({"error": "La partida seleccionada no pertenece al usuario."}, status=status.HTTP_403_FORBIDDEN)
+                    log = AnswerLogs(pregunta=Pregunta.objects.get(pk=pk_preg), partida=usercomp.partida)
+                    log.save()
+                    data = preguntaToJSON(pk_preg, log.pk)
+                    # TODO considerar si tengo que mandar el temporizador a cada rato
+                    return Response(data)
+                return Response({"error": "No se ha podido registrar la respuesta."}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "La partida seleccionada no pertenece al usuario."}, status=status.HTTP_403_FORBIDDEN)
+        return Response({"error": {"preguntas": "Este campo es requerido"}})
 
     # Recibe la respuesta a la pregunta por parte del usuario
     def partial_update(self, request, pk=None):

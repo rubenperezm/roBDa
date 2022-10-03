@@ -52,13 +52,17 @@ class PreguntaSerializer(serializers.ModelSerializer):
 
     def validate_opciones(self, value):
         nCorrectas = 0
+        textos = set(x['texto'] for x in value)
+        if len(textos) != len(value):
+            raise serializers.ValidationError("No puede haber opciones repetidas")
+        elif len(value) != 4:
+            raise serializers.ValidationError("Sólo debe haber cuatro opciones")
+
         for opcion in value:
             nCorrectas += opcion['esCorrecta']
 
         if nCorrectas != 1:
             raise serializers.ValidationError("Debe haber exactamente una respuesta correcta")
-        elif len(value) != 4:
-            raise serializers.ValidationError("Sólo debe haber cuatro opciones")
         else:
             return value
 
@@ -74,10 +78,23 @@ class PreguntaSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         options_data = validated_data.pop('opciones')
         pregunta = super().update(instance, validated_data)
-        instance.opciones.all().delete()
+        textos_incorrectos = [x['texto'] for x in options_data if x['esCorrecta'] == False]
 
+        correcta = instance.opciones.filter(esCorrecta=True).first()
+        opciones_modificables = list(instance.opciones.filter(esCorrecta = False).exclude(texto__in = textos_incorrectos).values_list('pk', flat=True))
+        textos_no_modificables = list(instance.opciones.filter(esCorrecta = False, texto__in = textos_incorrectos).values_list('texto', flat=True))
+        print(opciones_modificables)
         for option in options_data:
-            Opcion.objects.create(pregunta=pregunta, **option)
+            if option['esCorrecta'] == True:
+                if correcta.texto != option['texto']:
+                    correcta.texto = option['texto']
+                    correcta.save()
+            else:
+                if option['texto'] not in textos_no_modificables:
+                    aux = Opcion.objects.get(pk=opciones_modificables[-1])
+                    opciones_modificables.pop()
+                    aux.texto = option['texto']
+                    aux.save()
 
         return pregunta
 

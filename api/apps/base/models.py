@@ -116,7 +116,7 @@ class Opcion(models.Model):
     class Meta:
         verbose_name = 'Opción'
         verbose_name_plural = 'Opciones'
-        unique_together  = ('pregunta', 'texto')
+        #unique_together  = ('pregunta', 'texto')
     
     pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta", related_name="opciones")
     texto = models.CharField('Texto', max_length = 400)
@@ -226,7 +226,11 @@ class UserComp(models.Model):
 
     @property
     def score_f3(self):
-        return self.user.user_reports.filter(evento = self.pk, estado = 2).count() * 15
+        # Si terminan la última fase, reciben 10 puntos extra
+        if self.valoracion:
+            return self.user.user_reports.filter(evento = self.pk, estado = 2).count() * 15 + 10
+        else:
+            return self.user.user_reports.filter(evento = self.pk, estado = 2).count() * 15
 
     def __str__(self):
         return f'Participación {self.partida}'
@@ -239,6 +243,7 @@ class Repaso(models.Model):
     partida = models.OneToOneField(Partida, related_name = 'repaso',on_delete = models.CASCADE, verbose_name = "Partida", primary_key = True)
     user = models.ForeignKey(User, related_name = 'usuario', on_delete = models.CASCADE, verbose_name = 'Usuario')
     
+# TODO considerar esto
 class MejoresValoradas(models.Model):
     class Meta:
         verbose_name = "Pregunta mejor valorada"
