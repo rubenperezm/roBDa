@@ -25,6 +25,7 @@ from apps.users.views import *
 from apps.eventos.api.routers import *
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
+    TokenVerifyView
 )
 
 schema_view = get_schema_view(
@@ -44,6 +45,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/token/', MyTokenObtainPairView.as_view(), name='token'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('logout/', Logout.as_view(), name = 'logout'),
     path('register/', Register.as_view(), name = 'register'),
     path('users/', UserAPIView.as_view(), name = 'profile'),
