@@ -21,36 +21,41 @@ const initialState = {
     isAuthenticated: false,
     isLecturer: false,
     loading: false,
-    register_success: false
+    register_success: false,
+    error: null
 };
 
 const authReducer = (state = initialState, action) => {
     const { type, payload } = action;
-
     switch(type) {
         case REGISTER_SUCCESS:
             return {
                 ...state,
-                register_success: true
+                register_success: true,
+                error: null
             }
         case REGISTER_FAIL:
             return {
                 ...state,
+                error: payload.error
             }
         case RESET_REGISTER_SUCCESS:
             return {
                 ...state,
-                register_success: false
+                register_success: false,
+                error: null
             }
         case LOGIN_SUCCESS:
             return {
                 ...state,
-                isAuthenticated: true
+                isAuthenticated: true,
+                error: null
             }
         case LOGIN_FAIL:
             return {
                 ...state,
-                isAuthenticated: false
+                isAuthenticated: false,
+                error: payload.error
             }
         case LOGOUT_SUCCESS:
             return {

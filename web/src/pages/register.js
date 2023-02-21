@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useRouter } from 'next/router';
+import { router, useRouter } from 'next/router';
+import Link from 'next/link';
 import { register } from '../actions/auth';
 import PageLayout from '../components/PageLayout';
+import AccessCard from '../components/AccessCard';
 import CircularProgress from '@mui/material/CircularProgress';
-import router from 'next/router';
+import { TextField, CardContent, Typography, Button } from '@mui/material';
+import Grid2 from '@mui/material/Unstable_Grid2';
 
 const RegisterPage = () => {
     const dispatch = useDispatch();
     const router = useRouter();
     const register_success = useSelector(state => state.auth.register_success);
     const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+    const error = useSelector(state => state.auth.error);
     const loading = useSelector(state => state.auth.loading);
 
     const [formData, setFormData] = useState({
@@ -27,6 +31,7 @@ const RegisterPage = () => {
         password2
     } = formData;
 
+
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
     const onSubmit = e => {
@@ -42,71 +47,79 @@ const RegisterPage = () => {
         router.push('/login');
 
     return (
-        <PageLayout
-            title='httpOnly Auth | Register'
-            content='Resiger page for this auth tutorial on httpOnly cookies'
-        >
-            <h1 className='display-4 mt-5'>Register Page</h1>
-            <form className='bg-light p-5 mt-5 mb-5' onSubmit={onSubmit}>
-                <h3>Create An Account</h3>
-                <div className='form-group'>
-                    <input
-                        className='form-control'
-                        type='text'
-                        name='email'
-                        placeholder='Email *'
-                        onChange={onChange}
-                        value={email}
-                        required
+        <PageLayout title="Robda | Registro">
+            <AccessCard title="Crear cuenta">
+                <CardContent component="form" autoComplete="off" onSubmit={onSubmit} >
+
+                    <TextField
+                    error={error && error.email ? true : false}
+                    helperText={error && error.email ? error.email : ""}
+                    fullWidth
+                    margin="normal"
+                    onChange={onChange}
+                    required
+                    name="email"
+                    label="Correo electrónico"
+                    value={email}
                     />
-                </div>
-                <div className='form-group'>
-                    <input
-                        className='form-control'
-                        type='text'
-                        name='username'
-                        placeholder='Username *'
-                        onChange={onChange}
-                        value={username}
-                        required
+                    
+                    <TextField
+                    error={error && error.username ? true : false}
+                    helperText={error && error.username ? error.username : ""}
+                    fullWidth
+                    margin="normal"
+                    onChange={onChange}
+                    required
+                    name="username"
+                    label="Nombre de usuario"
+                    value={username}
                     />
-                </div>
-                <div className='form-group'>
-                    <input
-                        className='form-control'
-                        type='password'
-                        name='password'
-                        placeholder='Password *'
-                        onChange={onChange}
-                        value={password}
-                        minLength='8'
-                        required
+
+                    <TextField
+                    error={error && error.password ? true : false}
+                    helperText={error && error.password ? error.password : ""}
+                    fullWidth
+                    margin="normal"
+                    onChange={onChange}
+                    required
+                    type="password"
+                    name="password"
+                    label="Contraseña"
+                    value={password}
                     />
-                </div>
-                <div className='form-group'>
-                    <input
-                        className='form-control'
-                        type='password'
-                        name='password2'
-                        placeholder='Confirm Password *'
-                        onChange={onChange}
-                        value={password2}
-                        minLength='8'
-                        required
+
+                    <TextField
+                    error={error && (error.password2) ? true : false}
+                    helperText={error && error.password2 ? error.password2 : ""}
+                    fullWidth
+                    margin="normal"
+                    onChange={onChange}
+                    required
+                    type="password"
+                    name="password2"
+                    label="Repetir contraseña"
+                    value={password2}
                     />
-                </div>
-                {
-                    loading ? (
-                        <div className='d-flex justify-content-center align-items-center mt-5'>
-                            <CircularProgress />
-                        </div>
-                    ) : (
-                        <button className='btn btn-primary mt-5' type='submit'>
-                            Create Account
-                        </button>
-                    )
-                }
-            </form>
+
+                    {
+                        loading ? (
+                            <div style={{display: "flex", justifyContent: "center"}}>
+                                <CircularProgress sx={{m: "0 auto"}}/>
+                            </div>
+                            
+                        ) : (
+                            <Grid2 container spacing={2} sx={{mt: 2}}>
+                                <Grid2 item xs={12}>
+                                    <Button fullWidth type="submit" variant="contained">Crear cuenta</Button>      
+                                </Grid2>
+                                <Grid2 item xs={12}>
+                                    <Button fullWidth href="/login" LinkComponent={Link}>Ya tengo una cuenta</Button>
+                                </Grid2>
+                            </Grid2>
+                        )
+                    }
+                </CardContent>
+            </AccessCard>
         </PageLayout>
     );
 };

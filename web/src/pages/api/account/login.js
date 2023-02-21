@@ -51,7 +51,7 @@ export default async (req, res) => {
                 });
             } else {
                 return res.status(apiRes.status).json({
-                    error: 'Usuario o contraseña no válidos'
+                    error: 'Usuario o contraseña incorrectos'
                 });
             }
         } catch(err) {

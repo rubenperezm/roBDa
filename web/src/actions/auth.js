@@ -26,7 +26,7 @@ export const load_user = () => async dispatch => {
         });
 
         const data = await res.json();
-
+        console.log(data);
         if (res.status === 200) {
             dispatch({
                 type: LOAD_USER_SUCCESS,
@@ -122,6 +122,8 @@ export const register = (
             },
             body: body
         });
+        
+        const data = await res.json();
 
         if (res.status === 201) {
             dispatch({
@@ -129,7 +131,8 @@ export const register = (
             });
         } else {
             dispatch({
-                type: REGISTER_FAIL
+                type: REGISTER_FAIL,
+                payload: data
             });
         }
     } catch(err) {
@@ -169,6 +172,8 @@ export const login = (username, password) => async dispatch => {
             body: body
         });
 
+        const data = await res.json();
+        
         if (res.status === 200) {
             dispatch({
                 type: LOGIN_SUCCESS
@@ -176,12 +181,14 @@ export const login = (username, password) => async dispatch => {
             dispatch(load_user());
         } else {
             dispatch({
-                type: LOGIN_FAIL
+                type: LOGIN_FAIL,
+                payload: data
             });
         }
     } catch(err) {
         dispatch({
-            type: LOGIN_FAIL
+            type: LOGIN_FAIL,
+            payload: data
         });
     }
 

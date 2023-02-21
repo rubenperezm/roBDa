@@ -27,17 +27,15 @@ export default async (req, res) => {
             });
 
             const data = await apiRes.json();
-            console.log(data);
 
             if (apiRes.status === 201) {
                 return res.status(201).json({ success: data.success });
             } else {
                 return res.status(apiRes.status).json({
-                    error: data.error
+                    error: data
                 });
             }
         } catch(err) {
-            console.log(err);
             return res.status(500).json({
                 error: 'Algo salió mal al registrar el usuario'
             });
