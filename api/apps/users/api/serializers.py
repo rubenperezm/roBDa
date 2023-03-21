@@ -28,7 +28,7 @@ class PasswordSerializer(serializers.Serializer):
     def validate(self, data):
         if data['password'] != data['password2']:
             raise serializers.ValidationError(
-                {'password':'Debe ingresar ambas contraseñas iguales'}
+                {'password':'Debe ingresar ambas contraseñas iguales', 'password2': 'Debe ingresar ambas contraseñas iguales'}
             )
         return data
 

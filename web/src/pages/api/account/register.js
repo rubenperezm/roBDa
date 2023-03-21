@@ -31,8 +31,13 @@ export default async (req, res) => {
             if (apiRes.status === 201) {
                 return res.status(201).json({ success: data.success });
             } else {
+                const flattenedResults = {};
+                Object.keys(data).forEach((key) => {
+                    flattenedResults[key] = data[key][0];
+                });
+
                 return res.status(apiRes.status).json({
-                    error: data
+                    error: flattenedResults
                 });
             }
         } catch(err) {

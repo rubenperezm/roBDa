@@ -1,4 +1,5 @@
 import cookie from 'cookie';
+import axiosAuth from '../../../utils/axiosAuth';
 import { API_URL } from '../../../config/index';
 
 export default async (req, res) => {
@@ -8,10 +9,10 @@ export default async (req, res) => {
 
         if (access === false) {
             return res.status(401).json({
-                error: 'Usuario no autorizado para acceder a esta ruta'
+                error: 'Usuario no autorizado para cargar el perfil'
             });
         }
-
+        
         try {
             const apiRes = await fetch(`${API_URL}/users/`, {
                 method: 'GET',
@@ -20,8 +21,8 @@ export default async (req, res) => {
                     'Authorization': `Bearer ${access}`
                 }
             });
-            const data = await apiRes.json();
 
+            const data = await apiRes.json();
 
             if (apiRes.status === 200) {
                 return res.status(200).json({

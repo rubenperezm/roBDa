@@ -2,7 +2,7 @@ import cookie from 'cookie';
 import { API_URL } from '../../../config/index';
 
 export default async (req, res) => {
-    if (req.method === 'GET') {
+    if (req.method === 'POST') {
         const cookies = cookie.parse(req.headers.cookie ?? '');
         const refresh = cookies.refresh ?? false;
 
@@ -13,7 +13,7 @@ export default async (req, res) => {
         }
 
         const body = JSON.stringify({
-            refresh
+             refresh
         });
 
         try {
@@ -53,7 +53,7 @@ export default async (req, res) => {
                 return res.status(200).json({
                     success: 'Token refrescado exitosamente'
                 });
-            } else {
+            } else {   
                 return res.status(apiRes.status).json({
                     error: 'Algo salió mal al intentar refrescar el token'
                 });
@@ -64,7 +64,7 @@ export default async (req, res) => {
             });
         }
     } else {
-        res.setHeader('Allow', ['GET']);
+        res.setHeader('Allow', ['POST']);
         return res.status(405).json(
             { error: `Método ${req.method} no permitido` }
         )
