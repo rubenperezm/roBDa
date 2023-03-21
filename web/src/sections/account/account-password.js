@@ -19,7 +19,7 @@ import {
   Unstable_Grid2 as Grid
 } from '@mui/material';
 
-export const SettingsPassword = () => {
+export const AccountPassword = () => {
   const router = useRouter();
   const [showAlert, setShowAlert] = useState(false);
   const auth = useAuth();
