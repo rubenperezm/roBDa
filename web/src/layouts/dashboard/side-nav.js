@@ -1,5 +1,5 @@
 import NextLink from 'next/link';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import PropTypes from 'prop-types';
 import { useAuth } from 'src/hooks/use-auth';
@@ -21,7 +21,7 @@ import {
 } from '@mui/material';
 import { Logo } from 'src/components/logo';
 import { Scrollbar } from 'src/components/scrollbar';
-import { items } from './config';
+import { studentItems, adminItems } from './config';
 import { SideNavItem } from './side-nav-item';
 
 export const SideNav = (props) => {
@@ -30,6 +30,11 @@ export const SideNav = (props) => {
   const pathname = usePathname();
   const lgUp = useMediaQuery((theme) => theme.breakpoints.up('lg'));
   const auth = useAuth();
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    setItems(auth.user.is_staff === true ? adminItems : studentItems);
+  }, []);
 
   const LogOutIcon = (
     <SvgIcon fontSize="small">

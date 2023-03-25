@@ -116,7 +116,7 @@ class PreguntaListSerializer(PreguntaResueltaSerializer):
         return {
             'id': instance.id,
             'creador': instance.creador.username,
-            'enunciado': instance.enunciado,
+            'enunciado': instance.__str__(),
             'tema': instance.tema.nombre,
             'idioma': instance.get_idioma_display(),
             'creada': instance.created_date,

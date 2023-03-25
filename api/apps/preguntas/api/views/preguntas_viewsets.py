@@ -16,6 +16,7 @@ class PreguntaFilter(FilterSet):
     creador = CharFilter(field_name='creador__username', lookup_expr='contains')
     tema = NumberFilter(field_name='tema__id')
     idioma = ChoiceFilter(choices=Idioma.choices)
+    estado = ChoiceFilter(choices=Pregunta.EstadoPregunta.choices)
     evento = CharFilter(field_name='evento__name', lookup_expr='contains')
     class Meta:
         model = Pregunta

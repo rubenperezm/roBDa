@@ -1,3 +1,4 @@
+import NextLink from 'next/link';
 import {
   Avatar,
   Box,
@@ -9,16 +10,7 @@ import {
   Typography
 } from '@mui/material';
 
-const user = {
-  avatar: '/assets/menu/trophy.png',
-  city: 'Los Angeles',
-  country: 'USA',
-  jobTitle: 'Senior Developer',
-  name: 'Anika Visser',
-  timezone: 'GTM-7'
-};
-
-export const AccountProfile = () => (
+export const HomeCard = ({ title, description, image, to, buttonText }) => (
   <Card>
     <CardContent>
       <Box
@@ -29,41 +21,44 @@ export const AccountProfile = () => (
         }}
       >
         <Avatar
-          src={user.avatar}
+          src={image}
           sx={{
-            height: 80,
+            height: 100,
             mb: 2,
-            width: 80
+            width: 100
           }}
         />
         <Typography
           gutterBottom
           variant="h5"
         >
-          {user.name}
+          {title}
         </Typography>
         <Typography
           color="text.secondary"
           variant="body2"
         >
-          {user.city} {user.country}
-        </Typography>
-        <Typography
-          color="text.secondary"
-          variant="body2"
-        >
-          {user.timezone}
+          {description}
         </Typography>
       </Box>
     </CardContent>
     <Divider />
-    <CardActions>
-      <Button
-        fullWidth
-        variant="text"
-      >
-        Upload picture
-      </Button>
+    <CardActions
+      sx={{
+        alignItems: 'center',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+
+        <Button
+          component={NextLink}
+          fullWidth
+          variant="text"
+          href={to}
+        >
+          {buttonText}
+        </Button>
+
     </CardActions>
   </Card>
 );

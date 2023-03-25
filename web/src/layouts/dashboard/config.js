@@ -1,12 +1,13 @@
 import ChartBarIcon from '@heroicons/react/24/solid/ChartBarIcon'; // Dejarla porque se necesita para las stats
-import CogIcon from '@heroicons/react/24/solid/CogIcon';
-import ShoppingBagIcon from '@heroicons/react/24/solid/ShoppingBagIcon';
-import UserIcon from '@heroicons/react/24/solid/UserIcon';
-import UsersIcon from '@heroicons/react/24/solid/UsersIcon';
+import StarIcon from '@heroicons/react/24/solid/StarIcon';
+import TrophyIcon from '@heroicons/react/24/solid/TrophyIcon';
+import QuestionMarkCircleIcon from '@heroicons/react/24/solid/QuestionMarkCircleIcon';
 import HomeIcon from '@heroicons/react/24/solid/HomeIcon';
+import QueueListIcon from '@heroicons/react/24/solid/QueueListIcon';
+import BoltIcon from '@heroicons/react/24/solid/BoltIcon';
 import { SvgIcon } from '@mui/material';
 
-export const items = [
+export const studentItems = [
   {
     title: 'Menú Principal',
     path: '/',
@@ -17,38 +18,86 @@ export const items = [
     )
   },
   {
-    title: 'Customers',
-    path: '/customers',
+    title: 'Repasar',
+    path: '/study',
     icon: (
       <SvgIcon fontSize="small">
-        <UsersIcon />
+        <StarIcon />
       </SvgIcon>
     )
   },
   {
-    title: 'Companies',
-    path: '/companies',
+    title: 'Competiciones',
+    path: '/competitions',
     icon: (
       <SvgIcon fontSize="small">
-        <ShoppingBagIcon />
+        <TrophyIcon />
       </SvgIcon>
     )
   },
   {
-    title: 'Account',
-    path: '/account',
+    title: 'Duelos',
+    path: '/battles',
     icon: (
       <SvgIcon fontSize="small">
-        <UserIcon />
+        <BoltIcon />
       </SvgIcon>
     )
   },
   {
-    title: 'Settings',
-    path: '/settings',
+    title: 'Acerca de',
+    path: '/about',
     icon: (
       <SvgIcon fontSize="small">
-        <CogIcon />
+        <QuestionMarkCircleIcon />
+      </SvgIcon>
+    )
+  },
+];
+
+export const adminItems = [
+  {
+    title: 'Menú Principal',
+    path: '/',
+    icon: (
+      <SvgIcon fontSize="small">
+        <HomeIcon />
+      </SvgIcon>
+    )
+  },
+  {
+    title: 'Preguntas',
+    path: '/admin/questions',
+    icon: (
+      <SvgIcon fontSize="small">
+        <QueueListIcon />
+      </SvgIcon>
+    )
+  },
+  {
+    title: 'Competiciones',
+    path: '/admin/competitions',
+    icon: (
+      <SvgIcon fontSize="small">
+        <TrophyIcon />
+      </SvgIcon>
+    )
+  },
+  {
+    title: 'Estadísticas',
+    path: '/admin/stats',
+    icon: (
+      <SvgIcon fontSize="small">
+        <ChartBarIcon />
+      </SvgIcon>
+    )
+  },
+  {
+    title: 'Acerca de',
+    path: '/about',
+    icon: (
+      <SvgIcon fontSize="small">
+        <QuestionMarkCircleIcon />
       </SvgIcon>
     )
   },
