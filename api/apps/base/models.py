@@ -92,7 +92,7 @@ class Pregunta(BaseModel):
     
     class EstadoPregunta(models.Choices):
         EN_EVENTO = 1 # Pregunta en evento
-        SIN_ELIMINAR = 2 # Pregunta fuera de evento, esté o no reportada
+        ACTIVA = 2 # Pregunta fuera de evento, esté o no reportada
         ELIMINADA = 3 # Pregunta eliminada
         REPORTADA = 4 # Pregunta reportada
 

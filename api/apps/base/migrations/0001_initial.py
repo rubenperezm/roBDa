@@ -122,7 +122,7 @@ class Migration(migrations.Migration):
                 ('created_date', models.DateField(auto_now_add=True, verbose_name='Fecha de Creación')),
                 ('modified_date', models.DateField(auto_now=True, verbose_name='Fecha de Modificación')),
                 ('enunciado', models.CharField(max_length=400, verbose_name='Enunciado')),
-                ('estado', models.SmallIntegerField(choices=[(1, 'En Evento'), (2, 'Sin Eliminar'), (3, 'Eliminada')], default=1, verbose_name='Estado')),
+                ('estado', models.SmallIntegerField(choices=[(1, 'En evento'), (2, 'Sin eliminar'), (3, 'eliminada')], default=1, verbose_name='Estado')),
                 ('idioma', models.SmallIntegerField(choices=[(1, 'Esp'), (2, 'Ing')], default=1, verbose_name='Idioma')),
                 ('creador', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='Creador de la pregunta')),
                 ('evento', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='base.evento', verbose_name='Evento en el que fue creada')),

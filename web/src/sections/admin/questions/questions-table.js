@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { useState, useEffect, useCallback } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
-import { format } from 'date-fns';
 import {
     Avatar,
     Box,
@@ -17,11 +16,10 @@ import {
 } from '@mui/material';
 import { SeverityPill } from 'src/components/severity-pill';
 import { Scrollbar } from 'src/components/scrollbar';
+import { QuestionsFilters } from './questions-filters';
 
 export const QuestionsTable = (props) => {
-    const [preguntas, setPreguntas] = useState([]);
-    const [numberOfResults, setNumberOfResults] = useState(0);
-    const [pagina, setPagina] = useState(0);
+    const { setPagina, pagina, preguntas, numberOfResults } = props;
 
     const reportsColor = (reports) => {
         if (reports == 0)
@@ -35,16 +33,6 @@ export const QuestionsTable = (props) => {
     const onPageChange = useCallback((event, newPage) => {
         setPagina(newPage);
     }, []);
-    
-
-    useEffect(() => {
-        const getQuestions = async () => {
-            const res = await axiosAuth.get(`/api/questions?page=${pagina+1}`).then(res => res.data);
-            setPreguntas(res.results);
-            setNumberOfResults(res.count);
-        };
-        getQuestions();
-    }, [pagina]);
 
 
     return (
@@ -67,7 +55,10 @@ export const QuestionsTable = (props) => {
                                     Idioma
                                 </TableCell>
                                 <TableCell>
-                                    Última modificación
+                                    Evento
+                                </TableCell>
+                                <TableCell>
+                                    Estado
                                 </TableCell>
                                 <TableCell>
                                     Reportes
@@ -79,8 +70,8 @@ export const QuestionsTable = (props) => {
                         </TableHead>
                         <TableBody>
                             {preguntas.map((question) => {
-                                const fecha = format(new Date(question.modificada), 'HH:mm - dd/MM/yyyy');
-                                const createdAt = fecha.toString();
+                                //const fecha = format(new Date(question.modificada), 'HH:mm - dd/MM/yyyy');
+                                //const createdAt = fecha.toString();
 
                                 return (
                                     <TableRow
@@ -93,9 +84,9 @@ export const QuestionsTable = (props) => {
                                                 direction="row"
                                                 spacing={2}
                                             >
-                                            <Typography variant="subtitle2">
-                                                {question.enunciado}
-                                            </Typography>
+                                                <Typography variant="subtitle2">
+                                                    {question.enunciado}
+                                                </Typography>
                                             </Stack>
                                         </TableCell>
                                         <TableCell>
@@ -105,12 +96,15 @@ export const QuestionsTable = (props) => {
                                             {question.tema}
                                         </TableCell>
                                         <TableCell>
-                                            <Avatar 
+                                            <Avatar
                                                 src={`/assets/flags/${question.idioma}.png`}>
                                             </Avatar>
                                         </TableCell>
                                         <TableCell>
-                                            {createdAt}
+                                            {question.evento ? question.evento : 'Creada por profesor'}
+                                        </TableCell>
+                                        <TableCell>
+                                            {question.estado}
                                         </TableCell>
                                         <TableCell>
                                             <SeverityPill

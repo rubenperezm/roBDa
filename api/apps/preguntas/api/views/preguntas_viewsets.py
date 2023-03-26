@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from django_filters.rest_framework.backends import DjangoFilterBackend
 from django_filters.rest_framework.filterset import FilterSet
-from django_filters import CharFilter, NumberFilter, ChoiceFilter
+from django_filters import CharFilter, NumberFilter, MultipleChoiceFilter
 
 from django.utils import timezone
 from apps.base.models import Evento, Idioma, Pregunta
@@ -14,13 +14,13 @@ from apps.preguntas.api.serializers.preguntas_serializers import PreguntaListSer
 
 class PreguntaFilter(FilterSet):
     creador = CharFilter(field_name='creador__username', lookup_expr='contains')
-    tema = NumberFilter(field_name='tema__id')
-    idioma = ChoiceFilter(choices=Idioma.choices)
-    estado = ChoiceFilter(choices=Pregunta.EstadoPregunta.choices)
+    tema = CharFilter(field_name='tema__nombre', lookup_expr='contains')
+    idioma = MultipleChoiceFilter(choices=Idioma.choices)
+    estado = MultipleChoiceFilter(choices=Pregunta.EstadoPregunta.choices)
     evento = CharFilter(field_name='evento__name', lookup_expr='contains')
     class Meta:
         model = Pregunta
-        fields = ['creador', 'evento', 'tema', 'idioma']
+        fields = ['creador', 'evento', 'tema', 'idioma', 'estado']
 
 class PreguntaViewSet(GenericViewSet):
     serializer_class = PreguntaSerializer
@@ -118,6 +118,7 @@ class reportar(APIView):
                     return Response({'error': 'Solo puede reportarse preguntas en eventos en la tercera fase.'}, status=status.HTTP_403_FORBIDDEN)
 
             report_serial = ReportSerializer(data=data)
+            # TODO: Estoy cambiando el estado?
             if report_serial.is_valid():
                 report_serial.save()
                 return Response({'message': report_serial.data}, status=status.HTTP_201_CREATED)

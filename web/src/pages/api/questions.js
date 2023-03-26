@@ -13,10 +13,34 @@ export default async (req, res) => {
         }
 
         const page = req.query.page ?? 1;
-        
+        const {creador, enunciado, tema, evento, estado, idioma} = req.query;
+
+        let q = '';
+        if (creador) {
+            q += `&creador=${creador}`;
+        }
+        if (enunciado) {
+            q += `&enunciado=${enunciado}`;
+        }
+        if (tema) {
+            q += `&tema=${tema}`;
+        }
+        if (evento) {
+            q += `&evento=${evento}`;
+        }
+        if (idioma) {
+            idioma.split(',').forEach(i => {
+                q += `&idioma=${i}`;
+            });
+        }
+        if (estado) {
+            estado.split(',').forEach(est => {
+                q += `&estado=${est}`;
+            });
+        }
+
         try {
-            // TODO: Considerar filtros para creador, estado, etc.
-            const apiRes = await fetch(`${API_URL}/preguntas/preguntas/?page=${page}`, {
+            const apiRes = await fetch(`${API_URL}/preguntas/preguntas/?page=${page}${q}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',

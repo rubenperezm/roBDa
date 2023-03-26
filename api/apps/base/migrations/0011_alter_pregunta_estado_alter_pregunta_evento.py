@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='pregunta',
             name='estado',
-            field=models.SmallIntegerField(choices=[(1, 'En Evento'), (2, 'Sin Eliminar'), (3, 'Eliminada'), (4, 'Reportada')], default=1, verbose_name='Estado'),
+            field=models.SmallIntegerField(choices=[(1, 'En evento'), (2, 'Sin Eliminar'), (3, 'Eliminada'), (4, 'Reportada')], default=1, verbose_name='Estado'),
         ),
         migrations.AlterField(
             model_name='pregunta',

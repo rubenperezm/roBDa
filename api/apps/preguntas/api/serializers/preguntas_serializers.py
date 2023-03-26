@@ -110,7 +110,7 @@ class PreguntaListSerializer(PreguntaResueltaSerializer):
     tema = serializers.StringRelatedField()
     class Meta:
         model = Pregunta
-        fields = ('id', 'creador', 'enunciado', 'tema', 'idioma', 'estado', 'created_date', 'modified_date')
+        fields = ('id', 'creador', 'enunciado', 'tema', 'idioma', 'estado', 'evento', 'created_date', 'modified_date')
 
     def to_representation(self, instance):
         return {
@@ -119,6 +119,8 @@ class PreguntaListSerializer(PreguntaResueltaSerializer):
             'enunciado': instance.__str__(),
             'tema': instance.tema.nombre,
             'idioma': instance.get_idioma_display(),
+            'estado': instance.get_estado_display(),
+            'evento': instance.evento.name if instance.evento else None,
             'creada': instance.created_date,
             'modificada': instance.modified_date,
             'notificaciones': instance.reports.filter(estado = 1).count(),
