@@ -1,8 +1,8 @@
 import Head from 'next/head';
-import { useEffect, useState } from 'react';
-import axiosAuth from 'src/utils/axiosAuth';
+import NextLink from 'next/link';
 import PhotoIcon from '@heroicons/react/24/solid/PhotoIcon';
 import HashtagIcon from '@heroicons/react/24/solid/HashtagIcon';
+import ListBulletIcon from '@heroicons/react/24/solid/ListBulletIcon';
 import PlusIcon from '@heroicons/react/24/solid/PlusIcon';
 import {
     Box,
@@ -14,29 +14,12 @@ import {
     Unstable_Grid2 as Grid
 } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
-import { QuestionsTable } from 'src/sections/admin/questions/questions-table';
-import { QuestionsFilters } from 'src/sections/admin/questions/questions-filters';
 
-const Page = () => {
-    const [preguntas, setPreguntas] = useState([]);
-    const [numberOfResults, setNumberOfResults] = useState(0);
-    const [pagina, setPagina] = useState(0);
 
-    useEffect(() => {
-        const getQuestions = async () => {
-            const res = await axiosAuth.get('/api/questions', {
-                params: {
-                    page: pagina + 1
-                }
-            }).then(res => res.data);
-            setPreguntas(res.results);
-            setNumberOfResults(res.count);
-        };
-        getQuestions();
-    }, [pagina]);
-
+export const Layout = (props) => {
+    const {children, buttonText, buttonOnClick} = props;
     return (
-        <>
+        <DashboardLayout>
             <Head>
                 <title>
                     Preguntas | ROBDA
@@ -64,22 +47,38 @@ const Page = () => {
                                     spacing={1}
                                 >
                                     <Button
+                                        component={NextLink}
+                                        color="inherit"
+                                        startIcon={(
+                                            <SvgIcon fontSize="small">
+                                                <ListBulletIcon />
+                                            </SvgIcon>
+                                        )}
+                                        href="/admin/questions"
+                                    >
+                                        Preguntas
+                                    </Button>
+                                    <Button
+                                        component={NextLink}
                                         color="inherit"
                                         startIcon={(
                                             <SvgIcon fontSize="small">
                                                 <PhotoIcon />
                                             </SvgIcon>
                                         )}
+                                        href="/admin/questions/images"
                                     >
                                         Imágenes
                                     </Button>
                                     <Button
+                                        component={NextLink}
                                         color="inherit"
                                         startIcon={(
                                             <SvgIcon fontSize="small">
                                                 <HashtagIcon />
                                             </SvgIcon>
                                         )}
+                                        href="/admin/questions/topics"
                                     >
                                         Temas
                                     </Button>
@@ -94,31 +93,18 @@ const Page = () => {
                                         </SvgIcon>
                                     )}
                                     variant="contained"
-                                    sx={{float: 'right'}}
+                                    sx={{ float: 'right' }}
+                                    onClick={buttonOnClick}
                                 >
-                                    Crear pregunta
+                                    {buttonText}
                                 </Button>
                             </Grid>
                         </Grid>
-                        <QuestionsFilters setNumberOfResults={setNumberOfResults} setPreguntas={setPreguntas} setPagina={setPagina} />
-                        <QuestionsTable
-                            setPagina={setPagina}
-                            pagina={pagina}
-                            numberOfResults={numberOfResults}
-                            preguntas={preguntas}
-                        />
+                        {children}
                     </Stack>
                 </Container>
             </Box>
-        </>
+        </DashboardLayout>
     );
 };
-
-Page.getLayout = (page) => (
-    <DashboardLayout>
-        {page}
-    </DashboardLayout>
-);
-
-export default Page;
 

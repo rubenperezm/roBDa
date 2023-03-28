@@ -1,5 +1,5 @@
 import cookie from 'cookie';
-import { API_URL } from '../../config/index';
+import { API_URL } from '../../../config/index';
 
 export default async (req, res) => {
     if (req.method === 'GET') {
@@ -61,7 +61,7 @@ export default async (req, res) => {
             }
         } catch(err) {
             return res.status(500).json({
-                error: 'Algo salió mal al intentar obtener la información del usuario'
+                error: 'Algo salió mal al intentar obtener las preguntas'
             });
         }
     } else {

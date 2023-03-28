@@ -147,8 +147,8 @@ export const QuestionsTable = (props) => {
 };
 
 QuestionsTable.propTypes = {
-    count: PropTypes.number,
-    items: PropTypes.array,
-    onPageChange: PropTypes.func,
-    page: PropTypes.number,
+    numberOfResults: PropTypes.number,
+    preguntas: PropTypes.array,
+    setPagina: PropTypes.func,
+    pagina: PropTypes.number,
 };

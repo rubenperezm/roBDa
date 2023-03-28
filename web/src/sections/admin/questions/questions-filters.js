@@ -1,9 +1,6 @@
 import PropTypes from 'prop-types';
-import { useState } from 'react';
-import { useAuth } from 'src/hooks/use-auth';
 import { useFormik } from 'formik';
 import axiosAuth from 'src/utils/axiosAuth';
-import * as Yup from 'yup';
 import {
     Box,
     Button,
@@ -13,8 +10,6 @@ import {
     CardHeader,
     Divider,
     TextField,
-    Snackbar,
-    Alert,
     Unstable_Grid2 as Grid,
     Checkbox,
     FormGroup,
