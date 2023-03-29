@@ -18,12 +18,6 @@ class Idioma(models.IntegerChoices):
     ESP = 1
     ING = 2
 
-class Dispositivo(models.IntegerChoices):
-    ''' Clase de dispositivos (a modo de enum) '''
-    PC = 1
-    MOVIL = 2
-    TABLET = 3
-
 class BaseModel(models.Model):
     """
     Modelo base del que heredan los modelos 
@@ -48,6 +42,7 @@ class Imagen(models.Model):
 
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema")
     path = models.ImageField('Imagen Pregunta', upload_to='img/', unique = True)
+    nombre = models.CharField('Nombre de la imagen', max_length = 30, unique = True)
 
     def __str__(self):
         return str(self.path)
@@ -62,7 +57,6 @@ class Evento(BaseModel):
     fechaInicio = models.DateTimeField('Fecha de inicio del evento')
     finFase1 = models.DateTimeField('Fin de la fase de creación de pregunta')
     finFase2 = models.DateTimeField('Fin de la fase de cuestionarios')
-    finFase3 = models.DateTimeField('Fin de la fase de reportar')
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema")
     idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, default = 1)
     terminada = models.BooleanField('Evento terminado', default = False)
@@ -79,11 +73,14 @@ class Evento(BaseModel):
             return 'Crear preguntas'
         elif now < self.finFase2.timestamp():
             return 'Realizar test'
-        elif now < self.finFase3.timestamp():
-            return 'Ver resultados test'
         elif not self.terminada:
             return 'Esperando corrección del profesor'
         return 'Finalizada'
+    
+    @property
+    def mejores_jugadores(self):
+        partidas = Partida.objects.filter(evento = self).order_by('-puntuacion')
+        return partidas[:5]
 
 class Pregunta(BaseModel):
     class Meta:
@@ -104,8 +101,23 @@ class Pregunta(BaseModel):
     estado = models.SmallIntegerField('Estado', choices = EstadoPregunta.choices, default = 1)
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema")
     idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, default = 1)
-    dispositivo = models.SmallIntegerField('Dispositivo', choices = Dispositivo.choices, default = 1)
+    nIntentos = models.IntegerField('Número de intentos', default = 0)
+    nAciertos = models.IntegerField('Número de aciertos', default = 0)
+    nValorada = models.IntegerField('Número de veces valorada', default = 0)
+    valoracionAcumulada = models.IntegerField('Valoración acumulada', default = 0)
 
+    @property
+    def porcentajeAciertos(self):
+        if self.nIntentos == 0:
+            return 0
+        return round(self.nAciertos / self.nIntentos * 100, 2)
+
+    @property
+    def valoracionMedia(self):
+        if self.nValorada == 0:
+            return 5 # Máxima valoración
+        return round(self.valoracionAcumulada / self.nValorada, 2)
+    
     def __str__(self):
         if len(self.enunciado) > 50:
             return f'{self.enunciado[:50]}...'
@@ -116,7 +128,6 @@ class Opcion(models.Model):
     class Meta:
         verbose_name = 'Opción'
         verbose_name_plural = 'Opciones'
-        #unique_together  = ('pregunta', 'texto')
     
     pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta", related_name="opciones")
     texto = models.CharField('Texto', max_length = 400)
@@ -132,26 +143,17 @@ class Partida(BaseModel):
     
     tema = models.ForeignKey(Tema, on_delete = models.CASCADE, verbose_name = "Tema", null = True)
     idioma = models.SmallIntegerField('Idioma', choices = Idioma.choices, null = True)
-    dispositivo = models.SmallIntegerField('Dispositivo', choices = Dispositivo.choices, default = 1)
+    preguntas = models.ManyToManyField(Pregunta, related_name = 'partidas')
+    aciertos = models.IntegerField('Aciertos', default = 0)
+
+    @property
+    def porcentajeAcierto(self):
+        if self.preguntas.count() == 0:
+            return 0
+        return round(self.aciertos / self.preguntas.count() * 100, 2)
 
     def __str__(self):
         return f'Partida {self.id}'
-
-class AnswerLogs(models.Model):
-    class Meta:
-        verbose_name = "Respuesta individual"
-        verbose_name_plural = "Respuestas individuales"
-
-    partida = models.ForeignKey(Partida, on_delete = models.CASCADE, verbose_name = "Partida", related_name = 'preguntas')
-    pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta")
-    respuesta_user = models.ForeignKey(Opcion, on_delete = models.CASCADE, null = True, verbose_name = "Respuesta del usuario")
-    timeIni = models.DateTimeField('Hora de inicio de la pregunta', auto_now_add = True)
-    timeFin = models.DateTimeField('Hora de finalización de la pregunta', null = True)
-    acierto = models.BooleanField('Acierto', null = True)
-
-    def __str__(self):
-        return f'Registro {self.id}'
-
                 
 class Duelos(BaseModel):
     class Meta:
@@ -202,10 +204,6 @@ class UserComp(models.Model):
     partida = models.OneToOneField(Partida, related_name = 'participacion',on_delete = models.CASCADE, verbose_name = "Partida", primary_key = True)
     user = models.ForeignKey(User, related_name = 'participante', on_delete = models.CASCADE, verbose_name = 'Usuario')
     evento = models.ForeignKey(Evento, on_delete = models.CASCADE, verbose_name = "Evento")
-    # TODO considerar hacer @property las puntuaciones de las tres fases
-    #score_f1 = models.PositiveIntegerField('Puntuación de la fase de creación de pregunta', default = 0)
-    #score_f2 = models.PositiveIntegerField('Puntuación de la fase de cuestionario', default = 0)
-    #score_f3 = models.PositiveIntegerField('Puntuación de la fase de reportar', default = 0)
     valoracion = models.SmallIntegerField('Valoración', null = True)
     score = models.PositiveIntegerField('Puntuación', null = True)
 
@@ -230,7 +228,7 @@ class UserComp(models.Model):
         if self.valoracion:
             return self.user.user_reports.filter(evento = self.pk, estado = 2).count() * 15 + 10
         else:
-            return self.user.user_reports.filter(evento = self.pk, estado = 2).count() * 15
+            return 0
 
     def __str__(self):
         return f'Participación {self.partida}'
@@ -243,17 +241,6 @@ class Repaso(models.Model):
     partida = models.OneToOneField(Partida, related_name = 'repaso',on_delete = models.CASCADE, verbose_name = "Partida", primary_key = True)
     user = models.ForeignKey(User, related_name = 'usuario', on_delete = models.CASCADE, verbose_name = 'Usuario')
     
-# TODO considerar esto
-class MejoresValoradas(models.Model):
-    class Meta:
-        verbose_name = "Pregunta mejor valorada"
-        verbose_name_plural = "Preguntas mejor valoradas"
-        unique_together = ('evento', 'usuario')
-
-    evento = models.ForeignKey(Evento, on_delete = models.CASCADE, verbose_name = "Evento")
-    usuario = models.ForeignKey(User, on_delete = models.CASCADE, verbose_name = "Usuario")
-    pregunta = models.ForeignKey(Pregunta, on_delete = models.CASCADE, verbose_name = "Pregunta")
-
 class Report(BaseModel):
     class Meta:
         verbose_name = "Pregunta reportada"
@@ -276,7 +263,6 @@ class Report(BaseModel):
     motivo = models.SmallIntegerField('Motivo', choices = MotivoReport.choices)
     descripcion = models.CharField('Descripción', max_length= 400)
     estado = models.SmallIntegerField('Estado', choices = EstadoReport.choices, default = 1)
-    dispositivo = models.SmallIntegerField('Dispositivo', choices = Dispositivo.choices, default = 1)
 
     def __str__(self):
         return f'Report {self.id}'

@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from django.db.models import Sum, Count, Avg, F, DurationField
+from django.db.models import Sum, Count, Avg, F, DurationField, Q
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from apps.users.models import User
@@ -9,19 +9,16 @@ from apps.base.models import Partida, Pregunta, Report, Repaso, Duelos, Evento, 
 
 @api_view(['GET'])
 def estadisticas(request):
-    if request.user.is_staff:
+    if request.user.is_staff: # TODO: Hacer el else para mostrar estadísticas de cada alumno
         n_users = User.objects.filter(is_staff = False).count()
-        tiempo = AnswerLogs.objects.aggregate(total=Sum(F('timeFin') - F('timeIni'), output_field = DurationField()))
         n_total_partidas = Partida.objects.count()
         n_total_reports = Report.objects.count()
         reports = Report.objects.values('estado', 'evento').annotate(numero=Count('pk'))
         n_total_preguntas = Pregunta.objects.count()
         preguntas = Pregunta.objects.values('estado').annotate(numero=Count('pk'))
+        preguntas_respondidas = Partida.objects.annotate(numero=Count('preguntas'))
+        preguntas_acertadas = Partida.objects.annotate(numero=Sum('aciertos'))
 
-        # STATS BY DEVICE
-        partidas_por_dispositivo = Partida.objects.values('dispositivo').annotate(numero=Count('pk'))
-        preguntas_por_dispositivo = Pregunta.objects.values('dispositivo').annotate(numero=Count('pk'))
-        reports_por_dispositivo = Report.objects.values('dispositivo').annotate(numero=Count('pk'))
 
         # STATS LAST MONTH
         last_month = timezone.now() - timezone.timedelta(days = 30)
@@ -29,7 +26,9 @@ def estadisticas(request):
         preguntas_mes = Pregunta.objects.filter(created_date__gte=last_month).annotate(fecha=TruncDate('created_date')).values('fecha').annotate(numero=Count('pk'))
         reports_mes = Report.objects.filter(created_date__gte=last_month).annotate(fecha=TruncDate('created_date')).values('fecha').annotate(numero=Count('pk'))
 
-        n_logs = AnswerLogs.objects.values('partida__tema__nombre', 'partida__idioma', 'acierto').annotate(numero=Count('pk'))
+        porcentaje_aciertos_medio = Partida.objects.all().annotate(num_preguntas = Count('preguntas')
+            ).values('tema_nombre', 'idioma', 'aciertos'
+            ).annotate(num_partidas = Count('id'), porcentaje_acierto = Avg('aciertos') / Avg('num_preguntas') * 100)
 
         # STATS REPASOS
         n_repasos = Repaso.objects.values('partida__tema__nombre', 'partida__idioma').annotate(numero=Count('pk'))
@@ -47,25 +46,22 @@ def estadisticas(request):
         # STATS DUELOS
         n_duelos = Duelos.objects.values('partidaUser1__tema__nombre', 'partidaUser1__idioma').annotate(numero=Count('pk'))
         estado_duelos = Report.objects.values('estado').annotate(numero=Count('pk'))
+
+        # TODO: Estadísticas de las valoraciones de cada pregunta
+
         return Response({
             'usuarios': n_users,
-            'tiempo jugado': {
-                'horas': tiempo['total'].seconds // 3600,
-                'minutos': (tiempo['total'].seconds % 3600) // 60,
-                'segundos': ((tiempo['total'].seconds % 3600) % 60) // 60,
-            },
             'partidas totales': n_total_partidas,
             'reports totales': n_total_reports,
             'stats reports': reports,
             'preguntas totales': n_total_preguntas,
+            'preguntas respondidas': preguntas_respondidas,
+            'preguntas acertadas': preguntas_acertadas,
             'stats preguntas': preguntas,
-            'preguntas dispositivo': preguntas_por_dispositivo,
-            'partidas dispositivo': partidas_por_dispositivo,
-            'reports dispositivo': reports_por_dispositivo,
             'partidas mes': partidas_mes,
             'preguntas mes': preguntas_mes,
             'reports mes': reports_mes,
-            'porcentaje acierto': n_logs,
+            'porcentaje acierto': porcentaje_aciertos_medio,
             'repasos totales': n_repasos,
             'media de preguntas por repaso': preguntas_repasos_media['media'],
             'aciertos en repasos': n_logs_repasos,
