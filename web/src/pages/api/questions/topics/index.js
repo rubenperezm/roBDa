@@ -49,26 +49,34 @@ export default async (req, res) => {
             });
         }
 
-        const { id } = req.query;
-
         const { nombre } = req.body;
 
         try {
-            const apiRes = await fetch(`${API_URL}/preguntas/temas/${id}/`, {
+            const apiRes = await fetch(`${API_URL}/preguntas/temas/`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Authorization': `Bearer ${access}`
+                    'Authorization': `Bearer ${access}`,
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     nombre
                 })
             });
 
+            const data = await apiRes.json();
+            console.log(data);
             if (apiRes.status === 200) {
-                return res.status(200);
+                return res.status(200).json(data);
             } else {
-                return res.status(apiRes.status);
+                const flattenedResults = {};
+                Object.keys(data).forEach((key) => {
+                    flattenedResults[key] = data[key][0];
+                });
+
+                return res.status(apiRes.status).json({
+                    error: flattenedResults
+                });
             }
         } catch (err) {
             return res.status(500).json({

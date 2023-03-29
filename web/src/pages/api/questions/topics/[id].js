@@ -24,9 +24,9 @@ export default async (req, res) => {
             });
 
             if (apiRes.status === 204) {
-                return res.status(204);
+                return res.status(204).json({});
             } else {
-                return res.status(apiRes.status);
+                return res.status(apiRes.status).json({});
             }
         } catch (err) {
             return res.status(500).json({
@@ -59,7 +59,7 @@ export default async (req, res) => {
             if (apiRes.status === 200) {
                 return res.status(200).json(data);
             } else {
-                return res.status(apiRes.status);
+                return res.status(apiRes.status).json(data);
             }
         } catch (err) {
             return res.status(500).json({
@@ -80,22 +80,34 @@ export default async (req, res) => {
 
         const { nombre } = req.body;
 
+        const body = JSON.stringify({
+            nombre,
+        });
+
         try {
             const apiRes = await fetch(`${API_URL}/preguntas/temas/${id}/`, {
                 method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
-                    'Authorization': `Bearer ${access}`
+                    'Authorization': `Bearer ${access}`,
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    nombre
-                })
+                body: body
             });
 
+            const data = await apiRes.json();
+
             if (apiRes.status === 200) {
-                return res.status(200);
+                return res.status(200).json(data);
             } else {
-                return res.status(apiRes.status);
+                const flattenedResults = {};
+                Object.keys(data).forEach((key) => {
+                    flattenedResults[key] = data[key][0];
+                });
+
+                return res.status(apiRes.status).json({
+                    error: flattenedResults
+                });
             }
         } catch (err) {
             return res.status(500).json({

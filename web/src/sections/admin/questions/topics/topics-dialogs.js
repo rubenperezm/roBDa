@@ -7,26 +7,69 @@ import {
     DialogContentText,
     DialogActions,
     Snackbar,
+    CircularProgress,
 } from "@mui/material";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import axiosAuth from "src/utils/axiosAuth";
 import { TopicsForm } from "./topics-form";
 
 export const TopicsDialogs = (props) => {
-    const { id, getTopics, openDialog, setOpenDialog } = props;
-    const [submitHandler, setSubmitHandler] = useState(null);
+    const { topic,
+            setTopic,
+            openDialogUpdate,
+            setOpenDialogUpdate,
+            openDialogCreate,
+            setOpenDialogCreate,
+            openDialogDelete,
+            setOpenDialogDelete,
+        } = props;
     const [openAlert, setOpenAlert] = useState(false);
     const [messageAlert, setMessageAlert] = useState('');
-    const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
-    const [topic, setTopic] = useState({});
 
+    const formik = useFormik({
+        initialValues: {
+            nombre: topic ? topic.nombre : '',
+            submit: null
+        },
+        validationSchema: Yup.object({
+            nombre: Yup
+                .string()
+                .max(30)
+                .required('Introduce un nombre para el tema'),
+        }),
+        onSubmit:
+            async (values, helpers) => {
+                try {
+                    const body = {
+                        nombre: values.nombre,
+                    }
+
+                    if (topic) {
+                        await handleUpdate(topic, body);
+                    } else {
+                        await handleCreate(body);
+                    }
+
+                    helpers.setSubmitting(false);
+                    helpers.resetForm();
+
+                } catch (err) {
+                    helpers.setStatus({ success: false });
+                    helpers.setErrors(err.response.data.error);
+                    helpers.setSubmitting(false);
+                }
+            }
+    });
+    
     const handleConfirmDelete = (event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
         const deleteTopic = async () => {
-            try{
-            const res = await axiosAuth.delete(`/api/questions/topics/${id}`).then(res => res.data);
+            try {
+                const res = await axiosAuth.delete(`/api/questions/topics/${topic.id}`).then(res => res.data);
             } catch (error) {
                 console.log(error);
             }
@@ -34,24 +77,50 @@ export const TopicsDialogs = (props) => {
 
         deleteTopic();
 
-        setOpenDialog(false);
-        setOpenConfirmDelete(false);
+        setOpenDialogDelete(false);
+        setOpenDialogUpdate(false);
+        setMessageAlert('Tema eliminado correctamente');
         setOpenAlert(true);
-        setMessageAlert('Tema eliminado correctamente'); 
+        setTopic(null);
     };
 
-    const handleCloseDialog = useCallback((event, reason) => {
+    const handleCloseDialogUpdate = useCallback((event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
-        setOpenDialog(false);
+        setOpenDialogUpdate(false);
+        setTopic(null);
+    }, []);
+
+    const handleCloseDialogCreate = useCallback((event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpenDialogCreate(false);
+        setTopic(null);
     }, []);
 
     const handleCloseConfirmDelete = useCallback((event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
-        setOpenConfirmDelete(false);
+        setOpenDialogDelete(false);
+    }, []);
+
+    const handleCreate = useCallback(async (body) => {
+        await axiosAuth.post('/api/questions/topics', body);
+        setOpenDialogCreate(false);
+        setTopic(null);
+        setMessageAlert('Tema creado correctamente');
+        setOpenAlert(true);
+    }, []);
+
+    const handleUpdate = useCallback(async (topic, body) => {
+        await axiosAuth.put(`/api/questions/topics/${topic.id}`, body);
+        setOpenDialogUpdate(false);
+        setTopic(null);
+        setMessageAlert('Tema editado correctamente');
+        setOpenAlert(true);
     }, []);
 
     const handleCloseAlert = useCallback((event, reason) => {
@@ -61,46 +130,56 @@ export const TopicsDialogs = (props) => {
         setOpenAlert(false);
     }, []);
 
-    useEffect(() => {
-            const getTopic = async () => {
-                if (id !== ''){
-                    try{
-                        const res = await axiosAuth.get(`/api/questions/topics/${id}`).then((res) => setTopic(res.data));
-                        console.log(topic);
-                    } catch (error) {
-                        console.log("error");
-                    }
-                }
-                
-            };
-            getTopic();   
-    }, [id]);
-
-
     return (
         <>
-            <Dialog
-                open={openDialog}
-                onClose={handleCloseDialog}
+            <Dialog // Create
+                open={openDialogCreate}
+                onClose={handleCloseDialogCreate}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
             >
                 <DialogTitle id="alert-dialog-title">
-                    Editar tema
+                    Crear tema
                 </DialogTitle>
                 <DialogContent>
-                    <TopicsForm topic={topic} setSubmitHandler={setSubmitHandler} />
+                    <TopicsForm formik={formik} />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDialog}>Cancelar</Button>
-                    <Button type="submit" onClick={submitHandler}>{id ? "Editar" : "Crear"}</Button>
-                    <Button onClick={() => setOpenConfirmDelete(true)}>
-                        Eliminar
-                    </Button>
+                    <Button onClick={handleCloseDialogCreate}>Cancelar</Button>
+                    <Button type="submit" onClick={formik.handleSubmit} autoFocus>Crear</Button>
                 </DialogActions>
             </Dialog>
-            <Dialog
-                open={openConfirmDelete}
+            <Dialog // Update & delete topic dialog
+                open={openDialogUpdate}
+                onClose={handleCloseDialogUpdate}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                {!topic ?
+                    <DialogContent sx={{minWidth: "300px", display: "flex", justifyContent: "center"}}>
+                        <CircularProgress />
+                    </DialogContent>
+                    :
+                    <>
+                        <DialogTitle id="alert-dialog-title">
+                            Editar tema
+                        </DialogTitle>
+                        <DialogContent>
+                            <TopicsForm values={topic} formik={formik}/>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleCloseDialogUpdate}>Cancelar</Button>
+                            <Button type="submit" onClick={formik.handleSubmit} autoFocus>Editar</Button>
+                            <Button onClick={() => setOpenDialogDelete(true)}>
+                                Eliminar
+                            </Button>
+                        </DialogActions>
+                    </>
+                }
+            </Dialog>
+
+            <Dialog // Confirm delete dialog
+                open={openDialogDelete}
                 onClose={handleCloseConfirmDelete}
                 aria-labelledby="alert-confirm-title"
                 aria-describedby="alert-confirm-description"

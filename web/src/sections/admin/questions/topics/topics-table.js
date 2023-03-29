@@ -2,17 +2,9 @@ import PropTypes from 'prop-types';
 import { useCallback, useState, useEffect } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
 import {
-    Alert,
     Box,
-    Button,
     Card,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
     IconButton,
-    Snackbar,
     Stack,
     SvgIcon,
     Table,
@@ -29,14 +21,21 @@ import PencilIcon from '@heroicons/react/24/solid/PencilIcon';
 import { TopicsDialogs } from './topics-dialogs';
 
 export const TopicsTable = (props) => {
-    const { getTopics, setPagina, pagina, temas, numberOfResults } = props;
-    const [id, setId] = useState('');
-    const [openDialog, setOpenDialog] = useState(false);
-
+    const { getTopics, setPagina, pagina, temas, numberOfResults, openDialogCreate, setOpenDialogCreate } = props;
+    const [topic, setTopic] = useState(null);
+    const [openDialogUpdate, setOpenDialogUpdate] = useState(false);
+    const [openDialogDelete, setOpenDialogDelete] = useState(false);
 
     const showTopicDialog = useCallback((id) => {
-        setId(id);
-        setOpenDialog(true);
+        try{
+            const getTopic = async () => {
+                await axiosAuth.get(`/api/questions/topics/${id}`).then((res) => setTopic(res.data));
+            };
+            getTopic();
+            setOpenDialogUpdate(true);
+        } catch (error) {
+            console.log("error");
+        }
     }, []);
 
     const onPageChange = useCallback((event, newPage) => {
@@ -44,20 +43,21 @@ export const TopicsTable = (props) => {
     }, []);
 
     useEffect(() => {
-        if (!openDialog){
-            setId('');
-            getTopics();
-        }
-    }, [openDialog, pagina]);
+        getTopics();
+    }, [openDialogCreate, openDialogUpdate, openDialogDelete, pagina]);
 
 
     return (
         <Card>
             <TopicsDialogs 
-                openDialog={openDialog}
-                setOpenDialog={setOpenDialog}
-                getTopics={getTopics}
-                id={id}
+                openDialogUpdate={openDialogUpdate}
+                setOpenDialogUpdate={setOpenDialogUpdate}
+                openDialogCreate={openDialogCreate}
+                setOpenDialogCreate={setOpenDialogCreate}
+                openDialogDelete={openDialogDelete}
+                setOpenDialogDelete={setOpenDialogDelete}
+                topic={topic}
+                setTopic={setTopic}
             />
             <Scrollbar>
                 <Box sx={{ minWidth: 300 }}>
