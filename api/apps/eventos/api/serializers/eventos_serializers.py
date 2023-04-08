@@ -1,7 +1,8 @@
 from django.utils import timezone
 from rest_framework import serializers
 
-from apps.base.models import Evento, Tema
+from apps.eventos.models import Evento
+from apps.preguntas.models import Tema
 
 class EventoSerializer(serializers.ModelSerializer):
     tema = serializers.SlugRelatedField(

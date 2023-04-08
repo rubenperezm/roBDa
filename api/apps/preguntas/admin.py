@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.base.models import Pregunta, Tema, Imagen
+from apps.preguntas.models import Pregunta, Tema, Imagen
 
 
 

@@ -3,7 +3,9 @@ from rest_framework import status
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
-from apps.base.models import Evento, Pregunta, Report, UserComp
+from apps.eventos.models import Evento
+from apps.preguntas.models import Pregunta, Report
+from apps.partidas.models import UserComp
 from apps.base.permissions import esProfeOSoloLectura
 from apps.eventos.api.serializers.eventos_serializers import EventoListSerializer, EventoSerializer
 

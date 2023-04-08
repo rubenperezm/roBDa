@@ -2,14 +2,14 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from random import choice
 from django.utils import timezone
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
-from apps.base.models import AnswerLogs, Opcion, Partida, Pregunta, Repaso
+from apps.preguntas.models import Pregunta, Opcion
+from apps.partidas.models import Partida, Repaso, AnswerLogs
 from apps.partidas.api.serializers.repasos_serializers import RepasoListSerializer, RepasoReviewSerializer, RepasoSerializer
 from apps.partidas.api.serializers.general_serializers import AnswerLogsSerializer
-from apps.partidas.api.views.utils import esAcierto, preguntaToJSON
+from apps.partidas.api.views.utils import esAcierto, pregunta_aleatoria, preguntaToJSON
 
 class PartidaRepasoViewSet(GenericViewSet):
     serializer_class = RepasoSerializer
@@ -18,32 +18,32 @@ class PartidaRepasoViewSet(GenericViewSet):
     pregunta_serializer = PreguntaSerializer
     model = Repaso
     
-    def pregunta_aleatoria(self, partida):
-        filters = {
-            "estado": 2
-        }
+    # def pregunta_aleatoria(self, partida):
+    #     filters = {
+    #         "estado": 2
+    #     }
         
-        tema = partida.tema
-        idioma = partida.idioma 
+    #     tema = partida.tema
+    #     idioma = partida.idioma 
         
-        if tema: filters['tema']  = tema
-        if idioma: filters['idioma'] = idioma
+    #     if tema: filters['tema']  = tema
+    #     if idioma: filters['idioma'] = idioma
 
-        preguntas = Pregunta.objects.filter(**filters)
-        pks = preguntas.values_list('pk', flat = True)
+    #     preguntas = Pregunta.objects.filter(**filters)
+    #     pks = preguntas.values_list('pk', flat = True)
         
-        if len(pks) <= 1:
-            raise Exception("No existen preguntas suficientes.")
+    #     if len(pks) <= 1:
+    #         raise Exception("No existen preguntas suficientes.")
 
-        preguntas_contestadas = list(partida.preguntas.values_list('pregunta', flat=True))
-        if len(pks) > 15:
-            preguntas_contestadas = preguntas_contestadas[max(-15, -len(preguntas_contestadas)):]
-        else:
-            preguntas_contestadas = preguntas_contestadas[max(-len(pks)+1, -len(preguntas_contestadas)):]
+    #     preguntas_contestadas = list(partida.preguntas.values_list('pregunta', flat=True))
+    #     if len(pks) > 15:
+    #         preguntas_contestadas = preguntas_contestadas[max(-15, -len(preguntas_contestadas)):]
+    #     else:
+    #         preguntas_contestadas = preguntas_contestadas[max(-len(pks)+1, -len(preguntas_contestadas)):]
 
-        pks = preguntas.exclude(pk__in=preguntas_contestadas).values_list('pk', flat = True)
-
-        return choice(pks)
+    #     pks = preguntas.exclude(pk__in=preguntas_contestadas).values_list('pk', flat = True)
+    
+    #     return choice(pks)
 
     def get_queryset(self, pk=None):
         if pk is None:
@@ -52,7 +52,6 @@ class PartidaRepasoViewSet(GenericViewSet):
 
     def list(self, request):
         if request.user.is_staff:
-            # TODO filter by created_date (CURSO)(lo mismo para user_comp y para duelos)
             repasos = self.filter_queryset(self.get_queryset()).order_by("-partida__modified_date")
             page = self.paginate_queryset(repasos)
             if page is not None:
@@ -64,14 +63,13 @@ class PartidaRepasoViewSet(GenericViewSet):
 
     def retrieve(self, request, pk=None):
         repaso = self.get_object()
-        if request.user.is_staff or repaso.user == request.user:
+        if request.user.is_staff:
             repaso_serializer = self.serializer_class_retrieve(repaso)
             return Response(repaso_serializer.data)
         return Response({"error": "No tiene acceso al informe de esta partida."}, status=status.HTTP_403_FORBIDDEN)
 
     def create(self, request):
         if not request.user.is_staff and request.user.is_active:
-            # TODO Partida -> dispositivo
             partida = Partida(tema = request.data.get('tema', None), idioma = request.data.get('idioma', None))
             partida.save()
             repaso = self.model(user = request.user, partida = partida)
@@ -83,7 +81,7 @@ class PartidaRepasoViewSet(GenericViewSet):
     def update(self, request, pk=None):
         repaso = self.get_object()
         if repaso.user == request.user:
-            pk_preg = self.pregunta_aleatoria(repaso.partida)
+            pk_preg = pregunta_aleatoria(repaso.partida)
             log = AnswerLogs(pregunta=Pregunta.objects.get(pk=pk_preg), partida=repaso.partida)
             log.save()
             data = preguntaToJSON(pk_preg, log.pk)
@@ -98,12 +96,19 @@ class PartidaRepasoViewSet(GenericViewSet):
                 respuesta = request.data.get('respuesta', None)
                 correcta = get_object_or_404(Opcion, pregunta = log.pregunta.id, esCorrecta=True)
                 opcion = get_object_or_404(Opcion, texto=respuesta, pregunta=log.pregunta.id)
+
+                if request.data.get('valoracion', 0) != 0:
+                    log.pregunta.valoracionAcumulada += request.data.get('valoracion', 0)
+                    log.pregunta.nValorada += 1
+                    log.pregunta.save()
+                    
                 data = {
                     "timeFin": timezone.now(),
                     "respuesta_user": opcion.id,
                     "acierto": esAcierto(log, respuesta),
                 }
                 a_l_serializer = AnswerLogsSerializer(log, data = data, partial = True)
+
                 if a_l_serializer.is_valid():
                     a_l_serializer.save()
                     return Response({"solucion": correcta.texto})

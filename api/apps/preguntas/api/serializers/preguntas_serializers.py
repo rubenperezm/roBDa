@@ -1,22 +1,19 @@
 from rest_framework import serializers
 
-from apps.base.models import Opcion, Pregunta, Report, Tema
+from apps.preguntas.models import Opcion, Pregunta, Report, Tema
 
 
 
-class OpcionSolucionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Opcion
-        fields = ('texto', 'esCorrecta')
+# class OpcionSolucionSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Opcion
+#         fields = ('texto', 'esCorrecta')
         
 
 class OpcionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Opcion
         fields = ('texto', 'esCorrecta')
-        extra_kwargs = {
-            'esCorrecta': {'write_only': True}
-        }
 
 class ReportSerializer(serializers.ModelSerializer):
     class Meta:
@@ -99,7 +96,7 @@ class PreguntaSerializer(serializers.ModelSerializer):
         return pregunta
 
 class PreguntaResueltaSerializer(PreguntaSerializer):
-    opciones = OpcionSolucionSerializer(many=True)
+    opciones = OpcionSerializer(many=True)
     tema = None
     class Meta:
         model = Pregunta

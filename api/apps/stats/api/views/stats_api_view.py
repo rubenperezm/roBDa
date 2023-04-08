@@ -5,13 +5,16 @@ from django.db.models import Sum, Count, Avg, F, DurationField
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from apps.users.models import User
-from apps.base.models import Partida, Pregunta, Report, Repaso, Duelos, Evento, UserComp, AnswerLogs
+from apps.eventos.models import Evento
+from apps.preguntas.models import Pregunta, Report
+from apps.partidas.models import Partida, Repaso, AnswerLogs, Duelos, UserComp
+
 
 @api_view(['GET'])
 def estadisticas(request):
     if request.user.is_staff:
         n_users = User.objects.filter(is_staff = False).count()
-        tiempo = AnswerLogs.objects.aggregate(total=Sum(F('timeFin') - F('timeIni'), output_field = DurationField()))
+        tiempo = AnswerLogs.objects.aggregate(total=Sum(F('modified_date') - F('created_date'), output_field = DurationField()))
         n_total_partidas = Partida.objects.count()
         n_total_reports = Report.objects.count()
         reports = Report.objects.values('estado', 'evento').annotate(numero=Count('pk'))

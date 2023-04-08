@@ -1,8 +1,11 @@
 from django.conf import settings
-from apps.base.models import Opcion, Pregunta, Imagen
+from django.db.models import F
+from apps.partidas.models import UsuarioPregunta
+from apps.preguntas.models import Opcion, Pregunta, Imagen
 from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
 from random import sample
+import numpy as np
 
 def preguntaToJSON(pk, pk_log):
         preg_serial = PreguntaSerializer(Pregunta.objects.get(pk=pk))
@@ -19,38 +22,72 @@ def preguntaToJSON(pk, pk_log):
             pass
         return data
 
+def preguntas_to_JSON(pks):
+    preguntas = Pregunta.objects.filter(pk__in=pks)
+    preg_serial = PreguntaSerializer(preguntas, many=True)
+    data = []
+    for p in preg_serial.data:
+        pregunta = {
+            "id": p["id"],
+            "enunciado": p["enunciado"],
+            "opciones": p["opciones"],
+        }
+        try:
+            img = Imagen.objects.get(pk = p["imagen"])
+            img_serial = ImagenSerializer(img)
+            pregunta["imagen"] =  img_serial.data["path"]
+        except:
+            pass
+        data.append(pregunta)
+    return data
+
 def esAcierto(log, respuesta):
     if respuesta:
         return respuesta == Opcion.objects.get(pregunta = log.pregunta.id, esCorrecta=True).texto
 
 
-def pregunta_aleatoria(partida, preguntas):
-    contestadas = partida.preguntas.values_list('pregunta', flat=True)
-    if len(contestadas) >= settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
-        raise Exception("Ya se ha completado el cuestionario.")
+def pregunta_aleatoria(partida):
+    filters = {
+        "estado": 2,
+        "tema": partida.tema,
+        "idioma": partida.idioma,
+    }
 
-    for pr in preguntas:
-        if pr not in contestadas:
-            return pr
+    pks = Pregunta.objects.filter(**filters).values_list('pk', flat = True)
+
+    if len(pks) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
+        raise Exception("No existen preguntas suficientes.")
+
+    # Obtener preguntas contestadas por el usuario y sus idoneidades
+    preguntas_contestadas = UsuarioPregunta.objects.filter(user=partida.user, pregunta__in=pks).values_list('pregunta', 'idoneidad')
+    preguntas_dict = dict(preguntas_contestadas)
+
+    # TODO: Al no usar el factor dificultad percibida (valoracion_media) de cada pregunta, podemos poner 0.5 directamente
+    idoneidad_preguntas = np.array([preguntas_dict.get(pk, 0.5) for pk in pks])
+
+    pregunta_seleccionada = np.random.choice(pks, size=1, replace=False, p=idoneidad_preguntas/np.sum(idoneidad_preguntas))
+
+
+    UsuarioPregunta.objects.filter(user=partida.user, pregunta__in=pks).exclude(pregunta=pregunta_seleccionada[0]).aupdate(espaciado=F('espaciado')*settings.VALOR_FACTOR_ESPACIADO)
+    UsuarioPregunta.objects.aupdate_or_create(user=partida.user, pregunta=pregunta_seleccionada[0], defaults={'espaciado': 1, 'historico': 0.5})
+    
+    return pregunta_seleccionada[0]
 
 def preguntas_user1(partida):
     filters = {
-        "estado": 2
+        "estado": 2,
+        "tema": partida.tema,
+        "idioma": partida.idioma,
     }
-    
-    tema = partida.tema
-    idioma = partida.idioma 
-    
-    if tema: filters['tema']  = tema
-    if idioma: filters['idioma'] = idioma   
 
     preguntas = Pregunta.objects.filter(**filters)
     pks = preguntas.values_list('pk', flat = True)
 
-    if len(preguntas) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
+    if len(pks) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
         raise Exception("No existen preguntas suficientes.")
-
-    return sample(list(pks), settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO)
+    else:
+        seleccionadas = sample(list(pks), settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO)
+        return preguntas_to_JSON(seleccionadas)
 
 def preguntas_user2(partida):
     return partida.preguntas.values_list('pregunta', flat=True)
@@ -77,5 +114,6 @@ def preguntas_usercomp(usercomp):
 
             pks +=  otras_preguntas.values_list('pk', flat = True)
    
-        return sample(list(pks), settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO)
+        seleccionadas = sample(list(pks), settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO)
+        return preguntas_to_JSON(seleccionadas)
 
