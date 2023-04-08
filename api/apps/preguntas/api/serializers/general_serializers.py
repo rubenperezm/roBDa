@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.base.models import Tema, Imagen
+from apps.preguntas.models import Tema, Imagen
        
 class TemaSerializer(serializers.ModelSerializer):
     class Meta:

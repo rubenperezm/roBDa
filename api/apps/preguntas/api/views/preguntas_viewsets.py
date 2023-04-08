@@ -9,7 +9,8 @@ from django_filters.rest_framework.filterset import FilterSet
 from django_filters import CharFilter, NumberFilter, MultipleChoiceFilter
 
 from django.utils import timezone
-from apps.base.models import Evento, Idioma, Pregunta
+from apps.preguntas.models import Idioma, Pregunta
+from apps.eventos.models import Evento
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaListSerializer, PreguntaSerializer, PregutaConReportsSerializer, ReportSerializer
 
 class PreguntaFilter(FilterSet):
@@ -59,9 +60,9 @@ class PreguntaViewSet(GenericViewSet):
         data = request.data.copy()
         data["creador"] = request.user.id  
         data["imagen"] = request.data.get('imagen', None)
-        # TODO data["dispositivo"] = request.data.get('dispositivo, None)
         if request.user.is_staff:
-            data["idioma"] = request.data.get('idioma', None)
+            if request.data.get('idioma', None):
+                data["idioma"] = request.data.get('idioma', None)
             data["tema"] = request.data.get('tema', None)
             data["estado"] = 2
         else:
@@ -73,7 +74,6 @@ class PreguntaViewSet(GenericViewSet):
                 data["tema"] = event.tema
             else:
                 return Response({'error': "Sólo puede crearse una pregunta por evento, y debe de hacerse en la primera fase"}, status=status.HTTP_403_FORBIDDEN)
-
         preg_serial = self.serializer_class(data=data)
         if preg_serial.is_valid():
             preg_serial.save()
