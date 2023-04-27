@@ -9,6 +9,7 @@ import { useNProgress } from 'src/hooks/use-nprogress';
 import { createTheme } from 'src/theme';
 import { createEmotionCache } from 'src/utils/create-emotion-cache';
 import 'simplebar-react/dist/simplebar.min.css';
+import "src/theme/lightbox.css"
 
 const clientSideEmotionCache = createEmotionCache();
 
@@ -31,7 +32,7 @@ const App = (props) => {
         </title>
         <meta
           name="viewport"
-          content="initial-scale=1, width=device-width"
+          content="initial-scale=1, width=device-width, user-scalable=0"
         />
       </Head>
       <LocalizationProvider dateAdapter={AdapterDateFns}>

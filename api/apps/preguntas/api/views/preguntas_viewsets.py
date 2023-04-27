@@ -9,13 +9,13 @@ from django_filters.rest_framework.filterset import FilterSet
 from django_filters import CharFilter, NumberFilter, MultipleChoiceFilter
 
 from django.utils import timezone
-from apps.preguntas.models import Idioma, Pregunta
+from apps.preguntas.models import Idioma, Opcion, Pregunta
 from apps.eventos.models import Evento
-from apps.preguntas.api.serializers.preguntas_serializers import PreguntaListSerializer, PreguntaSerializer, PregutaConReportsSerializer, ReportSerializer
+from apps.preguntas.api.serializers.preguntas_serializers import PreguntaListSerializer, PreguntaSerializer, PreguntaConReportsSerializer, ReportSerializer
 
 class PreguntaFilter(FilterSet):
     creador = CharFilter(field_name='creador__username', lookup_expr='contains')
-    tema = CharFilter(field_name='tema__nombre', lookup_expr='contains')
+    tema = CharFilter(field_name='tema__nombre')
     idioma = MultipleChoiceFilter(choices=Idioma.choices)
     estado = MultipleChoiceFilter(choices=Pregunta.EstadoPregunta.choices)
     evento = CharFilter(field_name='evento__name', lookup_expr='contains')
@@ -26,7 +26,7 @@ class PreguntaFilter(FilterSet):
 class PreguntaViewSet(GenericViewSet):
     serializer_class = PreguntaSerializer
     serializer_class_list = PreguntaListSerializer
-    serializer_class_retrieve = PregutaConReportsSerializer
+    serializer_class_retrieve = PreguntaConReportsSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = PreguntaFilter
     model = Pregunta
@@ -51,7 +51,7 @@ class PreguntaViewSet(GenericViewSet):
     def retrieve(self, request, pk=None):
         if request.user.is_staff:
             pregunta = self.get_object()
-            pregunta_serializer = self.serializer_class_retrieve(pregunta)
+            pregunta_serializer = self.serializer_class_retrieve(pregunta, context={"request": request})
             return Response(pregunta_serializer.data)
         return Response({"error": "No puede ver esta pregunta."}, status=status.HTTP_403_FORBIDDEN)
 
@@ -83,13 +83,23 @@ class PreguntaViewSet(GenericViewSet):
     def partial_update(self, request, pk=None):
         if request.user.is_staff:
             pregunta = self.get_object()
-            serial = PreguntaSerializer(pregunta, data=request.data, partial=True)
+            data = request.data.copy()
+            options_data = data.pop('opciones', None)
+            for option in options_data:
+                op = Opcion.objects.get(id=option['id'])
+                op.texto = option['texto']
+                op.esCorrecta = option['esCorrecta']
+                op.save()
+
+            serial = PreguntaSerializer(pregunta, data=data, partial=True)
             if serial.is_valid():
                 serial.save()
+            else:
+                print(serial.data)
             return Response(serial.data)
         return Response({'error': 'Acción no permitida para el alumno.'}, status=status.HTTP_403_FORBIDDEN)
 
-    def destroy(self, request):
+    def destroy(self, request, pk=None):
         if request.user.is_staff:
             pregunta = self.get_object()      
             if pregunta:

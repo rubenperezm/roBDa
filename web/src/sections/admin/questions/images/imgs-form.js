@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axiosAuth from 'src/utils/axiosAuth';
+import { TopicsSelection } from '../topics/topics-selection';
 import {
     Alert,
     Box,
@@ -17,13 +18,12 @@ import {
     DialogActions,
     Divider,
     Snackbar,
-    CircularProgress,
     TextField,
     Unstable_Grid2 as Grid
 } from '@mui/material';
 
-export const TopicForm = (props) => {
-    const { formHandler, topic, alertMessage } = props;
+export const ImgsForm = (props) => {
+    const { formHandler, image, alertMessage } = props;
     const router = useRouter();
     const [showAlert, setShowAlert] = useState(false);
     const [messageAlert, setMessageAlert] = useState('');
@@ -31,7 +31,8 @@ export const TopicForm = (props) => {
 
     const formik = useFormik({
         initialValues: {
-            nombre: topic?.nombre ?? '',
+            nombre: image?.nombre ?? '',
+            tema: image?.tema ?? '',
             submit: null
         },
         enableReinitialize: true,
@@ -39,29 +40,27 @@ export const TopicForm = (props) => {
             nombre: Yup
                 .string()
                 .max(30)
-                .required('Introduce un nombre para el tema'),
+                .required('Introduce un nombre para la imagen'),
+            tema: Yup
+                .string()
+                .required('Selecciona un tema')
         }),
         onSubmit:
             async (values, helpers) => {
                 try {
                     const body = {
                         nombre: values.nombre,
+                        tema: values.tema,
                     }
 
-                    if (topic) // Update
-                        await formHandler(topic, body);
 
-                    else // Create
-                        await formHandler(body);
+                    await formHandler(image, body);
+
 
                     setMessageAlert(alertMessage);
                     setShowAlert(true);
 
                     helpers.setSubmitting(false);
-
-                    if (!topic)
-                        helpers.resetForm();
-
                 } catch (err) {
                     helpers.setStatus({ success: false });
                     helpers.setErrors(err.response.data.error);
@@ -88,49 +87,46 @@ export const TopicForm = (props) => {
         if (reason === 'clickaway') {
             return;
         }
-        const deleteTopic = async () => {
+        const deleteImage = async () => {
             try {
-                const res = await axiosAuth.delete(`/api/questions/topics/${topic.id}`).then(res => res.data);
+                const res = await axiosAuth.delete(`/api/questions/images/${image.id}`).then(res => res.data);
             } catch (error) {
                 console.log(error);
             }
         };
 
-        deleteTopic();
+        deleteImage();
 
         setOpenDialogDelete(false);
-        setMessageAlert('Tema eliminado correctamente');
+        setMessageAlert('Imagen eliminada correctamente');
         setShowAlert(true);
 
-        router.push('/admin/questions/topics');
+        router.push('/admin/questions/images');
     };
-
 
     return (
         <>
-            {topic &&
-                <Dialog // Confirm delete dialog
-                    open={openDialogDelete}
-                    onClose={handleCloseConfirmDelete}
-                    aria-labelledby="alert-confirm-title"
-                    aria-describedby="alert-confirm-description"
-                >
-                    <DialogTitle id="alert-confirm-title">
-                        ¿Estás seguro de que quieres eliminar este tema?
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id="alert-confirm-description">
-                            Se eliminarán todas las preguntas y competiciones asociadas a este tema.
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseConfirmDelete}>Cancelar</Button>
-                        <Button onClick={handleConfirmDelete} autoFocus>
-                            Eliminar
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            }
+            <Dialog // Confirm delete dialog
+                open={openDialogDelete}
+                onClose={handleCloseConfirmDelete}
+                aria-labelledby="alert-confirm-title"
+                aria-describedby="alert-confirm-description"
+            >
+                <DialogTitle id="alert-confirm-title">
+                    ¿Estás seguro de que quieres eliminar esta imagen?
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-confirm-description">
+                        Se eliminarán todas las preguntas asociadas a esta imagen.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseConfirmDelete}>Cancelar</Button>
+                    <Button onClick={handleConfirmDelete} autoFocus>
+                        Eliminar
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <form
                 autoComplete="off"
                 noValidate
@@ -147,6 +143,7 @@ export const TopicForm = (props) => {
                                 spacing={3}
                             >
                                 <Grid
+                                    item
                                     xs={12}
                                     md={6}
                                 >
@@ -162,22 +159,29 @@ export const TopicForm = (props) => {
                                         value={formik.values.nombre}
                                     />
                                 </Grid>
+                                <Grid
+                                    item
+                                    xs={12}
+                                    md={6}
+                                >
+                                    <TopicsSelection formik={formik} />
+
+
+                                </Grid>
                             </Grid>
                         </Box>
                     </CardContent>
                     <Divider />
                     <CardActions sx={{ justifyContent: 'flex-end' }}>
-                        {topic &&
-                            <Button
-                                color="error"
-                                variant="contained"
-                                onClick={() => setOpenDialogDelete(true)}
-                            >
-                                Eliminar
-                            </Button>
-                        }
+                        <Button
+                            color="error"
+                            variant="contained"
+                            onClick={() => setOpenDialogDelete(true)}
+                        >
+                            Eliminar
+                        </Button>
                         <Button variant="contained" type="submit">
-                            {topic ? "Guardar" : "Crear"}
+                            Guardar
                         </Button>
                     </CardActions>
                 </Card>

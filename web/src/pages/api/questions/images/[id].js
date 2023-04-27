@@ -1,46 +1,52 @@
 import cookie from 'cookie';
-import { API_URL } from '../../../config/index';
+import { API_URL } from '../../../../config/index';
 
 export default async (req, res) => {
-    if (req.method === 'GET') {
+    if (req.method === 'DELETE') {
         const cookies = cookie.parse(req.headers.cookie ?? '');
         const access = cookies.access ?? false;
 
         if (access === false) {
             return res.status(401).json({
-                error: 'Usuario no autorizado para ver las preguntas'
+                error: 'Usuario no autorizado para eliminar imágenes'
             });
         }
 
-        const page = req.query.page ?? 1;
-        const { creador, enunciado, tema, evento, estado, idioma } = req.query;
-
-        let q = '';
-        if (creador) {
-            q += `&creador=${creador}`;
-        }
-        if (enunciado) {
-            q += `&enunciado=${enunciado}`;
-        }
-        if (tema) {
-            q += `&tema=${tema}`;
-        }
-        if (evento) {
-            q += `&evento=${evento}`;
-        }
-        if (idioma) {
-            idioma.split(',').forEach(i => {
-                q += `&idioma=${i}`;
-            });
-        }
-        if (estado) {
-            estado.split(',').forEach(est => {
-                q += `&estado=${est}`;
-            });
-        }
+        const { id } = req.query;
 
         try {
-            const apiRes = await fetch(`${API_URL}/preguntas/preguntas/?page=${page}${q}`, {
+            const apiRes = await fetch(`${API_URL}/preguntas/imagenes/${id}/`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${access}`
+                }
+            });
+
+            if (apiRes.status === 204) {
+                return res.status(204).json({});
+            } else {
+                return res.status(apiRes.status).json({});
+            }
+        } catch (err) {
+            return res.status(500).json({
+                error: err
+            });
+        }
+    } else if (req.method === 'GET') {
+        const cookies = cookie.parse(req.headers.cookie ?? '');
+        const access = cookies.access ?? false;
+        
+        if (access === false) {
+            return res.status(401).json({
+                error: 'Usuario no autorizado para ver imágenes'
+            });
+        }
+
+        const { id } = req.query;
+
+        try {
+            const apiRes = await fetch(`${API_URL}/preguntas/imagenes/${id}/`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -51,43 +57,37 @@ export default async (req, res) => {
             const data = await apiRes.json();
 
             if (apiRes.status === 200) {
-                return res.status(200).json(
-                    data
-                );
+                return res.status(200).json(data);
             } else {
-                return res.status(apiRes.status).json({
-                    error: data
-                });
+                return res.status(apiRes.status).json(data);
             }
         } catch (err) {
             return res.status(500).json({
-                error: 'Algo salió mal al intentar obtener las preguntas'
+                error: err
             });
         }
-    }
-    else if (req.method === 'POST') {
+    }else if (req.method === 'PUT') {
         const cookies = cookie.parse(req.headers.cookie ?? '');
         const access = cookies.access ?? false;
 
         if (access === false) {
             return res.status(401).json({
-                error: 'Usuario no autorizado para crear temas'
+                error: 'Usuario no autorizado para modificar imágenes'
             });
         }
 
-        const { enunciado, opciones, tema, idioma, image } = req.body;
+        const { id } = req.query;
+
+        const { nombre, tema } = req.body;
 
         const body = JSON.stringify({
-            enunciado,
-            opciones,
+            nombre,
             tema,
-            idioma,
-            imagen: image === '' ? null : image,
         });
 
         try {
-            const apiRes = await fetch(`${API_URL}/preguntas/preguntas/`, {
-                method: 'POST',
+            const apiRes = await fetch(`${API_URL}/preguntas/imagenes/${id}/`, {
+                method: 'PUT',
                 headers: {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${access}`,
@@ -98,10 +98,9 @@ export default async (req, res) => {
 
             const data = await apiRes.json();
 
-            if (apiRes.status === 201) {
-                return res.status(201).json(data);
+            if (apiRes.status === 200) {
+                return res.status(200).json(data);
             } else {
-                console.log(data)
                 const flattenedResults = {};
                 Object.keys(data).forEach((key) => {
                     flattenedResults[key] = data[key][0];
@@ -112,13 +111,12 @@ export default async (req, res) => {
                 });
             }
         } catch (err) {
-            console.log(err)
             return res.status(500).json({
                 error: err
             });
         }
     } else {
-        res.setHeader('Allow', ['GET', 'POST']);
+        res.setHeader('Allow', ['DELETE', 'GET', 'PUT']);
         return res.status(405).json({
             error: `Método ${req.method} no permitido`
         });

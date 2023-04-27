@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
 from apps.preguntas.models import Opcion, Pregunta, Report, Tema
 
 
@@ -13,7 +13,7 @@ from apps.preguntas.models import Opcion, Pregunta, Report, Tema
 class OpcionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Opcion
-        fields = ('texto', 'esCorrecta')
+        fields = ('id', 'texto', 'esCorrecta')
 
 class ReportSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,7 +23,7 @@ class ReportSerializer(serializers.ModelSerializer):
 class ReportReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
-        exclude = ('dispositivo', 'estado', 'pregunta')
+        exclude = ('estado', 'pregunta')
 
     def to_representation(self, instance):
         return {
@@ -72,35 +72,12 @@ class PreguntaSerializer(serializers.ModelSerializer):
 
         return pregunta
 
-    def update(self, instance, validated_data):
-        options_data = validated_data.pop('opciones')
-        pregunta = super().update(instance, validated_data)
-        textos_incorrectos = [x['texto'] for x in options_data if x['esCorrecta'] == False]
-
-        correcta = instance.opciones.filter(esCorrecta=True).first()
-        opciones_modificables = list(instance.opciones.filter(esCorrecta = False).exclude(texto__in = textos_incorrectos).values_list('pk', flat=True))
-        textos_no_modificables = list(instance.opciones.filter(esCorrecta = False, texto__in = textos_incorrectos).values_list('texto', flat=True))
-        print(opciones_modificables)
-        for option in options_data:
-            if option['esCorrecta'] == True:
-                if correcta.texto != option['texto']:
-                    correcta.texto = option['texto']
-                    correcta.save()
-            else:
-                if option['texto'] not in textos_no_modificables:
-                    aux = Opcion.objects.get(pk=opciones_modificables[-1])
-                    opciones_modificables.pop()
-                    aux.texto = option['texto']
-                    aux.save()
-
-        return pregunta
-
 class PreguntaResueltaSerializer(PreguntaSerializer):
     opciones = OpcionSerializer(many=True)
     tema = None
     class Meta:
         model = Pregunta
-        exclude = ('created_date', 'modified_date', 'estado', 'evento', 'creador', 'tema', 'idioma', 'dispositivo')
+        exclude = ('created_date', 'modified_date', 'estado', 'evento', 'creador', 'tema', 'idioma')
 
 
 class PreguntaListSerializer(PreguntaResueltaSerializer):
@@ -123,22 +100,33 @@ class PreguntaListSerializer(PreguntaResueltaSerializer):
             'notificaciones': instance.reports.filter(estado = 1).count(),
         }
 
-class PregutaConReportsSerializer(PreguntaResueltaSerializer):
+class PreguntaConReportsSerializer(PreguntaResueltaSerializer):
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Pregunta
         fields = ('id', 'creador', 'imagen', 'enunciado', 'tema', 'idioma')
+
+    def get_image_url(self, obj):
+        request = self.context.get('request')
+        image_url = obj.imagen.path
+        return request.build_absolute_uri(image_url)
+    
     
     def to_representation(self, instance):
         reports = instance.reports.filter(estado = 1)
         reports_serial = ReportReviewSerializer(reports, many = True)
+        opciones_serial = OpcionSerializer(instance.opciones.all(), many=True)
+        image_serial = ImagenSerializer(instance.imagen) if instance.imagen else None
         return {
             'id': instance.id,
             'creador': instance.creador.username,
-            'imagen': instance.imagen.path if instance.imagen else None,
+            'imagen': image_serial.data if instance.imagen else None,
             'enunciado': instance.enunciado,
             'tema': instance.tema.nombre,
-            'idioma': instance.get_idioma_display(),
+            'idioma': instance.idioma,
             'creada': instance.created_date,
             'modificada': instance.modified_date,
-            'notificaciones': reports_serial.data,
+            'reports': reports_serial.data,
+            'opciones': opciones_serial.data,
         }

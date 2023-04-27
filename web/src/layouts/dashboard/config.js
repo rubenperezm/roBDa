@@ -66,7 +66,7 @@ export const adminItems = [
     )
   },
   {
-    title: 'Preguntas',
+    title: 'Administración',
     path: '/admin/questions',
     icon: (
       <SvgIcon fontSize="small">

@@ -36,7 +36,7 @@ export default async (req, res) => {
     } else if (req.method === 'GET') {
         const cookies = cookie.parse(req.headers.cookie ?? '');
         const access = cookies.access ?? false;
-
+        
         if (access === false) {
             return res.status(401).json({
                 error: 'Usuario no autorizado para ver temas'
@@ -72,7 +72,7 @@ export default async (req, res) => {
 
         if (access === false) {
             return res.status(401).json({
-                error: 'Usuario no autorizado para ver temas'
+                error: 'Usuario no autorizado para modificar temas'
             });
         }
 

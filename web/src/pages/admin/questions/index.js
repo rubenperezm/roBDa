@@ -40,7 +40,8 @@ const Page = () => {
 Page.getLayout = (page) => (
     <QuestionsLayout
         buttonText="Crear pregunta"
-        buttonOnClick={() => { /* TODO */ }}
+        creationLink="/admin/questions/create"
+        title="Preguntas"
     >
         {page}
     </QuestionsLayout>

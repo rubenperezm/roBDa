@@ -16,7 +16,6 @@ class EventoViewSet(ModelViewSet):
     serializer_class_list = EventoListSerializer
     model = Evento
 
-    # TODO mostrar solo los eventos del curso actual (created_date__gte=07/02/(year_actual if today > 07/02 else year_actual+1))
     def get_queryset(self, pk=None):
         if pk is None:
             return self.model.objects.all()

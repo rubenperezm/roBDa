@@ -1,39 +1,42 @@
 import PropTypes from 'prop-types';
+import NextLink from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
 import {
     Avatar,
     Box,
     Card,
+    IconButton,
     Stack,
+    SvgIcon,
     Table,
     TableBody,
     TableCell,
     TableHead,
     TablePagination,
     TableRow,
+    Tooltip,
     Typography
 } from '@mui/material';
 import { SeverityPill } from 'src/components/severity-pill';
 import { Scrollbar } from 'src/components/scrollbar';
-import { QuestionsFilters } from './questions-filters';
+import PencilIcon from '@heroicons/react/24/solid/PencilIcon';
 
 export const QuestionsTable = (props) => {
     const { setPagina, pagina, preguntas, numberOfResults } = props;
 
-    const reportsColor = (reports) => {
-        if (reports == 0)
-            return 'success';
-        else if (reports < 3)
-            return 'warning';
-        else
-            return 'error';
+    const stateColor = (state) => {
+        const colors = {
+            'Activa': 'success',
+            'En evento': 'warning',
+            'Reportada': 'error',
+        };
+        return colors[state];
     };
 
     const onPageChange = useCallback((event, newPage) => {
         setPagina(newPage);
     }, []);
-
 
     return (
         <Card>
@@ -60,10 +63,7 @@ export const QuestionsTable = (props) => {
                                 <TableCell>
                                     Estado
                                 </TableCell>
-                                <TableCell>
-                                    Reportes
-                                </TableCell>
-                                <TableCell>
+                                <TableCell sx={{ textAlign: 'right' }}>
                                     Acciones
                                 </TableCell>
                             </TableRow>
@@ -104,27 +104,27 @@ export const QuestionsTable = (props) => {
                                             {question.evento ? question.evento : 'Creada por profesor'}
                                         </TableCell>
                                         <TableCell>
-                                            {question.estado}
-                                        </TableCell>
-                                        <TableCell>
                                             <SeverityPill
-                                                color={reportsColor(question.notificaciones)}
+                                                color={stateColor(question.estado)}
                                             >
-                                                {question.notificaciones}
+                                                {question.estado} {question.estado === 'Reportada' && ` (${question.notificaciones})`}
                                             </SeverityPill>
                                         </TableCell>
                                         <TableCell>
                                             <Stack
                                                 alignItems="center"
-                                                direction="row"
+                                                direction="row-reverse"
                                                 spacing={2}
                                             >
-                                                <Typography variant="subtitle2">
-                                                    Editar
-                                                </Typography>
-                                                <Typography variant="subtitle2">
-                                                    Eliminar
-                                                </Typography>
+                                                <Tooltip title="Editar pregunta">
+                                                    <IconButton
+                                                        component={NextLink}
+                                                        href={`/admin/questions/${question.id}`}>
+                                                        <SvgIcon fontSize="small">
+                                                            <PencilIcon />
+                                                        </SvgIcon>
+                                                    </IconButton>
+                                                </Tooltip>
                                             </Stack>
                                         </TableCell>
                                     </TableRow>

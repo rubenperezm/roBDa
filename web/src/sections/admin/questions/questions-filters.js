@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import axiosAuth from 'src/utils/axiosAuth';
+import { TopicsSelection } from './topics/topics-selection';
 import {
     Box,
     Button,
@@ -90,14 +91,7 @@ export const QuestionsFilters = (props) => {
                                 xs={6}
                                 md={3}
                             >
-                                <TextField
-                                    fullWidth
-                                    label="Tema"
-                                    name="tema"
-                                    onBlur={formik.handleBlur}
-                                    onChange={formik.handleChange}
-                                    value={formik.values.tema}
-                                />
+                                <TopicsSelection formik={formik} emptyOption/>
                             </Grid>
                             <Grid
                                 xs={6}

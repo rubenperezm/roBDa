@@ -1,12 +1,12 @@
 import Head from 'next/head';
 import NextLink from 'next/link';
-import PhotoIcon from '@heroicons/react/24/solid/PhotoIcon';
-import HashtagIcon from '@heroicons/react/24/solid/HashtagIcon';
-import ListBulletIcon from '@heroicons/react/24/solid/ListBulletIcon';
-import PlusIcon from '@heroicons/react/24/solid/PlusIcon';
+import { useRouter } from 'next/router';
+import { useEffect, useState, useCallback } from 'react';
+import axiosAuth from 'src/utils/axiosAuth';
 import {
     Box,
     Button,
+    Card,
     Container,
     Stack,
     SvgIcon,
@@ -14,15 +14,46 @@ import {
     Unstable_Grid2 as Grid
 } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
+import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
+import { QuestionForm } from 'src/sections/admin/questions/questions-form';
+import { QuestionQuiz } from 'src/sections/admin/questions/question-quiz';
+
+const Page = (props) => {
+    const router = useRouter();
+    const [question, setQuestion] = useState(null);
+    const { id } = router.query;
+
+    const handleUpdate = useCallback(async (question, body) => {
+        await axiosAuth.put(`/api/questions/${question.id}`, body);
+    }, [question]);
 
 
-export const Layout = (props) => {
-    const {children, buttonText, creationLink, title} = props;
+    useEffect(() => {
+        if (id) {
+            const getQuestion = async (id) => {
+                try {
+                    let response = await axiosAuth.get(`/api/questions/${id}`).then(res => res.data);
+                    response.opciones = response.opciones.sort(function(x, y) { return y.esCorrecta - x.esCorrecta });
+                    setQuestion(response);
+                } catch (err) {
+                    router.push('/404', router.asPath);
+
+                }
+            }
+            getQuestion(id);
+        }
+    }, [id]);
+
+
+    if (!question) {
+        return null;
+    }
+
     return (
         <DashboardLayout>
             <Head>
                 <title>
-                    {title} | ROBDA
+                    Editar pregunta | ROBDA
                 </title>
             </Head>
             <Box
@@ -37,7 +68,7 @@ export const Layout = (props) => {
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <Typography variant="h4">
-                                    {title}
+                                    Editar pregunta
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sm={9} md={10}>
@@ -51,36 +82,12 @@ export const Layout = (props) => {
                                         color="inherit"
                                         startIcon={(
                                             <SvgIcon fontSize="small">
-                                                <ListBulletIcon />
+                                                <ArrowLeftIcon />
                                             </SvgIcon>
                                         )}
                                         href="/admin/questions"
                                     >
-                                        Preguntas
-                                    </Button>
-                                    <Button
-                                        component={NextLink}
-                                        color="inherit"
-                                        startIcon={(
-                                            <SvgIcon fontSize="small">
-                                                <PhotoIcon />
-                                            </SvgIcon>
-                                        )}
-                                        href="/admin/questions/images"
-                                    >
-                                        Imágenes
-                                    </Button>
-                                    <Button
-                                        component={NextLink}
-                                        color="inherit"
-                                        startIcon={(
-                                            <SvgIcon fontSize="small">
-                                                <HashtagIcon />
-                                            </SvgIcon>
-                                        )}
-                                        href="/admin/questions/topics"
-                                    >
-                                        Temas
+                                        Volver a preguntas
                                     </Button>
                                 </Stack>
                             </Grid>
@@ -88,24 +95,30 @@ export const Layout = (props) => {
                                 <Button
                                     component={NextLink}
                                     fullWidth
-                                    startIcon={(
-                                        <SvgIcon fontSize="small">
-                                            <PlusIcon />
-                                        </SvgIcon>
-                                    )}
                                     variant="contained"
                                     sx={{ float: 'right' }}
-                                    href={creationLink}
+                                    href={`/admin/questions/${question.id}/edit`}
                                 >
-                                    {buttonText}
+                                    Editar Pregunta
                                 </Button>
                             </Grid>
                         </Grid>
-                        {children}
                     </Stack>
+                </Container>
+                <Container maxWidth="xl">
+                    {/* <QuestionForm
+                        question={question}
+                        formHandler={handleUpdate}
+                        alertMessage="Pregunta actualizada correctamente"
+                    /> */}{/* TODO: Poner el questionForm en la ruta de [id]/edit*/ }
+                    <QuestionQuiz
+                        question={question}
+                    />
+                    {/* TODO: Reports */}
                 </Container>
             </Box>
         </DashboardLayout>
     );
 };
 
+export default Page;
