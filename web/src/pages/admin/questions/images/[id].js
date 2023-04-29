@@ -35,8 +35,10 @@ const Page = (props) => {
                     const response = await axiosAuth.get(`/api/questions/images/${id}`).then(res => res.data);
                     setImage(response);
                 } catch (err) {
-                    router.push('/404', router.asPath);  
-
+                    if (err.response.status === 404)
+                        router.push('/404', router.asPath);  
+                    else
+                        router.push('/admin/questions/images', router.asPath);
                 }
             }
             getImage(id);

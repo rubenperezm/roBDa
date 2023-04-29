@@ -104,10 +104,15 @@ export default async (req, res) => {
                 return res.status(200).json(data);
             } else {
                 const flattenedResults = {};
-                Object.keys(data).forEach((key) => {
-                    flattenedResults[key] = data[key][0];
+                Object.keys(data.error).forEach((key) => {
+                    flattenedResults[key] = data.error[key][0];
                 });
-
+                
+                if (flattenedResults['opciones']){
+                    flattenedResults['opcion1'] = flattenedResults['opcion2'] = flattenedResults['opcion3'] = flattenedResults['opcion4'] = flattenedResults['opciones'];
+                    delete flattenedResults['opciones'];
+                }
+                
                 return res.status(apiRes.status).json({
                     error: flattenedResults
                 });

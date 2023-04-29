@@ -4,10 +4,13 @@ import { useRouter } from 'next/router';
 import { useEffect, useState, useCallback } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
 import {
+    Alert,
     Box,
     Button,
     Card,
     Container,
+    Divider,
+    Snackbar,
     Stack,
     SvgIcon,
     Typography,
@@ -17,32 +20,46 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
 import { QuestionForm } from 'src/sections/admin/questions/questions-form';
 import { QuestionQuiz } from 'src/sections/admin/questions/question-quiz';
+import { ReportList } from 'src/sections/admin/questions/report-list';
 
 const Page = (props) => {
     const router = useRouter();
     const [question, setQuestion] = useState(null);
+    const [editMode, setEditMode] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [messageAlert, setMessageAlert] = useState('');
+    const [updateFlag, setUpdateFlag] = useState(true);
     const { id } = router.query;
 
     const handleUpdate = useCallback(async (question, body) => {
         await axiosAuth.put(`/api/questions/${question.id}`, body);
     }, [question]);
 
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setShowAlert(false);
+    };
 
     useEffect(() => {
-        if (id) {
+        if (id && updateFlag) {
             const getQuestion = async (id) => {
                 try {
                     let response = await axiosAuth.get(`/api/questions/${id}`).then(res => res.data);
-                    response.opciones = response.opciones.sort(function(x, y) { return y.esCorrecta - x.esCorrecta });
+                    response.opciones = response.opciones.sort(function (x, y) { return y.esCorrecta - x.esCorrecta });
                     setQuestion(response);
                 } catch (err) {
-                    router.push('/404', router.asPath);
-
+                    if (err.response.status === 404)
+                        router.push('/404', router.asPath);
+                    else
+                        router.push('/admin/questions', router.asPath);
                 }
             }
             getQuestion(id);
+            setUpdateFlag(false);
         }
-    }, [id]);
+    }, [id, updateFlag]);
 
 
     if (!question) {
@@ -53,7 +70,7 @@ const Page = (props) => {
         <DashboardLayout>
             <Head>
                 <title>
-                    Editar pregunta | ROBDA
+                    Ver pregunta | ROBDA
                 </title>
             </Head>
             <Box
@@ -63,6 +80,9 @@ const Page = (props) => {
                     py: 8
                 }}
             >
+                <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={showAlert} autoHideDuration={4000} onClose={handleClose}>
+                    <Alert onClose={handleClose} variant="filled" severity="success" sx={{ width: "100%" }}>{messageAlert}</Alert>
+                </Snackbar>
                 <Container maxWidth="xl">
                     <Stack spacing={3}>
                         <Grid container spacing={2}>
@@ -93,28 +113,39 @@ const Page = (props) => {
                             </Grid>
                             <Grid item xs={12} sm={3} md={2}>
                                 <Button
-                                    component={NextLink}
                                     fullWidth
                                     variant="contained"
                                     sx={{ float: 'right' }}
-                                    href={`/admin/questions/${question.id}/edit`}
+                                    onClick={() => setEditMode(!editMode)}
                                 >
-                                    Editar Pregunta
+                                    { editMode ? "Salir del modo edición" : "Editar Pregunta" }
                                 </Button>
                             </Grid>
                         </Grid>
                     </Stack>
                 </Container>
                 <Container maxWidth="xl">
-                    {/* <QuestionForm
-                        question={question}
-                        formHandler={handleUpdate}
-                        alertMessage="Pregunta actualizada correctamente"
-                    /> */}{/* TODO: Poner el questionForm en la ruta de [id]/edit*/ }
-                    <QuestionQuiz
-                        question={question}
-                    />
-                    {/* TODO: Reports */}
+                    {editMode ?
+                        <QuestionForm
+                            question={question}
+                            formHandler={handleUpdate}
+                            alertMessage="Pregunta actualizada correctamente"
+                            setEditMode={setEditMode}
+                            setUpdateFlag={setUpdateFlag}
+                            setShowAlert={setShowAlert}
+                            setMessageAlert={setMessageAlert}
+                        />
+                        :
+                        <>
+                            <QuestionQuiz
+                                question={question}
+                                solved={true}
+                            />
+                            <Divider />
+                            <ReportList reports={question.reports} />
+                        </>
+                    }{/* TODO: Poner el questionForm en la ruta de [id]/edit*/}
+
                 </Container>
             </Box>
         </DashboardLayout>

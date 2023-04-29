@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import axiosAuth from 'src/utils/axiosAuth';
-import { createTheme } from '@mui/material/styles'
 import {
     Alert,
     Box,
@@ -28,11 +27,18 @@ import { ImgsSelection } from './images/imgs-selection';
 import { ImageLightbox } from './images/imgs-lightbox';
 
 export const QuestionForm = (props) => {
-    const { formHandler, question, alertMessage, studentQuestion } = props;
+    const { 
+        formHandler,
+        question,
+        alertMessage,
+        setMessageAlert,
+        setShowAlert,
+        setEditMode,
+        setUpdateFlag,
+        studentQuestion
+    } = props;
     // TODO: Reutilizar componente para la creación de pregunta por parte del usuario
     const router = useRouter();
-    const [showAlert, setShowAlert] = useState(false);
-    const [messageAlert, setMessageAlert] = useState('');
     const [openDialogDelete, setOpenDialogDelete] = useState(false);
     const [image, setImage] = useState(null);
 
@@ -45,7 +51,7 @@ export const QuestionForm = (props) => {
             opcion4: question?.opciones[3]?.texto ?? '',
             tema: question?.tema ?? '',
             idioma: question?.idioma ?? '',
-            image: question?.imagen.id ?? '',
+            image: question?.imagen?.id ?? '',
 
 
             submit: null
@@ -59,19 +65,51 @@ export const QuestionForm = (props) => {
             opcion1: Yup
                 .string()
                 .max(300)
-                .required('Introduce una opción'),
+                .required('Introduce una opción')
+                .notOneOf(
+                    [
+                      Yup.ref('opcion2'),
+                      Yup.ref('opcion3'),
+                      Yup.ref('opcion4')
+                    ],
+                    'Las opciones deben ser diferentes'
+                ),
             opcion2: Yup
                 .string()
                 .max(300)
-                .required('Introduce una opción'),
+                .required('Introduce una opción')
+                .notOneOf(
+                    [
+                      Yup.ref('opcion1'),
+                      Yup.ref('opcion3'),
+                      Yup.ref('opcion4')
+                    ],
+                    'Las opciones deben ser diferentes'
+                ),
             opcion3: Yup
                 .string()
                 .max(300)
-                .required('Introduce una opción'),
+                .required('Introduce una opción')
+                .notOneOf(
+                    [
+                      Yup.ref('opcion2'),
+                      Yup.ref('opcion1'),
+                      Yup.ref('opcion4')
+                    ],
+                    'Las opciones deben ser diferentes'
+                ),
             opcion4: Yup
                 .string()
                 .max(300)
-                .required('Introduce una opción'),
+                .required('Introduce una opción')
+                .notOneOf(
+                    [
+                      Yup.ref('opcion2'),
+                      Yup.ref('opcion3'),
+                      Yup.ref('opcion1')
+                    ],
+                    'Las opciones deben ser diferentes'
+                ),
             tema: Yup
                 .string()
                 .max(30)
@@ -99,6 +137,9 @@ export const QuestionForm = (props) => {
                             {id: question.opciones[3].id, texto: values.opcion4, esCorrecta: false},
                         ];
                         await formHandler(question, body);
+                        setUpdateFlag(true);
+                        setEditMode(false);
+
                     }else{
                         body.opciones = [
                             {texto: values.opcion1, esCorrecta: true},
@@ -118,7 +159,6 @@ export const QuestionForm = (props) => {
                         helpers.resetForm();
 
                 } catch (err) {
-                    console.log(err);
                     helpers.setStatus({ success: false });
                     helpers.setErrors(err.response.data.error);
                     helpers.setSubmitting(false);
@@ -142,13 +182,6 @@ export const QuestionForm = (props) => {
             setImage(null);
 
     }, [formik.values.image]);
-
-    const handleClose = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setShowAlert(false);
-    };
 
     const handleCloseConfirmDelete = useCallback((event, reason) => {
         if (reason === 'clickaway') {
@@ -209,9 +242,6 @@ export const QuestionForm = (props) => {
                 noValidate
                 onSubmit={formik.handleSubmit}
             >
-                <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={showAlert} autoHideDuration={4000} onClose={handleClose}>
-                    <Alert onClose={handleClose} variant="filled" severity="success" sx={{ width: "100%" }}>{messageAlert}</Alert>
-                </Snackbar>
                 <Card>
                     <CardContent>
                         <Box>

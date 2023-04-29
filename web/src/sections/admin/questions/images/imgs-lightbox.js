@@ -22,7 +22,8 @@ export const ImageLightbox = (props) => {
                     display: 'block',
                     marginX: 'auto',
                     marginY: 2,
-                    boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.08), 0 6px 20px 0 rgba(0, 0, 0, 0.07)"
+                    boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.08), 0 6px 20px 0 rgba(0, 0, 0, 0.07)",
+                    cursor: 'pointer'
                 }}
             />
 

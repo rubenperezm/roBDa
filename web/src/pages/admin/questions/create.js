@@ -1,12 +1,14 @@
 import Head from 'next/head';
 import NextLink from 'next/link';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
 import { 
+    Alert,
     Box,
     Button,
     Container,
     Stack,
+    Snackbar,
     SvgIcon,
     Typography,
     Unstable_Grid2 as Grid
@@ -16,9 +18,19 @@ import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
 import { QuestionForm } from 'src/sections/admin/questions/questions-form';
 
 const Page = () => {
+    const [showAlert, setShowAlert] = useState(false);
+    const [messageAlert, setMessageAlert] = useState('');
+
     const handleCreate = useCallback(async (body) => {
         await axiosAuth.post('/api/questions', body);
     }, []);
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setShowAlert(false);
+    };
 
 
     return (
@@ -35,6 +47,9 @@ const Page = () => {
                     py: 8
                 }}
             >
+                <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={showAlert} autoHideDuration={4000} onClose={handleClose}>
+                    <Alert onClose={handleClose} variant="filled" severity="success" sx={{ width: "100%" }}>{messageAlert}</Alert>
+                </Snackbar>
                 <Container maxWidth="xl">
                     <Stack spacing={3}>
                         <Grid container spacing={2}>
@@ -70,6 +85,8 @@ const Page = () => {
                     <QuestionForm 
                         formHandler={handleCreate}
                         alertMessage="Pregunta creada correctamente"
+                        setShowAlert={setShowAlert}
+                        setMessageAlert={setMessageAlert}
                     />
                 </Container>
             </Box>

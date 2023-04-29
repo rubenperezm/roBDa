@@ -8,7 +8,7 @@ import {
 import { ImageLightbox } from './images/imgs-lightbox';
 import { API_URL } from 'src/config';
 export const QuestionQuiz = (props) => {
-    const { question, solved } = props;
+    const { question, solved, answered } = props; // answered === selected ???
     const [selected, setSelected] = useState(null);
 
     const handleSelect = (option) => {
@@ -36,25 +36,28 @@ export const QuestionQuiz = (props) => {
                     {question.enunciado}
                 </Typography>
             </Grid>
-            <Grid
-                item
-                xs={12}
-            >
-                <ImageLightbox imagePath={`${API_URL}${question.imagen.path}`} />
-            </Grid>
-            {question.opciones.map((opcion) => (
+            { question.imagen &&
                 <Grid
                     item
                     xs={12}
                 >
+                    <ImageLightbox imagePath={`${API_URL}${question.imagen.path}`} />
+                </Grid>
+            }
+            {question.opciones.map((opcion) => (
+                <Grid
+                    item
+                    xs={12}
+                    key={opcion.id}
+                >
                     <Card
-                        disabled={solved}
-                        onClick={() => handleSelect(opcion.id)}
+                        onClick={!solved ? () => handleSelect(opcion.id) : null}
                         sx={{
-                            backgroundColor: selected === opcion.id ? 'primary.main' : 'background.paper',
+                            backgroundColor: selected === opcion.id ? 'primary.main' 
+                                : solved && opcion.esCorrecta ? 'green' : '#f0f0f0',
                             cursor: solved ? 'default' : 'pointer',
                             '&:hover': {
-                                backgroundColor: 'primary.main',
+                                backgroundColor: !solved ? 'primary.main' : null,
                             }
                         }}
                     >
@@ -64,7 +67,7 @@ export const QuestionQuiz = (props) => {
                             }}
                         >
                             <Typography
-                                color={selected === opcion.id? "white" : "textPrimary"}
+                                color={selected === opcion.id && !solved || (solved && opcion.esCorrecta)? "white" : "textPrimary"}
                                 variant="h6"
                             >
                                 {opcion.texto}

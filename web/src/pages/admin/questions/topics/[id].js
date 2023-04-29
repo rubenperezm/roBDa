@@ -33,8 +33,10 @@ const Page = (props) => {
                     const response = await axiosAuth.get(`/api/questions/topics/${id}`).then(res => res.data);
                     setTopic(response);
                 } catch (err) {
-                    router.push('/404', router.asPath);  
-
+                    if (err.response.status === 404)
+                        router.push('/404', router.asPath);
+                    else
+                        router.push('/admin/questions/topics', router.asPath);
                 }
             }
             getTopic(id);

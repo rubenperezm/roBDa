@@ -101,12 +101,16 @@ export default async (req, res) => {
             if (apiRes.status === 201) {
                 return res.status(201).json(data);
             } else {
-                console.log(data)
                 const flattenedResults = {};
-                Object.keys(data).forEach((key) => {
-                    flattenedResults[key] = data[key][0];
+                Object.keys(data.error).forEach((key) => {
+                    flattenedResults[key] = data.error[key][0];
                 });
-
+                
+                if (flattenedResults['opciones']){
+                    flattenedResults['opcion1'] = flattenedResults['opcion2'] = flattenedResults['opcion3'] = flattenedResults['opcion4'] = flattenedResults['opciones'];
+                    delete flattenedResults['opciones'];
+                }
+                
                 return res.status(apiRes.status).json({
                     error: flattenedResults
                 });
