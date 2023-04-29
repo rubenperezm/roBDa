@@ -3,6 +3,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState, useCallback } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
+import { withAuthorization } from 'src/hocs/with-authorization';
 import {
     Alert,
     Box,
@@ -144,7 +145,7 @@ const Page = (props) => {
                             <Divider />
                             <ReportList reports={question.reports} />
                         </>
-                    }{/* TODO: Poner el questionForm en la ruta de [id]/edit*/}
+                    }
 
                 </Container>
             </Box>
@@ -152,4 +153,4 @@ const Page = (props) => {
     );
 };
 
-export default Page;
+export default withAuthorization(Page, true);

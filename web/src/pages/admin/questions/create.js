@@ -2,6 +2,7 @@ import Head from 'next/head';
 import NextLink from 'next/link';
 import { useCallback, useState } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
+import { withAuthorization } from 'src/hocs/with-authorization';
 import { 
     Alert,
     Box,
@@ -100,4 +101,4 @@ Page.getLayout = (page) => (
     </DashboardLayout>
 );
 
-export default Page;
+export default withAuthorization(Page, true);

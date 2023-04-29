@@ -119,7 +119,6 @@ class reportar(APIView):
                 'pregunta': pregunta.id,
                 'motivo': request.data.get('motivo', None),
                 'descripcion': request.data.get('descripcion', None),
-                # TODO dispositivo...
             }
             if pregunta.estado == 1 and pregunta.evento: # EN_EVENTO
                 if pregunta.evento.fase_actual == 'Ver resultados test':

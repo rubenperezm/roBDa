@@ -24,7 +24,7 @@ const LayoutContainer = styled('div')({
 });
 
 export const Layout = withAuthGuard((props) => {
-  const { children } = props; // TODO: Ver si se puede pasar una propiedad para que la barra lateral este o no
+  const { children } = props;
   const pathname = usePathname();
   const [openNav, setOpenNav] = useState(false);
 

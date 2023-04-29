@@ -31,7 +31,8 @@ export const QuestionQuiz = (props) => {
             >
                 <Typography
                     color="textPrimary"
-                    variant="h5"
+                    variant="h6"
+                    style={{whiteSpace: 'pre-line'}}
                 >
                     {question.enunciado}
                 </Typography>
@@ -68,7 +69,8 @@ export const QuestionQuiz = (props) => {
                         >
                             <Typography
                                 color={selected === opcion.id && !solved || (solved && opcion.esCorrecta)? "white" : "textPrimary"}
-                                variant="h6"
+                                variant="body"
+                                style={{whiteSpace: 'pre-line'}}
                             >
                                 {opcion.texto}
                             </Typography>

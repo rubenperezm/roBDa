@@ -18,6 +18,7 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 
 export const Layout = (props) => {
     const {children, buttonText, creationLink, title} = props;
+
     return (
         <DashboardLayout>
             <Head>

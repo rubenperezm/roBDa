@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
+import { withAuthorization } from 'src/hocs/with-authorization';
 
 import { Layout as QuestionsLayout } from 'src/layouts/questions/layout';
 import { QuestionsTable } from 'src/sections/admin/questions/questions-table';
@@ -47,5 +48,5 @@ Page.getLayout = (page) => (
     </QuestionsLayout>
 );
 
-export default Page;
+export default withAuthorization(Page, true);
 

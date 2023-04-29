@@ -3,6 +3,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState, useCallback } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
+import { withAuthorization } from 'src/hocs/with-authorization';
 import { 
     Box,
     Button,
@@ -104,4 +105,4 @@ const Page = (props) => {
     );
 };
 
-export default Page;
+export default withAuthorization(Page, true);

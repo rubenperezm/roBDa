@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
+import { withAuthorization } from 'src/hocs/with-authorization';
 
 import { Pagination, Unstable_Grid2 as Grid } from '@mui/material';
 import { Layout as QuestionsLayout } from 'src/layouts/questions/layout';
@@ -60,5 +61,5 @@ Page.getLayout = (page) => (
     </QuestionsLayout>
 );
 
-export default Page;
+export default withAuthorization(Page, true);
 

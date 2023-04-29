@@ -11,7 +11,7 @@ export const ReportList = (props) => {
                     Lista de reportes
                 </Typography>
                 <div style={{ textAlign: 'center' }}>
-                    <Typography variant="h6">
+                    <Typography variant="body">
                         No hay reportes para esta pregunta
                     </Typography>
                 </div>

@@ -3,6 +3,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState, useCallback } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
+import { withAuthorization } from 'src/hocs/with-authorization';
 import { 
     Box,
     Button,
@@ -97,23 +98,7 @@ const Page = (props) => {
                 </Container>
                 <Container maxWidth= "xl">
                     <Card sx={{marginY: 5}}>
-                    {/* <Box
-                    component="img"
-                    src={image.path}
-                    alt={image.nombre}
-                    sx={{
-                        height: 'auto',
-                        maxHeight: 400,
-                        maxWidth: '80%',
-                        borderRadius: 1,
-                        display: 'block',
-                        marginX: 'auto',
-                        marginY: 2,
-                        boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.08), 0 6px 20px 0 rgba(0, 0, 0, 0.07)"
-                    }} 
-                    />*/}
-                    <ImageLightbox imagePath={image.path}/>
-
+                        <ImageLightbox imagePath={image.path}/>
                     </Card>
                 </Container>
                 <Container maxWidth="xl">
@@ -128,4 +113,4 @@ const Page = (props) => {
     );
 };
 
-export default Page;
+export default withAuthorization(Page, true);

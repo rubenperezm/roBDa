@@ -37,7 +37,7 @@ export const QuestionForm = (props) => {
         setUpdateFlag,
         studentQuestion
     } = props;
-    // TODO: Reutilizar componente para la creación de pregunta por parte del usuario
+    
     const router = useRouter();
     const [openDialogDelete, setOpenDialogDelete] = useState(false);
     const [image, setImage] = useState(null);

@@ -17,7 +17,7 @@ export const ImageLightbox = (props) => {
                 sx={{
                     height: 'auto',
                     maxHeight: 400,
-                    maxWidth: '80%',
+                    maxWidth: '100%',
                     borderRadius: 1,
                     display: 'block',
                     marginX: 'auto',
