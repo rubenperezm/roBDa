@@ -64,7 +64,6 @@ export const ImgsForm = (props) => {
                     setImagePreview(null);
 
                 } catch (err) {
-                    console.log(err)
                     helpers.setStatus({ success: false });
                     helpers.setErrors(err.response.data.error);
                     helpers.setSubmitting(false);

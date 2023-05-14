@@ -24,20 +24,26 @@ class Evento(BaseModel):
     def fase_actual(self):
         now = timezone.now().timestamp()
         if now < self.fechaInicio.timestamp():
-            return 'No ha comenzado'
+            return 'Sin comenzar'
         elif now < self.finFase1.timestamp():
-            return 'Crear preguntas'
+            return 'Creación preguntas'
         elif now < self.finFase2.timestamp():
-            return 'Realizar test'
-        # elif now < self.finFase3.timestamp():
-        #     return 'Ver resultados test'
+            return 'En juego'
         elif not self.terminada:
             return 'Esperando corrección del profesor'
         return 'Finalizada'
     
     @property
     def mejores_jugadores(self):
-        partidas = self.partida_set.all().order_by('-puntuacion')
+        partidas = self.usercomp_set.all().order_by('-score').values('user__username', 'score')
         if len(partidas) < 5:
             return partidas
         return partidas[:5]
+    
+    @property
+    def ranking(self):
+        return self.usercomp_set.all().order_by('-score').values('user__username', 'score')
+
+    @property
+    def terminable(self):
+        return self.fase_actual == "Esperando corrección del profesor" and not self.report_set.all().exists()

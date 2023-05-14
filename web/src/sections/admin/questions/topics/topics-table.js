@@ -10,6 +10,7 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableContainer,
     TableHead,
     TablePagination,
     TableRow,
@@ -30,8 +31,8 @@ export const TopicsTable = (props) => {
     return (
         <Card>
             <Scrollbar>
-                <Box sx={{ minWidth: 300 }}>
-                    <Table>
+                <TableContainer sx={{ minWidth: 300, maxHeight: 500 }}>
+                    <Table stickyHeader>
                         <TableHead>
                             <TableRow>
                                 <TableCell>
@@ -82,7 +83,7 @@ export const TopicsTable = (props) => {
                             })}
                         </TableBody>
                     </Table>
-                </Box>
+                </TableContainer>
             </Scrollbar>
             <TablePagination
                 rowsPerPageOptions={[]}

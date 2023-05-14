@@ -3,8 +3,8 @@ import { TextField } from '@mui/material';
 
 
 const langs = [
-    { id: 1, nombre: 'Español'},
-    { id: 2, nombre: 'Inglés'},
+    { id: 1, nombre: 'Español', abreviatura: 'Esp'},
+    { id: 2, nombre: 'Inglés', abreviatura: 'Ing'},
 ];
 
 export const LangSelection = (props) => {

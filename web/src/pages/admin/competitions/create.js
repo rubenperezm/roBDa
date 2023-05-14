@@ -1,25 +1,44 @@
 import Head from 'next/head';
 import NextLink from 'next/link';
+import { useCallback, useState } from 'react';
+import axiosAuth from 'src/utils/axiosAuth';
 import { withAuthorization } from 'src/hocs/with-authorization';
 import { 
+    Alert,
     Box,
     Button,
     Container,
     Stack,
+    Snackbar,
     SvgIcon,
     Typography,
     Unstable_Grid2 as Grid
 } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
-import { ImgsForm } from 'src/sections/admin/questions/images/imgs-create-form';
+import { EventForm } from 'src/sections/admin/events/events-form';
 
 const Page = () => {
+    const [showAlert, setShowAlert] = useState(false);
+    const [messageAlert, setMessageAlert] = useState('');
+
+    const handleCreate = useCallback(async (body) => {
+        await axiosAuth.post('/api/events', body);
+    }, []);
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setShowAlert(false);
+    };
+
+
     return (
         <DashboardLayout>
             <Head>
                 <title>
-                    Subir imagen | ROBDA
+                    Crear competición | ROBDA
                 </title>
             </Head>
             <Box
@@ -29,12 +48,15 @@ const Page = () => {
                     py: 8
                 }}
             >
+                <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={showAlert} autoHideDuration={4000} onClose={handleClose}>
+                    <Alert onClose={handleClose} variant="filled" severity="success" sx={{ width: "100%" }}>{messageAlert}</Alert>
+                </Snackbar>
                 <Container maxWidth="xl">
                     <Stack spacing={3}>
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <Typography variant="h4">
-                                    Crear tema
+                                    Crear competición
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sm={9} md={10}>
@@ -51,9 +73,9 @@ const Page = () => {
                                                 <ArrowLeftIcon />
                                             </SvgIcon>
                                         )}
-                                        href="/admin/questions/images"
+                                        href="/admin/competitions"
                                     >
-                                        Volver a imágenes
+                                        Volver a competiciones
                                     </Button>
                                 </Stack>
                             </Grid>
@@ -61,7 +83,12 @@ const Page = () => {
                     </Stack>
                 </Container>
                 <Container maxWidth="xl">
-                    <ImgsForm />
+                    <EventForm 
+                        formHandler={handleCreate}
+                        alertMessage="Competición creada correctamente"
+                        setShowAlert={setShowAlert}
+                        setMessageAlert={setMessageAlert}
+                    />
                 </Container>
             </Box>
         </DashboardLayout>

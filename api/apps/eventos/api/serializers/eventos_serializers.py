@@ -2,7 +2,7 @@ from django.utils import timezone
 from rest_framework import serializers
 
 from apps.eventos.models import Evento
-from apps.preguntas.models import Tema
+from apps.preguntas.models import Tema, Report
 
 class EventoSerializer(serializers.ModelSerializer):
     tema = serializers.SlugRelatedField(
@@ -14,7 +14,7 @@ class EventoSerializer(serializers.ModelSerializer):
         exclude = ('created_date', 'modified_date')
 
     def validate(self, data):
-        if data['fechaInicio'] < data['finFase1'] < data['finFase2'] < data['finFase3']:
+        if data['fechaInicio'] < data['finFase1'] < data['finFase2']: #< data['finFase3']:
             return data
         raise serializers.ValidationError(
             {'fechas':'Las fechas deben ser coherentes.'}
@@ -37,7 +37,21 @@ class EventoSerializer(serializers.ModelSerializer):
             'fechaInicio': instance.fechaInicio,
             'finFase1': instance.finFase1,
             'finFase2': instance.finFase2,
-            'finFase3': instance.finFase3,
+            'ranking': instance.ranking,
+            'terminada': instance.terminada,
+            'terminable': instance.terminable,
+        }
+class EventoStudentSerializer(EventoSerializer):
+    def to_representation(self, instance):
+        return {
+            'id': instance.id,
+            'name': instance.name,
+            'tema': instance.tema.nombre,
+            'idioma': instance.get_idioma_display(),
+            'fechaInicio': instance.fechaInicio,
+            'finFase1': instance.finFase1,
+            'finFase2': instance.finFase2,
+            'mejoresJugadores': instance.mejores_jugadores,
             'terminada': instance.terminada,
         }
 class EventoListSerializer(serializers.ModelSerializer):

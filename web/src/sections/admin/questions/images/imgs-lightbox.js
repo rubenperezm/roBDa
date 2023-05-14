@@ -10,6 +10,13 @@ export const ImageLightbox = (props) => {
 
     return (
         <>
+            {/* Para las imagenes con fondo transparente hay que establecer un fondo blanco*/}
+            <style jsx global>{`
+                .yarl__slide_image {
+                    background-color: #fff;
+                }
+            `}</style>
+
             <Box
                 component="img"
                 src={imagePath}

@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import NextLink from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
-import axiosAuth from 'src/utils/axiosAuth';
 import {
     Avatar,
     Box,
@@ -23,14 +22,16 @@ import { SeverityPill } from 'src/components/severity-pill';
 import { Scrollbar } from 'src/components/scrollbar';
 import EyeIcon from '@heroicons/react/24/solid/EyeIcon';
 
-export const QuestionsTable = (props) => {
-    const { setPagina, pagina, preguntas, numberOfResults } = props;
+export const EventsTable = (props) => {
+    const { setPagina, pagina, eventos, numberOfResults } = props;
 
     const stateColor = (state) => {
         const colors = {
-            'Activa': 'success',
-            'En evento': 'warning',
-            'Reportada': 'error',
+            'Sin comenzar': 'info',
+            'Creación preguntas': 'warning',
+            'En juego': 'success',
+            'Esperando corrección del profesor': 'error',
+            'Finalizada': 'error',
         };
         return colors[state];
     };
@@ -39,7 +40,7 @@ export const QuestionsTable = (props) => {
         setPagina(newPage);
     }, []);
 
-    if (preguntas.length === 0){
+    if (eventos.length === 0){
         return (
             <Card>
                 <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -47,13 +48,12 @@ export const QuestionsTable = (props) => {
                         color="textPrimary"
                         variant="body"
                     >
-                        No hay preguntas que mostrar
+                        No hay competiciones que mostrar
                     </Typography>
                 </Box>
             </Card>
         );
     }
-
     return (
         <Card>
             <Scrollbar>
@@ -62,10 +62,7 @@ export const QuestionsTable = (props) => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>
-                                    Enunciado
-                                </TableCell>
-                                <TableCell>
-                                    Creador
+                                    Nombre
                                 </TableCell>
                                 <TableCell>
                                     Tema
@@ -74,10 +71,7 @@ export const QuestionsTable = (props) => {
                                     Idioma
                                 </TableCell>
                                 <TableCell>
-                                    Evento
-                                </TableCell>
-                                <TableCell>
-                                    Estado
+                                    Fase Actual
                                 </TableCell>
                                 <TableCell>
                                     Acciones
@@ -85,11 +79,11 @@ export const QuestionsTable = (props) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {preguntas.map((question) => {
+                            {eventos.map((evento) => {
                                 return (
                                     <TableRow
                                         hover
-                                        key={question.id}
+                                        key={evento.id}
                                     >
                                         <TableCell>
                                             <Stack
@@ -98,30 +92,23 @@ export const QuestionsTable = (props) => {
                                                 spacing={2}
                                             >
                                                 <Typography variant="subtitle2">
-                                                    {question.enunciado}
+                                                    {evento.name}
                                                 </Typography>
                                             </Stack>
                                         </TableCell>
                                         <TableCell>
-                                            {question.creador}
-                                        </TableCell>
-                                        <TableCell>
-                                            {question.tema}
+                                            {evento.tema}
                                         </TableCell>
                                         <TableCell>
                                             <Avatar
-                                                src={`/assets/flags/${question.idioma}.png`}>
+                                                src={`/assets/flags/${evento.idioma}.png`}>
                                             </Avatar>
                                         </TableCell>
                                         <TableCell>
-                                            {question.evento ? question.evento : 'Creada por profesor'}
-                                        </TableCell>
-                                        <TableCell>
                                             <SeverityPill
-                                                color={stateColor(question.estado)}
-                                                smallSize
+                                                color={stateColor(evento.fase_actual)}
                                             >
-                                                {question.estado} {question.estado === 'Reportada' && ` (${question.notificaciones})`}
+                                                { evento.fase_actual }
                                             </SeverityPill>
                                         </TableCell>
                                         <TableCell>
@@ -130,10 +117,10 @@ export const QuestionsTable = (props) => {
                                                 direction="row"
                                                 spacing={2}
                                             >
-                                                <Tooltip title="Ver pregunta">
+                                                <Tooltip title="Ver competición">
                                                     <IconButton
                                                         component={NextLink}
-                                                        href={`/admin/questions/${question.id}`}>
+                                                        href={`/admin/competitions/${evento.id}`}>
                                                         <SvgIcon fontSize="small">
                                                             <EyeIcon />
                                                         </SvgIcon>
@@ -160,9 +147,9 @@ export const QuestionsTable = (props) => {
     );
 };
 
-QuestionsTable.propTypes = {
+EventsTable.propTypes = {
     numberOfResults: PropTypes.number,
-    preguntas: PropTypes.array,
+    eventos: PropTypes.array,
     setPagina: PropTypes.func,
     pagina: PropTypes.number,
 };

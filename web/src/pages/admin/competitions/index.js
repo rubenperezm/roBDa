@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
 import { withAuthorization } from 'src/hocs/with-authorization';
 
-import { Layout as QuestionsLayout } from 'src/layouts/questions/layout';
-import { QuestionsTable } from 'src/sections/admin/questions/questions-table';
-import { QuestionsFilters } from 'src/sections/admin/questions/questions-filters';
+import { Layout as EventsLayout } from 'src/layouts/events/layout';
+import { EventsTable } from 'src/sections/admin/events/events-table';
+import { EventsFilters } from 'src/sections/admin/events/events-filters';
 
 
 const Page = () => {
@@ -13,8 +13,8 @@ const Page = () => {
     const [pagina, setPagina] = useState(0);
 
     useEffect(() => {
-        const getQuestions = async () => {
-            const res = await axiosAuth.get('/api/questions', {
+        const getEvents = async () => {
+            const res = await axiosAuth.get('/api/events', {
                 params: {
                     page: pagina + 1
                 }
@@ -22,26 +22,21 @@ const Page = () => {
             setItems(res.results);
             setNumberOfResults(res.count);
         };
-        getQuestions();
+        getEvents();
     }, [pagina]);
 
     return (
-        <QuestionsLayout
-            buttonText="Crear pregunta"
-            creationLink="/admin/questions/create"
-            title="Preguntas"
-        >
-            <QuestionsFilters setNumberOfResults={setNumberOfResults} setPreguntas={setItems} setPagina={setPagina} />
-            <QuestionsTable
+        <EventsLayout>
+            <EventsFilters setNumberOfResults={setNumberOfResults} setPreguntas={setItems} setPagina={setPagina} />
+            <EventsTable
                 setPagina={setPagina}
                 pagina={pagina}
                 numberOfResults={numberOfResults}
-                preguntas={items}
+                eventos={items}
             />
-        </QuestionsLayout>
+        </EventsLayout>
     );
 };
-
 
 export default withAuthorization(Page, true);
 

@@ -23,7 +23,7 @@ const Page = () => {
 
 
     return (
-        <>
+        <DashboardLayout>
             <Head>
                 <title>
                     Crear tema | ROBDA
@@ -74,14 +74,8 @@ const Page = () => {
                     />
                 </Container>
             </Box>
-        </>
+        </DashboardLayout>
     );
 };
-
-Page.getLayout = (page) => (
-    <DashboardLayout>
-        {page}
-    </DashboardLayout>
-);
 
 export default withAuthorization(Page, true);

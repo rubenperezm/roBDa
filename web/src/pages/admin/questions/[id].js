@@ -89,7 +89,7 @@ const Page = (props) => {
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <Typography variant="h4">
-                                    Editar pregunta
+                                    Detalle pregunta
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sm={9} md={10}>

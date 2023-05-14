@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
 
-const SeverityPillRoot = styled('span')(({ theme, ownerState }) => {
+const SeverityPillRoot = styled('span')(({ theme, ownerState, smallSize }) => {
   const backgroundColor = theme.palette[ownerState.color].alpha12;
   const color = theme.palette.mode === 'dark'
     ? theme.palette[ownerState.color].main
     : theme.palette[ownerState.color].dark;
-
+  
+  const width = smallSize ? '120px' : '300px'
   return {
     alignItems: 'center',
     backgroundColor,
@@ -26,18 +27,20 @@ const SeverityPillRoot = styled('span')(({ theme, ownerState }) => {
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
     textTransform: 'uppercase',
+    width,
     whiteSpace: 'nowrap'
   };
 });
 
 export const SeverityPill = (props) => {
-  const { color = 'primary', children, ...other } = props;
+  const { color = 'primary', smallSize, children, ...other } = props;
 
   const ownerState = { color };
 
   return (
     <SeverityPillRoot
       ownerState={ownerState}
+      smallSize={smallSize}
       {...other}
     >
       {children}
@@ -54,5 +57,6 @@ SeverityPill.propTypes = {
     'info',
     'warning',
     'success'
-  ])
+  ]),
+  smallSize: PropTypes.bool 
 };

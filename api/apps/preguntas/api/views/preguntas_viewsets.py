@@ -38,7 +38,6 @@ class PreguntaViewSet(GenericViewSet):
 
     def list(self, request):
         if request.user.is_staff:
-            # TODO para obtener los datos separados en EN_EVENTO, REPORTADA y SIN_ELIMINAR, simplemente filtrar por estado
             preguntas = self.filter_queryset(self.get_queryset()).order_by("-modified_date")
             page = self.paginate_queryset(preguntas)
             if page is not None:

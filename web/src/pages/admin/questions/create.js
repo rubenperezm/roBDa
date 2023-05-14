@@ -35,7 +35,7 @@ const Page = () => {
 
 
     return (
-        <>
+        <DashboardLayout>
             <Head>
                 <title>
                     Crear pregunta | ROBDA
@@ -91,14 +91,8 @@ const Page = () => {
                     />
                 </Container>
             </Box>
-        </>
+        </DashboardLayout>
     );
 };
-
-Page.getLayout = (page) => (
-    <DashboardLayout>
-        {page}
-    </DashboardLayout>
-);
 
 export default withAuthorization(Page, true);
