@@ -17,12 +17,13 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 
 
 export const Layout = (props) => {
-    const {children, buttonText, buttonOnClick} = props;
+    const {children, buttonText, creationLink, title} = props;
+
     return (
         <DashboardLayout>
             <Head>
                 <title>
-                    Preguntas | ROBDA
+                    {title} | ROBDA
                 </title>
             </Head>
             <Box
@@ -37,7 +38,7 @@ export const Layout = (props) => {
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <Typography variant="h4">
-                                    Preguntas
+                                    {title}
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sm={9} md={10}>
@@ -86,6 +87,7 @@ export const Layout = (props) => {
                             </Grid>
                             <Grid item xs={12} sm={3} md={2}>
                                 <Button
+                                    component={NextLink}
                                     fullWidth
                                     startIcon={(
                                         <SvgIcon fontSize="small">
@@ -94,7 +96,7 @@ export const Layout = (props) => {
                                     )}
                                     variant="contained"
                                     sx={{ float: 'right' }}
-                                    onClick={buttonOnClick}
+                                    href={creationLink}
                                 >
                                     {buttonText}
                                 </Button>

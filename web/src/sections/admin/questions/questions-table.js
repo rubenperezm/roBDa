@@ -1,45 +1,64 @@
 import PropTypes from 'prop-types';
+import NextLink from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
 import {
     Avatar,
     Box,
     Card,
+    IconButton,
     Stack,
+    SvgIcon,
     Table,
     TableBody,
     TableCell,
+    TableContainer,
     TableHead,
     TablePagination,
     TableRow,
+    Tooltip,
     Typography
 } from '@mui/material';
 import { SeverityPill } from 'src/components/severity-pill';
 import { Scrollbar } from 'src/components/scrollbar';
-import { QuestionsFilters } from './questions-filters';
+import EyeIcon from '@heroicons/react/24/solid/EyeIcon';
 
 export const QuestionsTable = (props) => {
     const { setPagina, pagina, preguntas, numberOfResults } = props;
 
-    const reportsColor = (reports) => {
-        if (reports == 0)
-            return 'success';
-        else if (reports < 3)
-            return 'warning';
-        else
-            return 'error';
+    const stateColor = (state) => {
+        const colors = {
+            'Activa': 'success',
+            'En evento': 'warning',
+            'Reportada': 'error',
+        };
+        return colors[state];
     };
 
     const onPageChange = useCallback((event, newPage) => {
         setPagina(newPage);
     }, []);
 
+    if (preguntas.length === 0){
+        return (
+            <Card>
+                <Box sx={{ p: 3, textAlign: 'center' }}>
+                    <Typography
+                        color="textPrimary"
+                        variant="body"
+                    >
+                        No hay preguntas que mostrar
+                    </Typography>
+                </Box>
+            </Card>
+        );
+    }
 
     return (
         <Card>
             <Scrollbar>
-                <Box sx={{ minWidth: 800 }}>
-                    <Table>
+                <TableContainer sx={{ minWidth: 800, maxHeight: 400 }}>
+                    <Table stickyHeader>
                         <TableHead>
                             <TableRow>
                                 <TableCell>
@@ -61,18 +80,12 @@ export const QuestionsTable = (props) => {
                                     Estado
                                 </TableCell>
                                 <TableCell>
-                                    Reportes
-                                </TableCell>
-                                <TableCell>
                                     Acciones
                                 </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {preguntas.map((question) => {
-                                //const fecha = format(new Date(question.modificada), 'HH:mm - dd/MM/yyyy');
-                                //const createdAt = fecha.toString();
-
                                 return (
                                     <TableRow
                                         hover
@@ -104,13 +117,11 @@ export const QuestionsTable = (props) => {
                                             {question.evento ? question.evento : 'Creada por profesor'}
                                         </TableCell>
                                         <TableCell>
-                                            {question.estado}
-                                        </TableCell>
-                                        <TableCell>
                                             <SeverityPill
-                                                color={reportsColor(question.notificaciones)}
+                                                color={stateColor(question.estado)}
+                                                smallSize
                                             >
-                                                {question.notificaciones}
+                                                {question.estado} {question.estado === 'Reportada' && ` (${question.notificaciones})`}
                                             </SeverityPill>
                                         </TableCell>
                                         <TableCell>
@@ -119,12 +130,15 @@ export const QuestionsTable = (props) => {
                                                 direction="row"
                                                 spacing={2}
                                             >
-                                                <Typography variant="subtitle2">
-                                                    Editar
-                                                </Typography>
-                                                <Typography variant="subtitle2">
-                                                    Eliminar
-                                                </Typography>
+                                                <Tooltip title="Ver pregunta">
+                                                    <IconButton
+                                                        component={NextLink}
+                                                        href={`/admin/questions/${question.id}`}>
+                                                        <SvgIcon fontSize="small">
+                                                            <EyeIcon />
+                                                        </SvgIcon>
+                                                    </IconButton>
+                                                </Tooltip>
                                             </Stack>
                                         </TableCell>
                                     </TableRow>
@@ -132,7 +146,7 @@ export const QuestionsTable = (props) => {
                             })}
                         </TableBody>
                     </Table>
-                </Box>
+                </TableContainer>
             </Scrollbar>
             <TablePagination
                 rowsPerPageOptions={[]}

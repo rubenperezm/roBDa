@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import { useCallback, useState, useEffect } from 'react';
-import axiosAuth from 'src/utils/axiosAuth';
+import { useCallback } from 'react';
+import NextLink from 'next/link';
 import {
     Box,
     Card,
@@ -10,6 +10,7 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableContainer,
     TableHead,
     TablePagination,
     TableRow,
@@ -18,56 +19,26 @@ import {
 } from '@mui/material';
 import { Scrollbar } from 'src/components/scrollbar';
 import PencilIcon from '@heroicons/react/24/solid/PencilIcon';
-import { TopicsDialogs } from './topics-dialogs';
 
 export const TopicsTable = (props) => {
-    const { getTopics, setPagina, pagina, temas, numberOfResults, openDialogCreate, setOpenDialogCreate } = props;
-    const [topic, setTopic] = useState(null);
-    const [openDialogUpdate, setOpenDialogUpdate] = useState(false);
-    const [openDialogDelete, setOpenDialogDelete] = useState(false);
+    const { setPagina, pagina, temas, numberOfResults } = props;
 
-    const showTopicDialog = useCallback((id) => {
-        try{
-            const getTopic = async () => {
-                await axiosAuth.get(`/api/questions/topics/${id}`).then((res) => setTopic(res.data));
-            };
-            getTopic();
-            setOpenDialogUpdate(true);
-        } catch (error) {
-            console.log("error");
-        }
-    }, []);
 
     const onPageChange = useCallback((event, newPage) => {
         setPagina(newPage);
     }, []);
 
-    useEffect(() => {
-        getTopics();
-    }, [openDialogCreate, openDialogUpdate, openDialogDelete, pagina]);
-
-
     return (
         <Card>
-            <TopicsDialogs 
-                openDialogUpdate={openDialogUpdate}
-                setOpenDialogUpdate={setOpenDialogUpdate}
-                openDialogCreate={openDialogCreate}
-                setOpenDialogCreate={setOpenDialogCreate}
-                openDialogDelete={openDialogDelete}
-                setOpenDialogDelete={setOpenDialogDelete}
-                topic={topic}
-                setTopic={setTopic}
-            />
             <Scrollbar>
-                <Box sx={{ minWidth: 300 }}>
-                    <Table>
+                <TableContainer sx={{ minWidth: 300, maxHeight: 500 }}>
+                    <Table stickyHeader>
                         <TableHead>
                             <TableRow>
                                 <TableCell>
                                     Nombre del tema
                                 </TableCell>
-                                <TableCell sx={{textAlign: 'right'}}>
+                                <TableCell sx={{ textAlign: 'right' }}>
                                     Acciones
                                 </TableCell>
                             </TableRow>
@@ -98,8 +69,8 @@ export const TopicsTable = (props) => {
                                             >
                                                 <Tooltip title="Editar tema">
                                                     <IconButton
-                                                        onClick={() => showTopicDialog(tema.id)}
-                                                    >
+                                                        component={NextLink}
+                                                        href={`/admin/questions/topics/${tema.id}`}>
                                                         <SvgIcon fontSize="small">
                                                             <PencilIcon />
                                                         </SvgIcon>
@@ -112,7 +83,7 @@ export const TopicsTable = (props) => {
                             })}
                         </TableBody>
                     </Table>
-                </Box>
+                </TableContainer>
             </Scrollbar>
             <TablePagination
                 rowsPerPageOptions={[]}

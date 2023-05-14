@@ -12,10 +12,10 @@ export default async (req, res) => {
             });
         }
 
-        const page = req.query.page ?? 1;
+        let q = req.query.page ? `?page=${req.query.page}` : '';
 
         try {
-            const apiRes = await fetch(`${API_URL}/preguntas/temas/?page=${page}`, {
+            const apiRes = await fetch(`${API_URL}/preguntas/temas/${q}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -45,7 +45,7 @@ export default async (req, res) => {
 
         if (access === false) {
             return res.status(401).json({
-                error: 'Usuario no autorizado para ver temas'
+                error: 'Usuario no autorizado para crear temas'
             });
         }
 
@@ -65,9 +65,9 @@ export default async (req, res) => {
             });
 
             const data = await apiRes.json();
-            console.log(data);
-            if (apiRes.status === 200) {
-                return res.status(200).json(data);
+            
+            if (apiRes.status === 201) {
+                return res.status(201).json(data);
             } else {
                 const flattenedResults = {};
                 Object.keys(data).forEach((key) => {

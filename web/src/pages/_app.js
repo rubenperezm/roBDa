@@ -31,7 +31,7 @@ const App = (props) => {
         </title>
         <meta
           name="viewport"
-          content="initial-scale=1, width=device-width"
+          content="initial-scale=1, width=device-width, user-scalable=0"
         />
       </Head>
       <LocalizationProvider dateAdapter={AdapterDateFns}>

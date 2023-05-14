@@ -31,8 +31,8 @@ export const studentMenu = [
 
 export const adminMenu = [
     {
-        title: 'Preguntas',
-        description: 'Crea, edita y elimina preguntas, imágenes o temas',
+        title: 'Administración',
+        description: 'Crea, edita y elimina preguntas, imágenes y temas',
         image: '/assets/menu/question.png',
         to: '/admin/questions',
         buttonText: 'Ver preguntas'
