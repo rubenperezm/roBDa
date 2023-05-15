@@ -36,7 +36,7 @@ export default async (req, res) => {
                             secure: process.env.NODE_ENV !== 'development',
                             maxAge: 60 * 30,
                             sameSite: 'strict',
-                            path: '/api/'
+                            path: '/'
                         }
                     ),
                     cookie.serialize(
@@ -45,7 +45,7 @@ export default async (req, res) => {
                             secure: process.env.NODE_ENV !== 'development',
                             maxAge: 60 * 60 * 24 * 15,
                             sameSite: 'strict',
-                            path: '/api/'
+                            path: '/'
                         }
                     )
                 ]);

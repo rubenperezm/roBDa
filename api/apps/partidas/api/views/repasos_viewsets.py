@@ -70,11 +70,15 @@ class PartidaRepasoViewSet(GenericViewSet):
 
     def create(self, request):
         if not request.user.is_staff and request.user.is_active:
-            partida = Partida(tema = request.data.get('tema', None), idioma = request.data.get('idioma', None))
-            partida.save()
-            repaso = self.model(user = request.user, partida = partida)
-            repaso.save()
-            return Response(self.serializer_class(repaso).data, status = status.HTTP_201_CREATED)
+            tema = request.data.get('tema', None)
+            idioma = request.data.get('idioma', None)
+            if tema and idioma:
+                partida = Partida(tema = tema, idioma = idioma)
+                partida.save()
+                repaso = self.model(user = request.user, partida = partida)
+                repaso.save()
+                return Response(self.serializer_class(repaso).data, status = status.HTTP_201_CREATED)
+            return Response({"error": "Se necesita indicar tema e idioma."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "Los profesores no pueden crear partidas."}, status=status.HTTP_403_FORBIDDEN)
 
     # Añado una pregunta mas a la partida, y la devuelvo al cliente

@@ -58,11 +58,11 @@ export const EventForm = (props) => {
             tema: Yup
                 .string()
                 .max(30)
-                .required('Introduce un tema para la pregunta'),
+                .required('Introduce un tema para la competición'),
             idioma: Yup
                 .string()
                 .max(30)
-                .required('Introduce un idioma para la pregunta'),
+                .required('Introduce un idioma para la competición'),
             fechaInicio: Yup
                 .date()
                 .required('Introduce una fecha de inicio'),

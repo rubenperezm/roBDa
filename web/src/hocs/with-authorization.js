@@ -6,7 +6,7 @@ export function withAuthorization(Component, requiredPermission) {
     const router = useRouter()
     const auth = useAuth()
     
-    if (auth.user.is_staff !== requiredPermission) {
+    if (auth?.user?.is_staff !== requiredPermission) {
       // redireccionar al usuario a otra página si no tiene permiso
       router.push('/')
       return null

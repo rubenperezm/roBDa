@@ -42,6 +42,7 @@ export const QuestionQuiz = (props) => {
                     item
                     xs={12}
                 >
+                    {/* TODO: Ver que ocurre en caso de no funcionar el proxy inverso*/}
                     <ImageLightbox imagePath={`${API_URL}${question.imagen.path}`} />
                 </Grid>
             }
