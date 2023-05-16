@@ -5,7 +5,7 @@ from apps.partidas.api.serializers.general_serializers import PartidaSerializer,
 
 
 class RepasoSerializer(ModelSerializer):
-    partida = PartidaSerializer()
+    partida = PartidaSerializer()   
     class Meta:
         model = Repaso
         fields = '__all__'

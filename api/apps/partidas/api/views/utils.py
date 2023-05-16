@@ -55,11 +55,12 @@ def pregunta_aleatoria(partida):
 
     pks = Pregunta.objects.filter(**filters).values_list('pk', flat = True)
 
-    if len(pks) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
+    if len(pks) == 0:
         raise Exception("No existen preguntas suficientes.")
 
     # Obtener preguntas contestadas por el usuario y sus idoneidades
-    preguntas_contestadas = UsuarioPregunta.objects.filter(user=partida.user, pregunta__in=pks).values_list('pregunta', 'idoneidad')
+    print(partida.repaso)
+    preguntas_contestadas = UsuarioPregunta.objects.filter(user=partida.repaso.user, pregunta__in=pks).values_list('pregunta', 'historico')
     preguntas_dict = dict(preguntas_contestadas)
 
     # TODO: Al no usar el factor dificultad percibida (valoracion_media) de cada pregunta, podemos poner 0.5 directamente
@@ -68,8 +69,8 @@ def pregunta_aleatoria(partida):
     pregunta_seleccionada = np.random.choice(pks, size=1, replace=False, p=idoneidad_preguntas/np.sum(idoneidad_preguntas))
 
 
-    UsuarioPregunta.objects.filter(user=partida.user, pregunta__in=pks).exclude(pregunta=pregunta_seleccionada[0]).aupdate(espaciado=F('espaciado')*settings.VALOR_FACTOR_ESPACIADO)
-    UsuarioPregunta.objects.aupdate_or_create(user=partida.user, pregunta=pregunta_seleccionada[0], defaults={'espaciado': 1, 'historico': 0.5})
+    UsuarioPregunta.objects.filter(user=partida.repaso.user, pregunta__in=pks).exclude(pregunta=pregunta_seleccionada[0]).aupdate(espaciado=F('espaciado')*settings.VALOR_FACTOR_ESPACIADO)
+    UsuarioPregunta.objects.aupdate_or_create(user=partida.repaso.user, pregunta=pregunta_seleccionada[0], defaults={'espaciado': 1, 'historico': 0.5})
     
     return pregunta_seleccionada[0]
 

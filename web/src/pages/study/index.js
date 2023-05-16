@@ -13,29 +13,24 @@ import {
 
 import { Layout as QuizLayout } from 'src/layouts/quiz/layout';
 import { StartQuizForm } from 'src/sections/play/study/start-quiz-form';
+import { Quiz } from 'src/sections/play/study/quiz';
 
 import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
 
 
 const Page = () => {
-    const [onQuiz, setOnQuiz] = useState(false);
+    const [onQuiz, setOnQuiz] = useState(0);
     return (
         <QuizLayout
             title="Repaso"
         >
             {
-                onQuiz ?
-                    // <Quiz />
-                    <div>Quiz</div>
+                onQuiz !== 0 ?
+                    <Quiz idPartida={onQuiz}/>
                     :
                     <Container maxWidth="xl">
                         <Stack spacing={3}>
                             <Grid container spacing={2}>
-                                <Grid item xs={12}>
-                                    <Typography variant="h4">
-                                        Repaso
-                                    </Typography>
-                                </Grid>
                                 <Grid item xs={12}>
                                     <Stack
                                         alignItems="center"
@@ -58,7 +53,7 @@ const Page = () => {
                                 </Grid>
                             </Grid>
                         </Stack>
-                        <StartQuizForm />
+                        <StartQuizForm setOnQuiz={setOnQuiz}/>
                     </Container>
             }
         </QuizLayout>

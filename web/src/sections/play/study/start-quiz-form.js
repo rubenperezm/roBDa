@@ -20,8 +20,8 @@ export const StartQuizForm = (props) => {
     const { setOnQuiz } = props; // Actualizar a true en el handleCreate
 
     const handleCreate = useCallback(async (body) => {
-        const { data } = await axiosAuth.post('/api/quiz', body);
-        setOnQuiz(true);
+        const { data } = await axiosAuth.post('/api/play/study', body);
+        setOnQuiz(data.partida.id);
     }, []);
 
     const formik = useFormik({

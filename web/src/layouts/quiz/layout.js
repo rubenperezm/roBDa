@@ -4,6 +4,7 @@ import { styled } from '@mui/material/styles';
 import { withAuthGuard } from 'src/hocs/with-auth-guard';
 import Head from 'next/head';
 import { Box } from '@mui/material';
+import { TopNav } from './top-nav';
 
 const LayoutRoot = styled('div')(({ theme }) => ({
     display: 'flex',
@@ -42,6 +43,7 @@ export const Layout = withAuthGuard((props) => {
 
     return (
         <>
+            <TopNav title={title} color="#111927"/>
             <LayoutRoot>
                 <LayoutContainer>
                     <Head>
@@ -53,7 +55,7 @@ export const Layout = withAuthGuard((props) => {
                         component="main"
                         sx={{
                             flexGrow: 1,
-                            py: 8,
+                            py: 2,
                         }}
                     >
                         {children}

@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
-from apps.preguntas.models import Pregunta, Opcion
+from apps.preguntas.models import Pregunta, Opcion, Tema
 from apps.partidas.models import Partida, Repaso, AnswerLogs
 from apps.partidas.api.serializers.repasos_serializers import RepasoListSerializer, RepasoReviewSerializer, RepasoSerializer
 from apps.partidas.api.serializers.general_serializers import AnswerLogsSerializer
@@ -17,33 +17,6 @@ class PartidaRepasoViewSet(GenericViewSet):
     serializer_class_list = RepasoListSerializer
     pregunta_serializer = PreguntaSerializer
     model = Repaso
-    
-    # def pregunta_aleatoria(self, partida):
-    #     filters = {
-    #         "estado": 2
-    #     }
-        
-    #     tema = partida.tema
-    #     idioma = partida.idioma 
-        
-    #     if tema: filters['tema']  = tema
-    #     if idioma: filters['idioma'] = idioma
-
-    #     preguntas = Pregunta.objects.filter(**filters)
-    #     pks = preguntas.values_list('pk', flat = True)
-        
-    #     if len(pks) <= 1:
-    #         raise Exception("No existen preguntas suficientes.")
-
-    #     preguntas_contestadas = list(partida.preguntas.values_list('pregunta', flat=True))
-    #     if len(pks) > 15:
-    #         preguntas_contestadas = preguntas_contestadas[max(-15, -len(preguntas_contestadas)):]
-    #     else:
-    #         preguntas_contestadas = preguntas_contestadas[max(-len(pks)+1, -len(preguntas_contestadas)):]
-
-    #     pks = preguntas.exclude(pk__in=preguntas_contestadas).values_list('pk', flat = True)
-    
-    #     return choice(pks)
 
     def get_queryset(self, pk=None):
         if pk is None:
@@ -73,6 +46,7 @@ class PartidaRepasoViewSet(GenericViewSet):
             tema = request.data.get('tema', None)
             idioma = request.data.get('idioma', None)
             if tema and idioma:
+                tema = Tema.objects.get(nombre = tema)
                 partida = Partida(tema = tema, idioma = idioma)
                 partida.save()
                 repaso = self.model(user = request.user, partida = partida)
@@ -101,8 +75,10 @@ class PartidaRepasoViewSet(GenericViewSet):
                 correcta = get_object_or_404(Opcion, pregunta = log.pregunta.id, esCorrecta=True)
                 opcion = get_object_or_404(Opcion, texto=respuesta, pregunta=log.pregunta.id)
 
-                if request.data.get('valoracion', 0) != 0:
-                    log.pregunta.valoracionAcumulada += request.data.get('valoracion', 0)
+                val = request.data.get('valoracion', 0)
+
+                if val != 0:
+                    log.pregunta.valoracionAcumulada += val
                     log.pregunta.nValorada += 1
                     log.pregunta.save()
                     
