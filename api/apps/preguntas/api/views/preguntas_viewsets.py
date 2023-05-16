@@ -93,8 +93,6 @@ class PreguntaViewSet(GenericViewSet):
             serial = PreguntaSerializer(pregunta, data=data, partial=True)
             if serial.is_valid():
                 serial.save()
-            else:
-                print(serial.data)
             return Response(serial.data)
         return Response({'error': 'Acción no permitida para el alumno.'}, status=status.HTTP_403_FORBIDDEN)
 
