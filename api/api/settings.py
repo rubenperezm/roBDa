@@ -30,7 +30,14 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+# PRODUCTION CONFIG
+if not DEBUG:
+    ALLOWED_HOSTS = ['*']
+    CSFR_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = True
+else:
+    ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -181,6 +188,7 @@ AUTH_USER_MODEL = 'users.User'
 
 NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO = 10
 MINUTOS_POR_CUESTIONARIO = 15
+
 
 # TODO: Considerar si la valoración media debería incluirse en la fórmula
 VALOR_ALPHA= 0
