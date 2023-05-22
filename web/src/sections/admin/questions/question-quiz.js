@@ -8,8 +8,7 @@ import {
 import { ImageLightbox } from './images/imgs-lightbox';
 import { API_URL } from 'src/config';
 export const QuestionQuiz = (props) => {
-    const { question, solved, answered } = props; // answered === selected ???
-    const [selected, setSelected] = useState(null);
+    const { question, solved, selected, setSelected } = props; // answered === selected ???
 
     const handleSelect = (option) => {
         setSelected(option);

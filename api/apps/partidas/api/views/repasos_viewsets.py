@@ -69,11 +69,12 @@ class PartidaRepasoViewSet(GenericViewSet):
     # Recibe la respuesta a la pregunta por parte del usuario
     def partial_update(self, request, pk=None):
         log = get_object_or_404(AnswerLogs, pk=pk)
+        print(log)
         if log.partida.repaso.user == request.user:
-            if log.respuesta_user == None:
+            if log.respuesta == None:
                 respuesta = request.data.get('respuesta', None)
                 correcta = get_object_or_404(Opcion, pregunta = log.pregunta.id, esCorrecta=True)
-                opcion = get_object_or_404(Opcion, texto=respuesta, pregunta=log.pregunta.id)
+                opcion = get_object_or_404(Opcion, pk=respuesta, pregunta=log.pregunta.id)
 
                 val = request.data.get('valoracion', 0)
 
@@ -84,7 +85,7 @@ class PartidaRepasoViewSet(GenericViewSet):
                     
                 data = {
                     "timeFin": timezone.now(),
-                    "respuesta_user": opcion.id,
+                    "respuesta": opcion.id,
                     "acierto": esAcierto(log, respuesta),
                 }
                 a_l_serializer = AnswerLogsSerializer(log, data = data, partial = True)

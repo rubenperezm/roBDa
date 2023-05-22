@@ -6,7 +6,7 @@ export default async (req, res) => {
             cookie.serialize(
                 'access', '', {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV !== 'development',
+                    secure: process.env.SECURE !== 'False',
                     expires: new Date(0),
                     sameSite: 'strict',
                     path: '/'
@@ -15,7 +15,7 @@ export default async (req, res) => {
             cookie.serialize(
                 'refresh', '', {
                     httpOnly: true,
-                    secure: process.env.NODE_ENV !== 'development',
+                    secure: process.env.SECURE !== 'False',
                     expires: new Date(0),
                     sameSite: 'strict',
                     path: '/'
