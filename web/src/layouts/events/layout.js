@@ -30,7 +30,7 @@ export const Layout = (props) => {
                 component="main"
                 sx={{
                     flexGrow: 1,
-                    py: 8
+                    py: 4
                 }}
             >
                 <Container maxWidth="xl">
@@ -42,7 +42,7 @@ export const Layout = (props) => {
                                 </Typography>
                             </Grid>
                             
-                            <Grid item xs={12} sm={3} md={2} sx={{marginLeft: 'auto'}}>
+                            <Grid item xs={12} sm={4} md={3} sx={{marginLeft: 'auto'}}>
                                 <Button
                                     component={NextLink}
                                     fullWidth

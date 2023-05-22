@@ -23,9 +23,9 @@ export const HomeCard = ({ title, description, image, to, buttonText }) => (
         <Avatar
           src={image}
           sx={{
-            height: 100,
+            height: 70,
             mb: 2,
-            width: 100
+            width: 70
           }}
         />
         <Typography

@@ -24,6 +24,9 @@ export const Layout = (props) => {
         }}
       >
         <Grid
+          item
+          xs={12}
+          md={9}
           lg={6}
           sx={{
             backgroundColor: 'background.paper',

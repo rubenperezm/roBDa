@@ -8,7 +8,7 @@ export const studentMenu = [
     },
     {
         title: 'Competiciones',
-        description: 'Crea preguntas y responde cuestionarios con preguntas creadas por otros usuarios',
+        description: 'Crea preguntas y responde cuestionarios con preguntas de otros usuarios',
         image: '/assets/menu/trophy.png',
         to: '/competitions',
         buttonText: 'Ver competiciones'

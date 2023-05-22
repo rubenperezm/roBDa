@@ -78,7 +78,7 @@ const Page = (props) => {
                 component="main"
                 sx={{
                     flexGrow: 1,
-                    py: 8
+                    py: 4
                 }}
             >
                 <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={showAlert} autoHideDuration={4000} onClose={handleClose}>
@@ -119,7 +119,7 @@ const Page = (props) => {
                                     sx={{ float: 'right' }}
                                     onClick={() => setEditMode(!editMode)}
                                 >
-                                    { editMode ? "Salir del modo edición" : "Editar Pregunta" }
+                                    { editMode ? "Cancelar" : "Editar" }
                                 </Button>
                             </Grid>
                         </Grid>

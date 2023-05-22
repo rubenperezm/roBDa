@@ -102,7 +102,7 @@ const Page = (props) => {
                 component="main"
                 sx={{
                     flexGrow: 1,
-                    py: 8
+                    py: 4
                 }}
             >
                 <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={showAlert} autoHideDuration={4000} onClose={handleClose}>
@@ -169,7 +169,7 @@ const Page = (props) => {
                                                         fullWidth
                                                         variant="contained"
                                                     >
-                                                        Terminar competición
+                                                        Terminar
                                                     </Button>
                                                     </span>
                                                 </Tooltip>
@@ -180,7 +180,7 @@ const Page = (props) => {
                                                     sx={{ float: 'right' }}
                                                     onClick={() => terminarEvento()}
                                                 >
-                                                    Terminar competición
+                                                    Terminar
                                                 </Button>
                                         }
                                     </Grid>
@@ -191,7 +191,7 @@ const Page = (props) => {
                                             sx={{ float: 'right' }}
                                             onClick={() => setEditMode(!editMode)}
                                         >
-                                            {editMode ? "Salir del modo edición" : "Editar Competición"}
+                                            {editMode ? "Cancelar" : "Editar"}
                                         </Button>
                                     </Grid>
                                 </>

@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 
-const SIDE_NAV_WIDTH = 280;
+const SIDE_NAV_WIDTH = 250;
 const TOP_NAV_HEIGHT = 64;
 
 export const TopNav = (props) => {
