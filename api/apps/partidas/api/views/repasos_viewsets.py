@@ -1,12 +1,15 @@
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
+from rest_framework.decorators import api_view
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.db.models import F
+from api.settings import VALOR_K
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
 from apps.preguntas.models import Pregunta, Opcion, Tema
-from apps.partidas.models import Partida, Repaso, AnswerLogs
+from apps.partidas.models import Partida, Repaso, AnswerLogs, UsuarioPregunta
 from apps.partidas.api.serializers.repasos_serializers import RepasoListSerializer, RepasoReviewSerializer, RepasoSerializer
 from apps.partidas.api.serializers.general_serializers import AnswerLogsSerializer
 from apps.partidas.api.views.utils import esAcierto, pregunta_aleatoria, preguntaToJSON
@@ -69,25 +72,28 @@ class PartidaRepasoViewSet(GenericViewSet):
     # Recibe la respuesta a la pregunta por parte del usuario
     def partial_update(self, request, pk=None):
         log = get_object_or_404(AnswerLogs, pk=pk)
-        print(log)
+        
         if log.partida.repaso.user == request.user:
             if log.respuesta == None:
                 respuesta = request.data.get('respuesta', None)
                 correcta = get_object_or_404(Opcion, pregunta = log.pregunta.id, esCorrecta=True)
                 opcion = get_object_or_404(Opcion, pk=respuesta, pregunta=log.pregunta.id)
 
-                val = request.data.get('valoracion', 0)
+                # val = request.data.get('valoracion', 0)
 
-                if val != 0:
-                    log.pregunta.valoracionAcumulada += val
-                    log.pregunta.nValorada += 1
-                    log.pregunta.save()
+                # if val != 0:
+                #     log.pregunta.valoracionAcumulada += val
+                #     log.pregunta.nValorada += 1
+                #     log.pregunta.save()
                     
                 data = {
                     "timeFin": timezone.now(),
                     "respuesta": opcion.id,
                     "acierto": esAcierto(log, respuesta),
                 }
+
+                UsuarioPregunta.objects.filter(user = request.user, pregunta = log.pregunta).update(historico=F('historico') + VALOR_K*(1 - int(data["acierto"]) - F('historico')))
+                
                 a_l_serializer = AnswerLogsSerializer(log, data = data, partial = True)
 
                 if a_l_serializer.is_valid():
@@ -96,3 +102,17 @@ class PartidaRepasoViewSet(GenericViewSet):
                 return Response({"error": "No se ha podido registrar la respuesta."}, status=status.HTTP_400_BAD_REQUEST)
             return Response({"error": "Ya se ha contestado a esta pregunta."}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": "El registro seleccionado no pertenece al usuario."}, status=status.HTTP_403_FORBIDDEN)
+    
+@api_view(['PATCH'])
+def valorar_pregunta(request, pk=None):
+        if not request.user.is_staff:
+            val = request.data.get('valoracion', None)
+            if val and val >= 1 and val <= 5:
+                log = get_object_or_404(AnswerLogs, pk=pk)
+                log.pregunta.valoracionAcumulada += val
+                log.pregunta.nValorada += 1
+                log.pregunta.save()
+
+                return Response({"valoracion": log.pregunta.valoracionMedia})
+            return Response({"error": "Indique una valoración entre 1 y 5."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Los profesores no pueden valorar preguntas."}, status=status.HTTP_403_FORBIDDEN)

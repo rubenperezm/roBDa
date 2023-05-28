@@ -8,7 +8,7 @@ import {
 import { ImageLightbox } from './images/imgs-lightbox';
 import { API_URL } from 'src/config';
 export const QuestionQuiz = (props) => {
-    const { question, solved, selected, setSelected } = props; // answered === selected ???
+    const { question, solved, selected, setSelected } = props;
 
     const handleSelect = (option) => {
         setSelected(option);
@@ -54,8 +54,8 @@ export const QuestionQuiz = (props) => {
                     <Card
                         onClick={!solved ? () => handleSelect(opcion.id) : null}
                         sx={{
-                            backgroundColor: selected === opcion.id ? 'primary.main' 
-                                : solved && opcion.esCorrecta ? 'green' : '#f0f0f0',
+                            backgroundColor: solved && opcion.esCorrecta ? 'green'
+                                : selected === opcion.id ? solved ? '#ff2323' : 'primary.main' : '#f0f0f0',
                             cursor: solved ? 'default' : 'pointer',
                             '&:hover': {
                                 backgroundColor: !solved ? 'primary.main' : null,

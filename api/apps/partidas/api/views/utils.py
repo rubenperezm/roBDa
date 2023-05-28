@@ -43,7 +43,7 @@ def preguntas_to_JSON(pks):
 
 def esAcierto(log, respuesta):
     if respuesta:
-        return respuesta == Opcion.objects.get(pregunta = log.pregunta.id, esCorrecta=True).texto
+        return respuesta == Opcion.objects.get(pregunta = log.pregunta.id, esCorrecta=True).pk
 
 
 def pregunta_aleatoria(partida):
@@ -59,7 +59,6 @@ def pregunta_aleatoria(partida):
         raise Exception("No existen preguntas suficientes.")
 
     # Obtener preguntas contestadas por el usuario y sus idoneidades
-    print(partida.repaso)
     preguntas_contestadas = UsuarioPregunta.objects.filter(user=partida.repaso.user, pregunta__in=pks).values_list('pregunta', 'historico')
     preguntas_dict = dict(preguntas_contestadas)
 
@@ -69,8 +68,8 @@ def pregunta_aleatoria(partida):
     pregunta_seleccionada = np.random.choice(pks, size=1, replace=False, p=idoneidad_preguntas/np.sum(idoneidad_preguntas))
 
 
-    UsuarioPregunta.objects.filter(user=partida.repaso.user, pregunta__in=pks).exclude(pregunta=pregunta_seleccionada[0]).aupdate(espaciado=F('espaciado')*settings.VALOR_FACTOR_ESPACIADO)
-    UsuarioPregunta.objects.aupdate_or_create(user=partida.repaso.user, pregunta=pregunta_seleccionada[0], defaults={'espaciado': 1, 'historico': 0.5})
+    UsuarioPregunta.objects.filter(user=partida.repaso.user, pregunta__in=pks).exclude(pregunta=pregunta_seleccionada[0]).update(espaciado=F('espaciado')*settings.VALOR_FACTOR_ESPACIADO)
+    UsuarioPregunta.objects.update_or_create(user=partida.repaso.user, pregunta=Pregunta.objects.get(pk=pregunta_seleccionada[0]))
     
     return pregunta_seleccionada[0]
 
@@ -110,9 +109,11 @@ def preguntas_usercomp(usercomp):
             raise Exception("No existen preguntas suficientes.")
         # Tomar preguntas del mazo 'bueno'
         elif len(pks) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
-            otras_preguntas =  preguntas.filter(tema = usercomp.evento.tema, idioma = usercomp.evento.idioma).exclude(
-                estado = 1, evento = usercomp.evento) # TODO es necesario evento?
+            otras_preguntas =  preguntas.filter(tema = usercomp.evento.tema, idioma = usercomp.evento.idioma, estado = 2)\
+                .exclude(creador = usercomp.user)
 
+            # TODO: Si por ejemplo hay 1000 preguntas en el mazo 'bueno' y 2 creadas,
+            # la selección debe ser esas 2 más 8 aleatorias, no 10 aleatorias
             pks +=  otras_preguntas.values_list('pk', flat = True)
    
         seleccionadas = sample(list(pks), settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO)

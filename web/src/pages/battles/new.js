@@ -25,7 +25,8 @@ const Page = () => {
         >
             {
                 onQuiz !== 0 ?
-                    <Quiz idPartida={onQuiz}/>
+                    //<Quiz idPartida={onQuiz}/>
+                    <Button onClick={() => setOnQuiz(0)}>Volver</Button>
                     :
                     <Container maxWidth="xl">
                         <Stack spacing={3}>
@@ -44,9 +45,9 @@ const Page = () => {
                                                     <ArrowLeftIcon />
                                                 </SvgIcon>
                                             )}
-                                            href="/"
+                                            href="/battles"
                                         >
-                                            Volver al menú
+                                            Volver a duelos
                                         </Button>
                                     </Stack>
                                 </Grid>

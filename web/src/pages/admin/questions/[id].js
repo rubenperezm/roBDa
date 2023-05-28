@@ -21,7 +21,7 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
 import { QuestionForm } from 'src/sections/admin/questions/questions-form';
 import { QuestionQuiz } from 'src/sections/admin/questions/question-quiz';
-import { ReportList } from 'src/sections/admin/questions/report-list';
+import { ReportList } from 'src/sections/play/reports/report-list';
 
 const Page = (props) => {
     const router = useRouter();

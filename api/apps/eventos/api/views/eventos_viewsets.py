@@ -79,10 +79,12 @@ class terminar_evento(APIView):
                 evento = get_object_or_404(self.model, pk=pk)
                 reports_evento = Report.objects.filter(evento = pk, estado = 1)
                 if evento.fase_actual == 'Esperando corrección del profesor' and not reports_evento:
+                    user_comps = UserComp.objects.filter(evento=pk)
+                    for user_comp in user_comps:
+                        user_comp.score = user_comp.score_f1 + user_comp.score_f2 + user_comp.score_f3
+
+                    UserComp.objects.bulk_update(user_comps, ['score'])
                     Pregunta.objects.filter(evento = pk, estado = 1).update(estado = 2)
-                    for obj in UserComp.objects.filter(evento = pk):
-                        obj.score = obj.score_f1 + obj.score_f2 + obj.score_f3
-                        obj.save()
                     evento.terminada = True
                     evento.save()
                     return Response({'message': f'\'{evento.name}\' ha terminado. Los resultados estarán disponibles para los alumnos.'})

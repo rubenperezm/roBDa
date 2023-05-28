@@ -99,11 +99,8 @@ class UserComp(models.Model):
     @property
     def score_f1(self):
         pregunta = Pregunta.objects.get(creador=self.user, evento=self.evento)
-        if pregunta and (pregunta.estado == 1 or pregunta.estado == 2):
-            if pregunta.imagen:
-                return 50
-            else:
-                return 40
+        if pregunta and pregunta.created_date == pregunta.modified_date:
+            return 50
         else:
             return 0
     
@@ -139,8 +136,8 @@ class UsuarioPregunta(models.Model):
 
     user = models.ForeignKey(User, related_name = 'usuario_pregunta', on_delete = models.CASCADE, verbose_name = 'Usuario')
     pregunta = models.ForeignKey(Pregunta, related_name = 'pregunta_usuario', on_delete = models.CASCADE, verbose_name = 'Pregunta')
-    historico = models.SmallIntegerField('Histórico')
-    espaciado = models.SmallIntegerField('Espaciado')
+    historico = models.FloatField('Historico', default = 0.5)
+    espaciado = models.FloatField('Espaciado', default = 0.5)
 
     @property
     def idoneidad(self):

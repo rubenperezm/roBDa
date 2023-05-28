@@ -127,6 +127,7 @@ class PreguntaConReportsSerializer(PreguntaResueltaSerializer):
             'idioma': instance.idioma,
             'creada': instance.created_date,
             'modificada': instance.modified_date,
+            'valoracion': instance.valoracionMedia,
             'reports': reports_serial.data,
             'opciones': opciones_serial.data,
         }
