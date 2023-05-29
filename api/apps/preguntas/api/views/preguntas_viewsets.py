@@ -2,6 +2,7 @@ from gc import get_objects
 from django.shortcuts import get_object_or_404
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework import status
 from django_filters.rest_framework.backends import DjangoFilterBackend
@@ -9,7 +10,7 @@ from django_filters.rest_framework.filterset import FilterSet
 from django_filters import CharFilter, MultipleChoiceFilter
 
 from django.utils import timezone
-from apps.preguntas.models import Idioma, Opcion, Pregunta
+from apps.preguntas.models import Idioma, Opcion, Pregunta, Report
 from apps.partidas.models import AnswerLogs
 from apps.eventos.models import Evento
 from apps.preguntas.api.serializers.preguntas_serializers import (
@@ -42,13 +43,14 @@ class PreguntaViewSet(GenericViewSet):
 
     def get_queryset(self, pk=None):
         if pk is None:
-            return self.model.objects.exclude(estado=3)
-        return self.model.objects.filter(id=pk).exclude(estado=3).first()
+            # Excluir las que estén en un evento no terminado
+            return self.model.objects.exclude(estado=3).exclude(evento__finFase2__gte=timezone.now())
+        return self.model.objects.filter(id=pk).exclude(estado=3).exclude(evento__finFase2__gte=timezone.now()).first()
 
     def list(self, request):
         if request.user.is_staff:
             preguntas = self.filter_queryset(self.get_queryset()).order_by(
-                "-created_date"
+                "-estado", "-created_date"
             )
             page = self.paginate_queryset(preguntas)
             if page is not None:
@@ -194,3 +196,27 @@ class reportar(APIView):
             {"error": "Solamente los alumnos pueden reportar preguntas."},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+@api_view(["PATCH"])
+def cambiar_estado_report(request, pk=None):
+    if request.user.is_staff:
+        report = get_object_or_404(Report, pk=pk)
+        isAcepted = request.data.get("estado", False)
+        if report.estado == 1:
+            report.estado = 2 if isAcepted else 3
+            report.save()
+            
+            reportsLeft = Report.objects.filter(pregunta=report.pregunta, estado=1).count()
+            if reportsLeft == 0:
+                report.pregunta.estado = 2 # Ya no está reportada
+                report.pregunta.save()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {"error": "No se puede cambiar el estado de un reporte cerrado."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    return Response(
+        {"error": "Solamente los profesores pueden valorar un reporte."},
+        status=status.HTTP_400_BAD_REQUEST,
+    )

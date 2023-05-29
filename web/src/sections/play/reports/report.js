@@ -17,10 +17,9 @@ import HandThumbDownIcon from '@heroicons/react/24/solid/HandThumbDownIcon';
 import { ReportForm } from 'src/sections/play/reports/report-form';
 
 export const Report = (props) => {
-    const { question } = props;
+    const { question, setCanContinue, disabled, setDisabled } = props;
     const [openDialogReport, setOpenDialogReport] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
-    const [disabled, setDisable] = useState(false);
 
     const handleCloseConfirmReport = () => {
         setOpenDialogReport(false);
@@ -33,7 +32,8 @@ export const Report = (props) => {
         sendReport();
         setOpenDialogReport(false);
         setShowAlert(true);
-        setDisable(true);
+        setDisabled(true);
+        setCanContinue(true);
     };
 
     const handleClose = (event, reason) => {
@@ -43,47 +43,52 @@ export const Report = (props) => {
         setShowAlert(false);
     };
 
-    
+
     return (
         <>
-        <Snackbar anchorOrigin={{vertical: "top", horizontal: "center"}} open={showAlert} autoHideDuration={4000} onClose={handleClose}>
-            <Alert onClose={handleClose} variant="filled" severity="success" sx={{width: "100%"}}>Reporte enviado</Alert>
-        </Snackbar>
-        <Dialog
-            open={openDialogReport}
-            onClose={handleCloseConfirmReport}
-        >
-            <DialogTitle>
-                Reportar pregunta
-            </DialogTitle>
-            <DialogContent>
-                <ReportForm log={question.id_log} handleCloseConfirmReport={handleCloseConfirmReport} formHandler={handleConfirmReport}/>
-            </DialogContent>
-            {/* <DialogActions>
-                <Button onClick={handleCloseConfirmReport} >
-                    Cancelar
-                </Button>
-                <Button onClick={handleConfirmReport} >
-                    Reportar
-                </Button>
-            </DialogActions> */}
-        </Dialog>
-        <Stack
-            alignItems="center"
-            direction="row"
-            spacing={2}
-        >
-            <Tooltip title="Reportar pregunta">
-                <IconButton
-                    onClick={() => setOpenDialogReport(true)}
-                    disabled={disabled}
-                >
-                    <SvgIcon>
-                        <HandThumbDownIcon />
-                    </SvgIcon>
-                </IconButton>
-            </Tooltip>
-        </Stack>
+            <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={showAlert} autoHideDuration={4000} onClose={handleClose}>
+                <Alert onClose={handleClose} variant="filled" severity="success" sx={{ width: "100%" }}>Reporte enviado</Alert>
+            </Snackbar>
+            <Dialog
+                open={openDialogReport}
+                onClose={handleCloseConfirmReport}
+            >
+                <DialogTitle>
+                    Reportar pregunta
+                </DialogTitle>
+                <DialogContent>
+                    <ReportForm log={question.id_log} handleCloseConfirmReport={handleCloseConfirmReport} formHandler={handleConfirmReport} />
+                </DialogContent>
+            </Dialog>
+            <Stack
+                alignItems="center"
+                direction="row"
+                spacing={2}
+            >
+                {
+                    disabled ? (
+                        <IconButton
+                            disabled={disabled}
+                        >
+                            <SvgIcon>
+                                <HandThumbDownIcon />
+                            </SvgIcon>
+                        </IconButton>
+                    ) : (
+                        <Tooltip title="Reportar pregunta">
+                            <span>
+                                <IconButton
+                                    onClick={() => setOpenDialogReport(true)}
+                                >
+                                    <SvgIcon>
+                                        <HandThumbDownIcon />
+                                    </SvgIcon>
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    )
+                }
+            </Stack>
         </>
     )
 }

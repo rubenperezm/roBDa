@@ -15,12 +15,10 @@ export const Quiz = (props) => {
     const [selected, setSelected] = useState(null);
     const [rating, setRating] = useState(null);
     const [canContinue, setCanContinue] = useState(false);
+    const [disabled, setDisabled] = useState(false);
 
     useEffect(() => {
         const getQuestion = async () => {
-            setSelected(null);
-            setCanContinue(false);
-            setRating(null);
             const response = await axiosAuth.put(`/api/play/study/${idPartida}`);
             setQuestion(response.data);
         };
@@ -31,9 +29,13 @@ export const Quiz = (props) => {
             }
             await axiosAuth.patch(`/api/play/study/${question.id_log}`, body);
         };
-        if (!solution)
+        if (!solution){
             getQuestion();
-        else
+            setSelected(null);
+            setCanContinue(false);
+            setRating(null);
+            setDisabled(false);
+        }else
             sendAnswer();
     }, [solution]);
 
@@ -44,9 +46,8 @@ export const Quiz = (props) => {
             }
             await axiosAuth.patch(`/api/play/study/rate/${question.id_log}`, body);
         }
-        if (canContinue)
+        if (canContinue && rating !== null)
             sendRate();
-
     }, [canContinue]);
 
     if (!question) return null;
@@ -60,7 +61,7 @@ export const Quiz = (props) => {
                     canContinue ?
                         <Grid container p={5} spacing={2} pt={0}>
                             <Grid item xs={2} sm={4} md={6} lg={8} sx={{display: "flex", justifyContent: "right"}}>
-                                <Report question={question} />
+                                <Report question={question} setCanContinue={setCanContinue} disabled={disabled} setDisabled={setDisabled}/>
                             </Grid>
                             <Grid item xs={10} sm={4} md={3} lg={2}>
 
@@ -92,7 +93,7 @@ export const Quiz = (props) => {
 
                             <Grid item xs={12} sm={4}>
                                 <Stack spacing={2} direction="row" display="flex" justifyContent={{ xs: "center", sm: "right" }}>
-                                    <Report question={question} />
+                                    <Report question={question} setCanContinue={setCanContinue} disabled={disabled} setDisabled={setDisabled}/>
                                     <Button
                                         disabled={rating === null}
                                         variant="contained"

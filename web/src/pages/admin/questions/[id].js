@@ -14,6 +14,7 @@ import {
     Snackbar,
     Stack,
     SvgIcon,
+    Tooltip,
     Typography,
     Unstable_Grid2 as Grid
 } from '@mui/material';
@@ -113,14 +114,27 @@ const Page = (props) => {
                                 </Stack>
                             </Grid>
                             <Grid item xs={12} sm={3} md={2}>
-                                <Button
-                                    fullWidth
-                                    variant="contained"
-                                    sx={{ float: 'right' }}
-                                    onClick={() => setEditMode(!editMode)}
-                                >
-                                    { editMode ? "Cancelar" : "Editar" }
-                                </Button>
+                                {question.reports.length !== 0 ?
+                                    <Tooltip title="No se puede editar una pregunta con reportes pendientes">
+                                        <span>
+                                            <Button
+                                                disabled
+                                                fullWidth
+                                                variant="contained"
+                                            >
+                                                Editar
+                                            </Button>
+                                        </span>
+                                    </Tooltip>
+                                    :
+                                    <Button
+                                        fullWidth
+                                        variant="contained"
+                                        onClick={() => setEditMode(!editMode)}
+                                    >
+                                        {editMode ? "Cancelar" : "Editar"}
+                                    </Button>
+                                }
                             </Grid>
                         </Grid>
                     </Stack>
@@ -143,7 +157,12 @@ const Page = (props) => {
                                 solved={true}
                             />
                             <Divider />
-                            <ReportList reports={question.reports} />
+                            <ReportList
+                                reports={question.reports}
+                                setUpdateFlag={setUpdateFlag}
+                                setMessageAlert={setMessageAlert}
+                                setShowAlert={setShowAlert}
+                            />
                         </>
                     }
 

@@ -2,27 +2,26 @@ import cookie from 'cookie';
 import { API_URL } from 'src/config';
 
 export default async (req, res) => {
-    if (req.method === 'POST') {
+    if (req.method === 'PATCH') {
         const cookies = cookie.parse(req.headers.cookie ?? '');
         const access = cookies.access ?? false;
 
         if (access === false) {
             return res.status(401).json({
-                error: 'Usuario no autorizado para reportar preguntas'
+                error: 'Usuario no autorizado para decidir sobre reportes'
             });
         }
 
-        const { log, motivo, descripcion } = req.body;
+        const { id } = req.query;
+        const { isAcepted } = req.body;
 
         const body = JSON.stringify({
-            log,
-            motivo,
-            descripcion
+            estado: isAcepted
         });
 
         try {
-            const apiRes = await fetch(`${API_URL}/preguntas/reportar/`, {
-                method: 'POST',
+            const apiRes = await fetch(`${API_URL}/preguntas/decidir-report/${id}/`, {
+                method: 'PATCH',
                 headers: {
                     'Accept': 'application/json',
                     'Authorization': `Bearer ${access}`,
@@ -31,20 +30,18 @@ export default async (req, res) => {
                 body
             });
 
-            const data = await apiRes.json();
-            console.log(data)
-
             return res.status(apiRes.status).json({
-                data
+                message: 'Reporte decidido'
             });
 
         } catch (err) {
+            console.log(err);
             return res.status(500).json({
                 error: err
             });
         }
     } else {
-        res.setHeader('Allow', ['POST']);
+        res.setHeader('Allow', ['PATCH']);
         return res.status(405).json({
             error: `Método ${req.method} no permitido`
         });

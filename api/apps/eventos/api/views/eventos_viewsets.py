@@ -81,7 +81,7 @@ class terminar_evento(APIView):
                 if evento.fase_actual == 'Esperando corrección del profesor' and not reports_evento:
                     user_comps = UserComp.objects.filter(evento=pk)
                     for user_comp in user_comps:
-                        user_comp.score = user_comp.score_f1 + user_comp.score_f2 + user_comp.score_f3
+                        user_comp.score = user_comp.score_f1 + user_comp.score_f2 + user_comp.score_f3 # f3 son los reports
 
                     UserComp.objects.bulk_update(user_comps, ['score'])
                     Pregunta.objects.filter(evento = pk, estado = 1).update(estado = 2)

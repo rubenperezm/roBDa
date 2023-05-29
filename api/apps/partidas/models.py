@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from apps.users.models import User
 from apps.base.models import BaseModel
-from apps.preguntas.models import Pregunta, Tema, Idioma
+from apps.preguntas.models import Pregunta, Report, Tema, Idioma
 from apps.eventos.models import Evento
 
 class Partida(BaseModel):
@@ -99,7 +99,7 @@ class UserComp(models.Model):
     @property
     def score_f1(self):
         pregunta = Pregunta.objects.get(creador=self.user, evento=self.evento)
-        if pregunta and pregunta.created_date == pregunta.modified_date:
+        if pregunta and not Report.objects.filter(pregunta=pregunta, estado=2).exists():
             return 50
         else:
             return 0

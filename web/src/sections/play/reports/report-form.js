@@ -46,8 +46,6 @@ export const ReportForm = (props) => {
                         descripcion: values.descripcion,
                     };
 
-                    console.log("HOLA")
-
                     await formHandler(body);
 
                     helpers.setSubmitting(false);
@@ -55,6 +53,7 @@ export const ReportForm = (props) => {
                     // Salir del modal de reporte y pasar a la siguiente pregunta
 
                 } catch (err) {
+                    console.log(err);
                     helpers.setStatus({ success: false });
                     helpers.setErrors(err.response.data.error);
                     helpers.setSubmitting(false);
