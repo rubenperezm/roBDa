@@ -30,12 +30,9 @@ export default async (req, res) => {
                 body
             });
 
-            return res.status(apiRes.status).json({
-                message: 'Reporte decidido'
-            });
+            return res.status(apiRes.status);
 
         } catch (err) {
-            console.log(err);
             return res.status(500).json({
                 error: err
             });

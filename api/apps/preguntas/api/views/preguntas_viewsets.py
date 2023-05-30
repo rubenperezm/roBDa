@@ -151,7 +151,6 @@ class reportar(APIView):
 
     def post(self, request):
         if not request.user.is_staff:
-            print(request.data)
             log = get_object_or_404(AnswerLogs, pk=request.data.get("log", None))
             if (
                 (hasattr(log.partida, "repaso") and log.partida.repaso.user != request.user)
