@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
 import { withAuthorization } from 'src/hocs/with-authorization';
 
-import { Layout as EventsLayout } from 'src/layouts/events/layout';
+import { Layout as EventsLayout } from 'src/layouts/play/layout';
 import { EventsTable } from 'src/sections/admin/events/events-table';
 import { EventsFilters } from 'src/sections/admin/events/events-filters';
 
@@ -26,7 +26,11 @@ const Page = () => {
     }, [pagina]);
 
     return (
-        <EventsLayout>
+        <EventsLayout
+            buttonText="Crear competición"
+            creationLink='/admin/competitions/create'
+            title="Competiciones"
+        >
             <EventsFilters setNumberOfResults={setNumberOfResults} setPreguntas={setItems} setPagina={setPagina} />
             <EventsTable
                 setPagina={setPagina}

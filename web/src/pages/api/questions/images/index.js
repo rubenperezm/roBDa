@@ -2,7 +2,7 @@ import cookie from 'cookie';
 import formidable from 'formidable';
 import { Blob } from 'buffer';
 import fs from 'fs';
-import { API_URL } from '../../../../config/index';
+import { API_URL } from 'src/config';
 
 export default async (req, res) => {
     if (req.method === 'GET') {

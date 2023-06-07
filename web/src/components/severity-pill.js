@@ -1,13 +1,13 @@
 import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
 
-const SeverityPillRoot = styled('span')(({ theme, ownerState, smallSize }) => {
+const SeverityPillRoot = styled('span')(({ theme, ownerState, smallSize, autoWidth }) => {
   const backgroundColor = theme.palette[ownerState.color].alpha12;
   const color = theme.palette.mode === 'dark'
     ? theme.palette[ownerState.color].main
     : theme.palette[ownerState.color].dark;
   
-  const width = smallSize ? '120px' : '300px'
+  const width = autoWidth ? 'auto' : smallSize ? '120px' : '300px'
   return {
     alignItems: 'center',
     backgroundColor,

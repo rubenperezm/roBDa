@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import { useFormik } from 'formik';
+import { useRouter } from 'next/router';
 import * as Yup from 'yup';
 import axiosAuth from 'src/utils/axiosAuth';
 import {
@@ -10,27 +11,33 @@ import {
     CardContent,
     CardHeader,
     Divider,
+    TextField,
     Unstable_Grid2 as Grid
 } from '@mui/material';
 import { TopicsSelection } from 'src/sections/admin/questions/topics/topics-selection';
 import { LangSelection } from 'src/sections/admin/questions/languages/lang-selection';
 
 export const StartQuizForm = (props) => {
-    const { setOnQuiz } = props;
+    const router = useRouter();
 
     const handleCreate = useCallback(async (body) => {
-        const { data } = await axiosAuth.post('/api/play/study', body);
-        setOnQuiz(data.partida.id);
+        const { data } = await axiosAuth.post('/api/play/battles', body);
+        router.push(`/battles/${data.id}`);
     }, []);
 
     const formik = useFormik({
         initialValues: {
+            user2: '',
             tema: '',
             idioma: '',
             submit: null
         },
         enableReinitialize: true,
         validationSchema: Yup.object({
+            user2: Yup
+                .string()
+                .max(30)
+                .required('Indica un rival para la partida'),
             tema: Yup
                 .string()
                 .max(30)
@@ -44,6 +51,7 @@ export const StartQuizForm = (props) => {
             async (values, helpers) => {
                 try {
                     const body = {
+                        user2: values.user2,
                         tema: values.tema,
                         idioma: values.idioma,
                     };
@@ -53,6 +61,7 @@ export const StartQuizForm = (props) => {
                     helpers.setSubmitting(false);
 
                 } catch (err) {
+                    console.log(err)
                     helpers.setStatus({ success: false });
                     helpers.setErrors(err.response.data.error);
                     helpers.setSubmitting(false);
@@ -68,7 +77,7 @@ export const StartQuizForm = (props) => {
             >
                 <Card>
                     <CardHeader
-                        title="Elige un tema y un idioma para empezar a jugar"
+                        title="Elige rival, tema e idioma para empezar a jugar"
                     />
                     <CardContent>
                         <Box>
@@ -76,17 +85,37 @@ export const StartQuizForm = (props) => {
                                 container
                                 spacing={3}
                             >
-
-                                <Grid
+                                <Grid 
+                                    item
                                     xs={12}
                                     md={6}
+                                >
+                                    <TextField
+                                        error={!!(formik.touched.user2 && formik.errors.user2)}
+                                        fullWidth
+                                        helperText={formik.touched.user2 && formik.errors.user2}
+                                        label="Rival"
+                                        name="user2"
+                                        onBlur={formik.handleBlur}
+                                        onChange={formik.handleChange}
+                                        value={formik.values.user2}
+                                    /> 
+                                </Grid>
+
+                                <Grid
+                                    item
+                                    xs={12}
+                                    sm={6}
+                                    md={3}
                                 >
                                     <TopicsSelection formik={formik} defaultOption />
                                 </Grid>
 
                                 <Grid
+                                    item
                                     xs={12}
-                                    md={6}
+                                    sm={6}
+                                    md={3}
                                 >
                                     <LangSelection formik={formik} defaultOption />
                                 </Grid>
@@ -96,7 +125,7 @@ export const StartQuizForm = (props) => {
                     <Divider />
                     <CardActions sx={{ justifyContent: 'flex-end' }}>
                         <Button variant="contained" type="submit">
-                            Jugar
+                            Crear
                         </Button>
                     </CardActions>
                 </Card>

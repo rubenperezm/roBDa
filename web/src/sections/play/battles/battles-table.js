@@ -21,24 +21,16 @@ import {
 import { SeverityPill } from 'src/components/severity-pill';
 import { Scrollbar } from 'src/components/scrollbar';
 import EyeIcon from '@heroicons/react/24/solid/EyeIcon';
+import { ActionsTableBattles, StateColor } from './battles-misc';
 
-export const QuestionsTable = (props) => {
-    const { setPagina, pagina, preguntas, numberOfResults } = props;
-
-    const stateColor = (state) => {
-        const colors = {
-            'Activa': 'success',
-            'En evento': 'warning',
-            'Reportada': 'error',
-        };
-        return colors[state];
-    };
+export const BattlesTable = (props) => {
+    const { setPagina, pagina, battles, numberOfResults } = props;
 
     const onPageChange = useCallback((event, newPage) => {
         setPagina(newPage);
     }, []);
 
-    if (preguntas.length === 0){
+    if (battles.length === 0){
         return (
             <Card>
                 <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -46,7 +38,7 @@ export const QuestionsTable = (props) => {
                         color="textPrimary"
                         variant="body"
                     >
-                        No hay preguntas que mostrar
+                        No hay duelos que mostrar
                     </Typography>
                 </Box>
             </Card>
@@ -61,19 +53,13 @@ export const QuestionsTable = (props) => {
                         <TableHead>
                             <TableRow>
                                 <TableCell>
-                                    Enunciado
-                                </TableCell>
-                                <TableCell>
-                                    Creador
+                                    Enfrentamiento
                                 </TableCell>
                                 <TableCell>
                                     Tema
                                 </TableCell>
                                 <TableCell>
                                     Idioma
-                                </TableCell>
-                                <TableCell>
-                                    Evento
                                 </TableCell>
                                 <TableCell>
                                     Estado
@@ -84,11 +70,11 @@ export const QuestionsTable = (props) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {preguntas.map((question) => {
+                            {battles.map((battle) => {
                                 return (
                                     <TableRow
                                         hover
-                                        key={question.id}
+                                        key={battle.id}
                                     >
                                         <TableCell>
                                             <Stack
@@ -97,31 +83,20 @@ export const QuestionsTable = (props) => {
                                                 spacing={2}
                                             >
                                                 <Typography variant="subtitle2">
-                                                    {question.enunciado}
+                                                    {battle.user1} vs. {battle.user2}
                                                 </Typography>
                                             </Stack>
                                         </TableCell>
                                         <TableCell>
-                                            {question.creador}
-                                        </TableCell>
-                                        <TableCell>
-                                            {question.tema}
+                                            {battle.tema}
                                         </TableCell>
                                         <TableCell>
                                             <Avatar
-                                                src={`/assets/flags/${question.idioma}.png`}>
+                                                src={`/assets/flags/${battle.idioma}.png`}>
                                             </Avatar>
                                         </TableCell>
                                         <TableCell>
-                                            {question.evento ? question.evento : 'Creada por profesor'}
-                                        </TableCell>
-                                        <TableCell>
-                                            <SeverityPill
-                                                color={stateColor(question.estado)}
-                                                smallSize
-                                            >
-                                                {question.estado} {question.estado === 'Reportada' && ` (${question.notificaciones})`}
-                                            </SeverityPill>
+                                            <StateColor estado={battle.estado} user1={battle.user1} smallSize/>
                                         </TableCell>
                                         <TableCell>
                                             <Stack
@@ -129,15 +104,20 @@ export const QuestionsTable = (props) => {
                                                 direction="row"
                                                 spacing={2}
                                             >
-                                                <Tooltip title="Ver pregunta">
+                                                {/* <Tooltip title="Ver duelo">
                                                     <IconButton
                                                         component={NextLink}
-                                                        href={`/admin/questions/${question.id}`}>
+                                                        href={`/battles/${battle.id}`}>
                                                         <SvgIcon fontSize="small">
                                                             <EyeIcon />
                                                         </SvgIcon>
                                                     </IconButton>
-                                                </Tooltip>
+                                                </Tooltip> */}
+                                                <ActionsTableBattles 
+                                                    id={battle.id} 
+                                                    estado={battle.estado} 
+                                                    user1={battle.user1} 
+                                                />
                                             </Stack>
                                         </TableCell>
                                     </TableRow>
@@ -159,9 +139,9 @@ export const QuestionsTable = (props) => {
     );
 };
 
-QuestionsTable.propTypes = {
+BattlesTable.propTypes = {
     numberOfResults: PropTypes.number,
-    preguntas: PropTypes.array,
+    battles: PropTypes.array,
     setPagina: PropTypes.func,
     pagina: PropTypes.number,
 };

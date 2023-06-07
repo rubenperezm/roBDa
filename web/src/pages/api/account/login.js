@@ -1,6 +1,6 @@
 import cookie from 'cookie';
 import axiosAuth from 'src/utils/axiosAuth';
-import { API_URL } from '../../../config/index';
+import { API_URL } from 'src/config';
 
 
 export default async (req, res) => {

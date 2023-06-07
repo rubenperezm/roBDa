@@ -1,20 +1,21 @@
 import cookie from 'cookie';
-import axiosAuth from '../../../utils/axiosAuth';
 import { API_URL } from 'src/config';
 
 export default async (req, res) => {
     if (req.method === 'GET') {
         const cookies = cookie.parse(req.headers.cookie ?? '');
         const access = cookies.access ?? false;
-
+        
         if (access === false) {
             return res.status(401).json({
-                error: 'Usuario no autorizado para cargar el perfil'
+                error: 'Usuario no autorizado para obtener las preguntas'
             });
         }
+
+        const { id } = req.query;
         
         try {
-            const apiRes = await fetch(`${API_URL}/users/`, {
+            const apiRes = await fetch(`${API_URL}/partidas/partidas/duelo/preguntas/${id}/`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -23,19 +24,15 @@ export default async (req, res) => {
             });
 
             const data = await apiRes.json();
-
+            console.log(data);
             if (apiRes.status === 200) {
-                return res.status(200).json({
-                    user: data
-                });
+                return res.status(200).json(data);
             } else {
-                return res.status(apiRes.status).json({
-                    error: data
-                });
+                return res.status(apiRes.status).json(data);
             }
-        } catch(err) {
+        } catch (err) {
             return res.status(500).json({
-                error: 'Algo salió mal al intentar obtener la información del usuario'
+                error: err
             });
         }
     } else {

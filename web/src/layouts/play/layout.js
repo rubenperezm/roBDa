@@ -1,8 +1,5 @@
 import Head from 'next/head';
 import NextLink from 'next/link';
-import PhotoIcon from '@heroicons/react/24/solid/PhotoIcon';
-import HashtagIcon from '@heroicons/react/24/solid/HashtagIcon';
-import ListBulletIcon from '@heroicons/react/24/solid/ListBulletIcon';
 import PlusIcon from '@heroicons/react/24/solid/PlusIcon';
 import {
     Box,
@@ -17,13 +14,13 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 
 
 export const Layout = (props) => {
-    const {children} = props;
+    const {children, buttonText, creationLink, title} = props;
 
     return (
         <DashboardLayout>
             <Head>
                 <title>
-                    Competiciones | ROBDA
+                    {title} | ROBDA
                 </title>
             </Head>
             <Box
@@ -38,7 +35,7 @@ export const Layout = (props) => {
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <Typography variant="h4">
-                                    Competiciones
+                                    {title}
                                 </Typography>
                             </Grid>
                             
@@ -52,9 +49,9 @@ export const Layout = (props) => {
                                         </SvgIcon>
                                     )}
                                     variant="contained"
-                                    href='/admin/competitions/create'
+                                    href={creationLink}
                                 >
-                                    Crear competición
+                                    {buttonText}
                                 </Button>
                             </Grid>
                         </Grid>

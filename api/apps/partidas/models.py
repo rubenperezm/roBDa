@@ -137,7 +137,7 @@ class UsuarioPregunta(models.Model):
     user = models.ForeignKey(User, related_name = 'usuario_pregunta', on_delete = models.CASCADE, verbose_name = 'Usuario')
     pregunta = models.ForeignKey(Pregunta, related_name = 'pregunta_usuario', on_delete = models.CASCADE, verbose_name = 'Pregunta')
     historico = models.FloatField('Historico', default = 0.5)
-    espaciado = models.FloatField('Espaciado', default = 0.5)
+    espaciado = models.FloatField('Espaciado', default = 0)
 
     @property
     def idoneidad(self):

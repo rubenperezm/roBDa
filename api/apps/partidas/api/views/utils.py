@@ -69,7 +69,7 @@ def pregunta_aleatoria(partida):
 
 
     UsuarioPregunta.objects.filter(user=partida.repaso.user, pregunta__in=pks).exclude(pregunta=pregunta_seleccionada[0]).update(espaciado=F('espaciado')*settings.VALOR_FACTOR_ESPACIADO)
-    UsuarioPregunta.objects.update_or_create(user=partida.repaso.user, pregunta=Pregunta.objects.get(pk=pregunta_seleccionada[0]))
+    UsuarioPregunta.objects.update_or_create(user=partida.repaso.user, pregunta=Pregunta.objects.get(pk=pregunta_seleccionada[0]), defaults={'historico': 0.5, 'espaciado': 1})
     
     return pregunta_seleccionada[0]
 
