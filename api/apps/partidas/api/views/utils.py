@@ -4,16 +4,18 @@ from apps.partidas.models import UsuarioPregunta
 from apps.preguntas.models import Opcion, Pregunta, Imagen
 from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
-from random import sample
+from random import sample, shuffle
 import numpy as np
 
 def preguntaToJSON(pk, pk_log):
         preg_serial = PreguntaSerializer(Pregunta.objects.get(pk=pk))
+
         data = {
                 "id_log": pk_log,
                 "enunciado": preg_serial.data["enunciado"],
                 "opciones": preg_serial.data["opciones"],
             }
+        shuffle(data["opciones"])
         try:
             img = Imagen.objects.get(pk = preg_serial.data["imagen"])
             img_serial = ImagenSerializer(img)
@@ -32,6 +34,7 @@ def preguntas_to_JSON(pks):
             "enunciado": p["enunciado"],
             "opciones": p["opciones"],
         }
+        shuffle(pregunta["opciones"])
         try:
             img = Imagen.objects.get(pk = p["imagen"])
             img_serial = ImagenSerializer(img)
@@ -41,9 +44,10 @@ def preguntas_to_JSON(pks):
         data.append(pregunta)
     return data
 
-def esAcierto(log, respuesta):
+def esAcierto(pregunta, respuesta):
     if respuesta:
-        return respuesta == Opcion.objects.get(pregunta = log.pregunta.id, esCorrecta=True).pk
+        return respuesta == Opcion.objects.get(pregunta = pregunta.id, esCorrecta=True)
+    return None
 
 
 def pregunta_aleatoria(partida):
@@ -90,7 +94,7 @@ def preguntas_user1(partida):
         return preguntas_to_JSON(seleccionadas)
 
 def preguntas_user2(partida):
-    return partida.preguntas.values_list('pregunta', flat=True)
+    return preguntas_to_JSON(partida.preguntas.values_list('pregunta', flat=True))
 
 
 

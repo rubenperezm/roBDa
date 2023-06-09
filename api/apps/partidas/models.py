@@ -22,7 +22,7 @@ class Partida(BaseModel):
     def tiempo(self):
         if self.preguntas.count() == 0:
             return 0
-        return (self.preguntas.last().timeFin - self.preguntas.first().timeIni).total_seconds()
+        return (self.preguntas.filter(timeFin__isnull=False).last().timeFin - self.preguntas.first().timeIni).total_seconds()
 
 
     def __str__(self):

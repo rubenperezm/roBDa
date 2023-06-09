@@ -61,7 +61,6 @@ export const StartQuizForm = (props) => {
                     helpers.setSubmitting(false);
 
                 } catch (err) {
-                    console.log(err)
                     helpers.setStatus({ success: false });
                     helpers.setErrors(err.response.data.error);
                     helpers.setSubmitting(false);

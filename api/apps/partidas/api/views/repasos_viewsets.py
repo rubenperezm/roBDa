@@ -89,7 +89,7 @@ class PartidaRepasoViewSet(GenericViewSet):
                 data = {
                     "timeFin": timezone.now(),
                     "respuesta": opcion.id,
-                    "acierto": esAcierto(log, respuesta),
+                    "acierto": esAcierto(log.pregunta, respuesta),
                 }
 
                 UsuarioPregunta.objects.filter(user = request.user, pregunta = log.pregunta).update(historico=F('historico') + VALOR_K*(1 - int(data["acierto"]) - F('historico')))

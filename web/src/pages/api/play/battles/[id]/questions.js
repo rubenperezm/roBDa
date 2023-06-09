@@ -24,8 +24,12 @@ export default async (req, res) => {
             });
 
             const data = await apiRes.json();
-            console.log(data);
             if (apiRes.status === 200) {
+                data.forEach((question) => {
+                    if (question.imagen)
+                        question.imagen = {path: question.imagen}
+                });
+                console.log(data)
                 return res.status(200).json(data);
             } else {
                 return res.status(apiRes.status).json(data);

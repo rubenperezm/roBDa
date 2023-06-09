@@ -47,51 +47,36 @@ export default async (req, res) => {
 
         const { id } = req.query;
 
-        // const { enunciado, opciones, tema, idioma, image } = req.body;
+        const { respuestas } = req.body;
 
-        // const body = JSON.stringify({
-        //     enunciado,
-        //     opciones,
-        //     tema,
-        //     idioma,
-        //     imagen: image === '' ? null : image,
-        // });
+        const body = JSON.stringify({
+            respuestas
+        });
 
-        // try {
-        //     const apiRes = await fetch(`${API_URL}/preguntas/preguntas/${id}/`, {
-        //         method: 'PATCH',
-        //         headers: {
-        //             'Accept': 'application/json',
-        //             'Authorization': `Bearer ${access}`,
-        //             'Content-Type': 'application/json'
-        //         },
-        //         body: body
-        //     });
 
-        //     const data = await apiRes.json();
+        try {
+            const apiRes = await fetch(`${API_URL}/partidas/partidas/duelo/${id}/`, {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${access}`,
+                    'Content-Type': 'application/json'
+                },
+                body: body
+            });
 
-        //     if (apiRes.status === 200) {
-        //         return res.status(200).json(data);
-        //     } else {
-        //         const flattenedResults = {};
-        //         Object.keys(data.error).forEach((key) => {
-        //             flattenedResults[key] = data.error[key][0];
-        //         });
-                
-        //         if (flattenedResults['opciones']){
-        //             flattenedResults['opcion1'] = flattenedResults['opcion2'] = flattenedResults['opcion3'] = flattenedResults['opcion4'] = flattenedResults['opciones'];
-        //             delete flattenedResults['opciones'];
-        //         }
-                
-        //         return res.status(apiRes.status).json({
-        //             error: flattenedResults
-        //         });
-        //     }
-        // } catch (err) {
-        //     return res.status(500).json({
-        //         error: err
-        //     });
-        // }
+            const data = await apiRes.json();
+
+            if (apiRes.status === 200) {
+                return res.status(200).json(data);
+            } else {        
+                return res.status(apiRes.status).json({data});
+            }
+        } catch (err) {
+            return res.status(500).json({
+                error: err
+            });
+        }
     } else {
         res.setHeader('Allow', ['GET', 'PUT']);
         return res.status(405).json({

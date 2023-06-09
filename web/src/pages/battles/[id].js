@@ -17,23 +17,17 @@ import {
     Typography,
     Unstable_Grid2 as Grid,
 } from '@mui/material';
+import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
 
 import { Layout as QuizLayout } from 'src/layouts/quiz/layout';
-import { Quiz } from 'src/sections/play/study/quiz';
-
-import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
 import { StateColor, Score } from 'src/sections/play/battles/battles-misc';
+import { Quiz10 } from 'src/sections/play/quiz-10';
 
-
-const getScore = (score1, score2, estado) => {
-    return `${score1} : ${score2}`
-}
 const Page = () => {
     const router = useRouter();
     const auth = useAuth();
     const { id } = router.query;
-    const [onQuiz, setOnQuiz] = useState(false);
-    const [questions, setQuestions] = useState([]);
+    const [questions, setQuestions] = useState(null);
     const [battle, setBattle] = useState();
     const [notUser, setNotUser] = useState(false);
 
@@ -68,12 +62,10 @@ const Page = () => {
                 },
             });
             const data = await res.json();
-            console.log(data)
-            setQuestions(data.preguntas);
+            setQuestions(data);
         };
 
         getQuestions();
-        setOnQuiz(true);
     };
 
     if (!battle && !notUser) return null;
@@ -83,9 +75,8 @@ const Page = () => {
             title="Duelo"
         >
             {
-                onQuiz ?
-                    //<Quiz idPartida={onQuiz}/>
-                    <Button onClick={() => setOnQuiz(0)}>Quitar este botón</Button>
+                questions ?
+                    <Quiz10 id={id} questions={questions}/>
                     :
                     <Container maxWidth="xl">
                         <Stack spacing={3}>

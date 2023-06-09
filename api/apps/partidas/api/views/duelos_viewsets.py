@@ -5,7 +5,6 @@ from rest_framework import status
 from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
-from random import choice
 from django.utils import timezone
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
@@ -33,14 +32,14 @@ class PartidaDueloViewSet(GenericViewSet):
 
     def list(self, request):
         if request.user.is_staff: # Todos los duelos (profesores)
-            duelos = self.filter_queryset(self.get_queryset()).filter(Q(estado=3)|Q(estado=4)).order_by("-partidaUser1__modified_date")
+            duelos = self.filter_queryset(self.get_queryset()).filter(Q(estado=3)|Q(estado=4)).order_by("-modified_date")
             page = self.paginate_queryset(duelos)
             if page is not None:
                 duelos_serial = self.serializer_class_list(page, many = True)
                 return self.get_paginated_response(duelos_serial.data)
             duelos_serial = self.serializer_class_list(duelos, many = True)
         else: # Duelos propios (alumnos)
-            duelos = self.filter_queryset(self.get_queryset()).filter(Q(user1 = request.user) | Q(user2 = request.user), ~Q(estado=4)).exclude(estado=1, user2=request.user).order_by("-partidaUser1__modified_date")
+            duelos = self.filter_queryset(self.get_queryset()).filter(Q(user1 = request.user) | Q(user2 = request.user), ~Q(estado=4)).exclude(estado=1, user2=request.user).order_by("-modified_date")
             page = self.paginate_queryset(duelos)
             if page is not None:
                 duelos_serial = self.serializer_class_list_play(page, many = True)
@@ -91,19 +90,17 @@ class PartidaDueloViewSet(GenericViewSet):
         else:
             return Response({"error": "La partida seleccionada no pertenece al usuario."}, status=status.HTTP_403_FORBIDDEN)
         
+        if partida.preguntas.filter(timeIni__isnull=False).exists():
+            return Response({"error": "La partida ya ha sido jugada."}, status=status.HTTP_400_BAD_REQUEST)
         respuestas = request.data.get('respuestas', None)
         if respuestas:
             for r in respuestas:
                 # Update AnswerLogs
-                log = AnswerLogs(pregunta=Pregunta.objects.get(pk=r['id']), partida=partida)
-                log.respuesta = r['respuesta'] if r['respuesta'] else None
-                log.timeIni = r['timeIni'] if r['timeIni'] else None
-                log.timeFin = r['timeFin'] if r['timeFin'] else None
+                log = AnswerLogs.objects.get(pregunta=Pregunta.objects.get(pk=r['id']), partida=partida)
+                log.respuesta = Opcion.objects.get(pk=r['respuesta']) if 'respuesta' in r else None
+                log.timeIni = r['timeIni'] if 'timeIni' in r else None
+                log.timeFin = r['timeFin'] if 'timeFin' in r else None
                 log.acierto = esAcierto(log.pregunta, log.respuesta)
-                if r['valoracion']:
-                    log.pregunta.nValorada += 1
-                    log.pregunta.valoracion += r['valoracion']
-
                 log.save()
             
             return Response({"message": "Respuestas guardadas correctamente.",
@@ -115,8 +112,6 @@ class PartidaDueloViewSet(GenericViewSet):
 @api_view(['PATCH'])
 def decidir(request, pk=None):
     duelo = get_object_or_404(Duelos, pk=pk)
-    print(request.user)
-    print(duelo.user2)
     if request.user == duelo.user2:
         if duelo.estado == 2:
             decision = request.data.get('decision', None)
@@ -142,7 +137,7 @@ def getPreguntas(request, pk=None):
     elif request.user == duelo.user2 and duelo.estado == 5 and duelo.partidaUser2.preguntas.count() == 0:
         partida = duelo.partidaUser2
         duelo.estado = 3
-        preguntas = preguntas_user2(partida)
+        preguntas = preguntas_user2(duelo.partidaUser1)
     else:
         return Response({"error": "No puedes obtener las preguntas de esta partida."}, status=status.HTTP_403_FORBIDDEN)
 
