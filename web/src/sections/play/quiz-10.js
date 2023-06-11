@@ -16,7 +16,6 @@ export const Quiz10 = (props) => {
 
 
     useEffect(() => {
-        // responses.push({id: questions[currentQuestion].id, timeIni: Date.now()});
         setResponses([...responses, { id: questions[currentQuestion].id, timeIni: new Date().toISOString() }]);
     }, [currentQuestion]);
 
@@ -41,16 +40,6 @@ export const Quiz10 = (props) => {
             Router.reload();
         }
     }, [finished]);
-
-    const sendResults = async () => {
-        try {
-            const res = await axiosAuth.put(`/api/play/battles/${id}`, { respuestas: responses });
-            return res;
-        } catch (err) {
-            return err;
-        }
-
-    }
 
     const scrollToTop = () => {
         if (!isBrowser()) return;
