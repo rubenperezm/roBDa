@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { format, addMinutes, differenceInSeconds } from 'date-fns';
+import { format, addSeconds, differenceInSeconds } from 'date-fns';
 
 import { Typography } from '@mui/material';
 
 // Countdown component (mm:ss)
-export const CountDown = ({ minutes, setFinished }) => {
-    const [endTime, setEndTime] = useState(addMinutes(new Date(), minutes));
-    const [remainingTime, setRemainingTime] = useState(minutes * 60);
+export const CountDown = ({ setFinished }) => {
+    const [endTime, setDateLimit] = useState(addSeconds(new Date(), 15 * 60 + 1)); // 15 minutos de cuestionario
+    const [remainingTime, setRemainingTime] = useState(15 * 60);
 
     useEffect(() => {
         const timerId = setInterval(() => {

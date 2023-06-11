@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Router from 'next/router';
+import { addMinutes } from 'date-fns';
 import { Button, Container, Divider, Unstable_Grid2 as Grid, Typography } from '@mui/material';
 import { QuestionQuiz } from '../admin/questions/question-quiz';
 import axiosAuth from 'src/utils/axiosAuth';
@@ -85,7 +86,7 @@ export const Quiz10 = (props) => {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                    <CountDown minutes={1} setFinished={setFinished}/>
+                    <CountDown setFinished={setFinished}/>
                 </Grid>
             </Grid>
 

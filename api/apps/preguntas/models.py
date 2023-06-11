@@ -79,7 +79,6 @@ class Report(BaseModel):
     class Meta:
         verbose_name = "Pregunta reportada"
         verbose_name_plural = "Preguntas reportadas"
-        unique_together = ('reporter', 'pregunta')
 
     class MotivoReport(models.Choices):
         INCORRECTO = 1

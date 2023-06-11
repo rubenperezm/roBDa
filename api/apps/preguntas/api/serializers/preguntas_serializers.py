@@ -74,7 +74,9 @@ class PreguntaSerializer(serializers.ModelSerializer):
 
 class PreguntaResueltaSerializer(PreguntaSerializer):
     opciones = OpcionSerializer(many=True)
+    imagen = ImagenSerializer()
     tema = None
+
     class Meta:
         model = Pregunta
         exclude = ('created_date', 'modified_date', 'estado', 'evento', 'creador', 'tema', 'idioma')
@@ -101,17 +103,10 @@ class PreguntaListSerializer(PreguntaResueltaSerializer):
         }
 
 class PreguntaConReportsSerializer(PreguntaResueltaSerializer):
-    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Pregunta
-        fields = ('id', 'creador', 'imagen', 'enunciado', 'tema', 'idioma')
-
-    def get_image_url(self, obj):
-        request = self.context.get('request')
-        image_url = obj.imagen.path
-        return request.build_absolute_uri(image_url)
-    
+        fields = ('id', 'creador', 'imagen', 'enunciado', 'tema', 'idioma')   
     
     def to_representation(self, instance):
         reports = instance.reports.filter(estado = 1)

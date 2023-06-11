@@ -55,7 +55,7 @@ export const QuestionQuiz = (props) => {
                         onClick={!solved ? () => handleSelect(opcion.id) : null}
                         sx={{
                             backgroundColor: solved && opcion.esCorrecta ? 'green'
-                                : selected === opcion.id ? solved ? '#ff2323' : 'primary.main' : '#f0f0f0',
+                                : selected === opcion.id ? solved ? '#f42323' : 'primary.main' : '#f0f0f0',
                             cursor: solved ? 'default' : 'pointer',
                             '&:hover': {
                                 backgroundColor: !solved ? 'primary.main' : null,

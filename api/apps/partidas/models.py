@@ -20,10 +20,9 @@ class Partida(BaseModel):
     
     @property # timeFin de la ultima pregunta menos timeIni de la primera ordenadas cronologicamente
     def tiempo(self):
-        if self.preguntas.count() == 0:
+        if self.preguntas.count() == 0 or self.preguntas.filter(timeFin__isnull=False).count() == 0:
             return 0
         return (self.preguntas.filter(timeFin__isnull=False).last().timeFin - self.preguntas.first().timeIni).total_seconds()
-
 
     def __str__(self):
         return f'Partida {self.id}'
@@ -39,6 +38,7 @@ class AnswerLogs(BaseModel):
     timeIni = models.DateTimeField('Hora de inicio de la pregunta', null=True)
     timeFin = models.DateTimeField('Hora de finalización de la pregunta', null=True)
     acierto = models.BooleanField('Acierto', null = True)
+    reportada = models.BooleanField('Reportada', default = False)
 
     def __str__(self):
         return f'Registro {self.id}'

@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db.models import F
+from django.db.models import F, Case, When
 from apps.partidas.models import UsuarioPregunta
 from apps.preguntas.models import Opcion, Pregunta, Imagen
 from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
@@ -25,7 +25,9 @@ def preguntaToJSON(pk, pk_log):
         return data
 
 def preguntas_to_JSON(pks):
-    preguntas = Pregunta.objects.filter(pk__in=pks)
+    preserved = Case(*[When(pk=pk, then=pos) for pos, pk in enumerate(pks)])
+    preguntas = Pregunta.objects.filter(pk__in=pks).order_by(preserved)
+
     preg_serial = PreguntaSerializer(preguntas, many=True)
     data = []
     for p in preg_serial.data:
@@ -94,8 +96,7 @@ def preguntas_user1(partida):
         return preguntas_to_JSON(seleccionadas)
 
 def preguntas_user2(partida):
-    return preguntas_to_JSON(partida.preguntas.values_list('pregunta', flat=True))
-
+    return preguntas_to_JSON(partida.preguntas.order_by(F('timeIni').asc(nulls_last=True)).values_list('pregunta', flat=True))
 
 
 

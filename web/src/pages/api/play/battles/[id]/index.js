@@ -24,13 +24,14 @@ export default async (req, res) => {
             });
 
             const data = await apiRes.json();
-            console.log(data);
+            
             if (apiRes.status === 200) {
                 return res.status(200).json(data);
             } else {
                 return res.status(apiRes.status).json(data);
             }
         } catch (err) {
+            console.log(err);
             return res.status(500).json({
                 error: err
             });

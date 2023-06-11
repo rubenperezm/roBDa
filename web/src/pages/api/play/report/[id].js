@@ -30,7 +30,7 @@ export default async (req, res) => {
                 body
             });
 
-            return res.status(apiRes.status);
+            return res.status(200).json({"message": "Reporte decidido"});
 
         } catch (err) {
             return res.status(500).json({

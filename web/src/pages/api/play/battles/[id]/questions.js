@@ -29,7 +29,6 @@ export default async (req, res) => {
                     if (question.imagen)
                         question.imagen = {path: question.imagen}
                 });
-                console.log(data)
                 return res.status(200).json(data);
             } else {
                 return res.status(apiRes.status).json(data);

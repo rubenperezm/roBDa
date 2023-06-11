@@ -6,14 +6,18 @@ import NextLink from 'next/link';
 
 import {
     Avatar,
+    Box,
     Button,
     Card,
     CardActions,
     CardContent,
+    CardHeader,
     Container,
     Divider,
     Stack,
     SvgIcon,
+    Tab,
+    Tabs,
     Typography,
     Unstable_Grid2 as Grid,
 } from '@mui/material';
@@ -22,6 +26,7 @@ import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
 import { Layout as QuizLayout } from 'src/layouts/quiz/layout';
 import { StateColor, Score } from 'src/sections/play/battles/battles-misc';
 import { Quiz10 } from 'src/sections/play/quiz-10';
+import { PartidaReview } from 'src/sections/play/partida-review';
 
 const Page = () => {
     const router = useRouter();
@@ -30,7 +35,7 @@ const Page = () => {
     const [questions, setQuestions] = useState(null);
     const [battle, setBattle] = useState();
     const [notUser, setNotUser] = useState(false);
-
+    const [tabValue, setTabValue] = useState(0);
 
     useEffect(() => {
         if (id) {
@@ -44,6 +49,7 @@ const Page = () => {
                 if (res.status === 200) {
                     const data = await res.json();
                     setBattle(data);
+                    setNotUser(false);
                 } else {
                     setNotUser(true)
                 }
@@ -68,6 +74,29 @@ const Page = () => {
         getQuestions();
     };
 
+    const handleChangeTab = (event, newValue) => {
+        setTabValue(newValue);
+    };
+
+    const toggleReportada = (currentQuestion) => {
+        const newBattle = { ...battle };
+        if (auth.user.username === battle.user1){
+            newBattle.partidaUser1.preguntas[currentQuestion].reportada = true;
+        }else{
+            newBattle.partidaUser2.preguntas[currentQuestion].reportada = true;
+        }
+        setBattle(newBattle);
+    };
+
+    const sendResults = async () => {
+        try {
+            const res = await axiosAuth.put(`/api/play/battles/${id}`, { respuestas: responses });
+            return res;
+        } catch (err) {
+            return err;
+        }
+    }
+
     if (!battle && !notUser) return null;
 
     return (
@@ -76,7 +105,7 @@ const Page = () => {
         >
             {
                 questions ?
-                    <Quiz10 id={id} questions={questions}/>
+                    <Quiz10 id={id} questions={questions} sendResults={sendResults}/>
                     :
                     <Container maxWidth="xl">
                         <Stack spacing={3}>
@@ -109,6 +138,7 @@ const Page = () => {
                                 No tienes permiso para ver esta partida
                             </Typography>
                             :
+                            <>
                             <Card sx={{ mt: 3 }}>
                                 <CardContent>
                                     <Grid container>
@@ -124,10 +154,10 @@ const Page = () => {
                                                 display="flex"
                                                 justifyContent="center"
                                             >
-                                                <StateColor estado={battle.estado} user1={battle.user1}/>
+                                                <StateColor estado={battle.estado} user1={battle.user1} />
                                             </Grid>
                                             <Grid item xs={12} display="flex" justifyContent="center" mt={2}>
-                                                <Score estado={battle.estado} score1={battle.score1} score2={battle.score2} isUser1={auth.user.username === battle.user1}/>
+                                                <Score estado={battle.estado} score1={battle.score1} score2={battle.score2} isUser1={auth.user.username === battle.user1} />
                                             </Grid>
                                         </Grid>
                                         <Grid item xs={4} mt={6}>
@@ -183,6 +213,37 @@ const Page = () => {
                                     </CardActions>
                                 }
                             </Card>
+                            {
+                                battle.estado === "Finalizado" &&
+                                <Card sx={{ mt: 2 }}>
+                                    <CardHeader title="Informes de partida" />
+                                    <CardContent>
+                                        <Box>
+                                            <Tabs value={tabValue} onChange={handleChangeTab}>
+                                                <Tab label={battle.user1} />
+                                                <Tab label={battle.user2} />
+                                            </Tabs>
+                                        </Box>
+                                            
+                                        {
+                                            tabValue === 0 ?
+                                            <PartidaReview 
+                                                partida={battle.partidaUser1} 
+                                                toggleReportada={toggleReportada}
+                                                showReportButton={auth.user.username === battle.user1} 
+                                            />
+                                            :
+                                            <PartidaReview 
+                                                partida={battle.partidaUser2} 
+                                                toggleReportada={toggleReportada}
+                                                showReportButton={auth.user.username === battle.user2}
+                                            />
+                                        }
+                                        
+                                    </CardContent>
+                                </Card>
+                            }
+                            </>
                         }
                     </Container>
             }

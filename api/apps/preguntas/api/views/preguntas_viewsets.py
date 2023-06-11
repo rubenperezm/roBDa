@@ -156,7 +156,7 @@ class reportar(APIView):
                 (hasattr(log.partida, "repaso") and log.partida.repaso.user != request.user)
                 or (hasattr(log.partida, "participacion") and log.partida.participacion.user != request.user)
                 or (hasattr(log.partida, "partida_retador") and log.partida.partida_retador.user1 != request.user)
-                or (hasattr(log.partida, "partida_retado") and log.partida.partida_retado.user2 == request.user)
+                or (hasattr(log.partida, "partida_retado") and log.partida.partida_retado.user2 != request.user)
             ):
                 return Response(
                     {"error": "No puedes reportar una pregunta que no has contestado."},
@@ -185,6 +185,8 @@ class reportar(APIView):
                 report_serial.save()
                 log.pregunta.estado = 4
                 log.pregunta.save()
+                log.reportada = True
+                log.save()
                 return Response(
                     {"message": report_serial.data}, status=status.HTTP_201_CREATED
                 )

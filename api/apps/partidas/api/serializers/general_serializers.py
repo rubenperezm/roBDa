@@ -7,7 +7,7 @@ class AnswerLogsSerializer(ModelSerializer):
     pregunta = PreguntaResueltaSerializer()
     class Meta:
         model = AnswerLogs
-        exclude = ('id', 'partida')
+        exclude = ('partida',)
 
 class AnswerLogsRetrieveSerializer(AnswerLogsSerializer):
     respuesta_user = StringRelatedField()
