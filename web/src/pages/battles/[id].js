@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useAuth } from 'src/hooks/use-auth';
 import { withAuthorization } from 'src/hocs/with-authorization';
 import NextLink from 'next/link';
+import axiosAuth from 'src/utils/axiosAuth';
 
 import {
     Avatar,
@@ -88,12 +89,11 @@ const Page = () => {
         setBattle(newBattle);
     };
 
-    const sendResults = async () => {
+    const sendResults = async (responses) => {
         try {
-            const res = await axiosAuth.put(`/api/play/battles/${id}`, { respuestas: responses });
-            return res;
+            await axiosAuth.put(`/api/play/battles/${id}`, { respuestas: responses });
         } catch (err) {
-            return err;
+            //console.log(err);
         }
     }
 

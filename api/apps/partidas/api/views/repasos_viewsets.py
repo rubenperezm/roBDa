@@ -5,7 +5,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import F
-from api.settings import VALOR_K
+from api.settings import VALOR_K, NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
 from apps.preguntas.models import Pregunta, Opcion, Tema
@@ -50,6 +50,8 @@ class PartidaRepasoViewSet(GenericViewSet):
             idioma = request.data.get('idioma', None)
             if tema and idioma:
                 tema = Tema.objects.get(nombre = tema)
+                if Pregunta.objects.filter(tema = tema, idioma = idioma).count() < NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
+                    return Response({"error": {"tema": "No existen suficientes preguntas con el tema e idioma elegido.", "idioma": "No existen suficientes preguntas con el tema e idioma elegido."}}, status=status.HTTP_400_BAD_REQUEST)
                 partida = Partida(tema = tema, idioma = idioma)
                 partida.save()
                 repaso = self.model(user = request.user, partida = partida)

@@ -66,13 +66,17 @@ export const ReportReview = (props) => {
             >
                 {
                     disabled ? (
-                        <IconButton
-                            disabled={disabled}
-                        >
-                            <SvgIcon>
-                                <HandThumbDownIcon />
-                            </SvgIcon>
-                        </IconButton>
+                        <Tooltip title="Ya se ha reportado esta pregunta">
+                            <span>
+                                <IconButton
+                                    disabled={disabled}
+                                >
+                                    <SvgIcon>
+                                        <HandThumbDownIcon />
+                                    </SvgIcon>
+                                </IconButton>
+                            </span>
+                        </Tooltip>
                     ) : (
                         <Tooltip title="Reportar pregunta">
                             <span>

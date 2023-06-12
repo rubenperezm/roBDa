@@ -48,7 +48,7 @@ export const PartidaReview = (props) => {
                 sx={{ boxShadow: "0 4px 8px 0 rgba(0, 0, 0, 0.08), 0 6px 20px 0 rgba(0, 0, 0, 0.07)", borderRadius: "10px" }}
             >
                 <Scrollbar>
-                    <Stack maxHeight="60px" direction="row" px={2.5} py={1} spacing={3}>
+                    <Stack maxHeight="80px" direction="row" px={2.5} my={2.5} spacing={3}>
                         {
                             partida.preguntas.map((pregunta, index) => {
                                 return (

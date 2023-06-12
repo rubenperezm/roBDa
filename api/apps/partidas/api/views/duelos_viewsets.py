@@ -2,10 +2,10 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import status
-from django.conf import settings
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from api.settings import NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO
 
 from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
 from apps.partidas.models import AnswerLogs, Partida, Duelos
@@ -60,10 +60,14 @@ class PartidaDueloViewSet(GenericViewSet):
             user2 = User.objects.filter(username=request.data.get('user2', None)).first()
             if user2 and not user2.is_staff and user2 and user2.is_active:
                 if request.user != user2:
-                    # Check that partida and idioma is in request
-                    if not request.data.get('tema', None) or not request.data.get('idioma', None):
+                    tema = request.data.get('tema', None)
+                    idioma = request.data.get('idioma', None)
+                    if not tema or not idioma:
                         return Response({"error": "No se ha especificado el tema o el idioma."}, status=status.HTTP_400_BAD_REQUEST)
-                    partida = Partida(tema = Tema.objects.filter(nombre=request.data.get('tema', None)).first(), idioma = request.data.get('idioma', None))
+                    if Pregunta.objects.filter(tema__nombre=tema, idioma=idioma).count() < NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
+                        return Response({"error": {"tema": "No existen suficientes preguntas con el tema e idioma elegido.", "idioma": "No existen suficientes preguntas con el tema e idioma elegido."}}, status=status.HTTP_400_BAD_REQUEST)
+
+                    partida = Partida(tema = Tema.objects.filter(nombre=tema).first(), idioma = idioma)
                     partida.save()
                     data = {
                         "user1": request.user.id,

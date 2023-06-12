@@ -7,7 +7,7 @@ import axiosAuth from 'src/utils/axiosAuth';
 import { CountDown } from 'src/components/countDown';
 
 export const Quiz10 = (props) => {
-    const { id, questions, sendAnswers } = props;
+    const { id, questions, sendResults } = props;
     const [selected, setSelected] = useState(null);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [responses, setResponses] = useState([]);
@@ -36,7 +36,7 @@ export const Quiz10 = (props) => {
 
     useEffect(() => {
         if (finished) {
-            sendResults();
+            sendResults(responses);
             Router.reload();
         }
     }, [finished]);
