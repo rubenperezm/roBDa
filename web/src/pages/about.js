@@ -7,6 +7,7 @@ import {
     Card,
     CardContent,
     Container,
+    Divider,
     Stack,
     SvgIcon,
     Typography,
@@ -14,6 +15,7 @@ import {
 } from '@mui/material';
 import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import Image from 'next/image';
+import { GitHub } from '@mui/icons-material';
 
 
 
@@ -39,7 +41,7 @@ const Page = () => (
                                     Acerca de ROBDA
                                 </Typography>
                             </Grid>
-                            <Grid item xs={12} sm={6} md={8}>
+                            <Grid item xs={12} sm={8} md={9}>
                                 <Stack
                                     alignItems="center"
                                     direction="row"
@@ -59,11 +61,29 @@ const Page = () => (
                                     </Button>
                                 </Stack>
                             </Grid>
+                            <Grid item xs={12} sm={4} md={3}>
+                                <Button
+                                    component={NextLink}
+                                    fullWidth
+                                    startIcon={(
+                                        <SvgIcon fontSize="small">
+                                            <GitHub />
+                                        </SvgIcon>
+                                    )}
+                                    variant="contained"
+                                    sx={{ float: 'right' }}
+                                    href="https://github.com/rubenperezm/roBDa"
+                                    target="_blank"
+                                >
+                                    Ver repositorio
+                                </Button>
+                            </Grid>
                         </Grid>
                         <Card>
                             <CardContent>
                                 <Image src="/assets/logo_uca.png" alt="Logo de la Universidad de Cádiz" width={500} height={180}/>
-                                <Typography variant="body1" paragraph>
+                                <Divider />
+                                <Typography variant="body1" paragraph mt={3}>
                                     ROBDA es una plataforma web interactiva de la Universidad de Cádiz que permite a los usuarios responder cuestionarios de tipo test enfocados en teoría de bases de datos. Se trata de una aplicación colaborativa en la que los propios alumnos tienen la oportunidad de contribuir al desarrollo de preguntas y reportar cualquier problema que encuentren en los distintos modos de juegos diseñados para hacer el aprendizaje mucho más ameno. Con esta combinación de características, ROBDA busca fomentar la participación activa de los usuarios, brindando un entorno educativo dinámico y en constante crecimiento.
                                 </Typography>
 
@@ -74,6 +94,14 @@ const Page = () => (
                                 <Typography variant="body1" paragraph>
                                     Este proyecto ha sido desarrollado bajo licencia GNU GPL v3.0, y ha sido financiado en la convocatoria de Innovación Docente de la Universidad de Cádiz 2022/23 "Proyecto de Innovación y Mejora Docente de la UCA" (código sol-202200229934-tra).
                                     Esta página web está basada en la plantilla <NextLink href="https://material-kit-react.devias.io" target="_blank">Material Kit React</NextLink>. 
+                                </Typography>
+                                <Typography variant="body1" component="div">
+                                    Han participado en este proyecto:
+                                    <ul>
+                                        <li>Antonio Balderas</li>
+                                        <li>Manuel Palomo</li>
+                                        <li>Rubén Pérez</li>
+                                    </ul>        
                                 </Typography>
                             </CardContent>
                         </Card>

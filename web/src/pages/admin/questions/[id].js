@@ -22,6 +22,7 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 import ArrowLeftIcon from '@heroicons/react/24/solid/ArrowLeftIcon';
 import { QuestionForm } from 'src/sections/admin/questions/questions-form';
 import { QuestionQuiz } from 'src/sections/admin/questions/question-quiz';
+import { QuestionStats } from 'src/sections/admin/questions/question-stats';
 import { ReportList } from 'src/sections/play/reports/report-list';
 
 const Page = (props) => {
@@ -156,6 +157,8 @@ const Page = (props) => {
                                 question={question}
                                 solved={true}
                             />
+                            <Divider />
+                            <QuestionStats stats = {question.estadisticas}/>
                             <Divider />
                             <ReportList
                                 reports={question.reports}

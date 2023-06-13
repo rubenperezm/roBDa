@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from apps.partidas.models import AnswerLogs
 from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
 from apps.preguntas.models import Opcion, Pregunta, Report, Tema
 
@@ -113,6 +114,15 @@ class PreguntaConReportsSerializer(PreguntaResueltaSerializer):
         reports_serial = ReportReviewSerializer(reports, many = True)
         opciones_serial = OpcionSerializer(instance.opciones.all(), many=True)
         image_serial = ImagenSerializer(instance.imagen) if instance.imagen else None
+
+        # STATS
+        logs = AnswerLogs.objects.filter(pregunta = instance)
+        acertada = logs.filter(acierto = True).count()
+        fallada = logs.filter(acierto = False).count()
+        no_respondida = logs.filter(acierto__isnull = True)
+        leida = no_respondida.filter(timeIni__isnull = False).count()
+        no_leida = no_respondida.filter(timeIni__isnull = True).count()
+
         return {
             'id': instance.id,
             'creador': instance.creador.username,
@@ -122,7 +132,15 @@ class PreguntaConReportsSerializer(PreguntaResueltaSerializer):
             'idioma': instance.idioma,
             'creada': instance.created_date,
             'modificada': instance.modified_date,
-            'valoracion': instance.valoracionMedia,
             'reports': reports_serial.data,
             'opciones': opciones_serial.data,
+            'estadisticas' : {
+                'vecesAcertada': acertada,
+                'vecesFallada': fallada,
+                'vecesLeida': leida,
+                'vecesNoLeida': no_leida,
+                'vecesValorada': instance.nValorada,
+                'valoracion': instance.valoracionMedia,
+            }
+            
         }

@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import { styled } from '@mui/material/styles';
 import {
     Avatar,
+    Card,
+    CardContent,
+    CardHeader,
     Divider,
     Stack,
     Step,
@@ -161,6 +164,8 @@ export const EventOverview = (props) => {
     }, [event]);
 
     return (
+        <Card sx={{mt: 3}}>
+            <CardContent>
         <Grid
             container
             spacing={2}
@@ -234,7 +239,7 @@ export const EventOverview = (props) => {
                 xs={12}
             >
                 <Grid
-                    item
+                    container
                     xs={12}
                     display="flex"
                     justifyContent="space-between"
@@ -288,5 +293,7 @@ export const EventOverview = (props) => {
             }
             </Grid>
         </Grid>
+            </CardContent>
+        </Card>
     );
 }
