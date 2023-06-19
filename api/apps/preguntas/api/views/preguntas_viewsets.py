@@ -171,7 +171,7 @@ class reportar(APIView):
             }
             if log.pregunta.estado == 1:  # EN_EVENTO
                 if log.pregunta.evento.fase_actual == "En juego":
-                    data["evento"] = log.pregunta.evento
+                    data["evento"] = log.pregunta.evento.id
                 else:
                     return Response(
                         {

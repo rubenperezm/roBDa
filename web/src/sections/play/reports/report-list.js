@@ -45,7 +45,7 @@ export const ReportList = (props) => {
                 else
                     setMessageAlert('Reporte rechazado');
             } catch (err) {
-                console.log(err);
+                //console.log(err);
             }
         }
         sendDecision();

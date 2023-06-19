@@ -78,7 +78,7 @@ export const EventForm = (props) => {
                 .required('Introduce una fecha de fin de fase')
                 .min(
                     Yup.ref('finFase1'),
-                    'Debe introducir una fecha y hora posterior a la de fin de fase 1'
+                    'Debe introducir una fecha y hora posterior a la de fin de fase de creación de preguntas'
                 ),
         }),
         onSubmit:

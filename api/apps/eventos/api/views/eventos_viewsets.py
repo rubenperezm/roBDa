@@ -3,6 +3,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
+from apps.preguntas.api.serializers.preguntas_serializers import PreguntaResueltaSerializer
+from apps.partidas.api.serializers.user_comps_serializers import UserCompReviewSerializer
 from apps.eventos.models import Evento
 from apps.preguntas.models import Idioma, Pregunta, Report
 from apps.partidas.models import UserComp
@@ -10,6 +12,7 @@ from apps.base.permissions import esProfeOSoloLectura
 from apps.eventos.api.serializers.eventos_serializers import EventoListSerializer, EventoSerializer, EventoStudentSerializer
 from django_filters.rest_framework import FilterSet, CharFilter, MultipleChoiceFilter, BooleanFilter
 from django_filters.rest_framework.backends import DjangoFilterBackend
+from api.settings import NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO
 
 class EventoFilter(FilterSet):
     name = CharFilter(field_name='name', lookup_expr='contains')
@@ -29,14 +32,14 @@ class EventoViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = EventoFilter
     model = Evento
-
+  
     def get_queryset(self, pk=None):
         if pk is None:
             return self.model.objects.all()
         return self.model.objects.filter(id=pk).first()
 
     def list(self, request):
-        eventos = self.filter_queryset(self.get_queryset()).order_by('terminada', 'finFase2')
+        eventos = self.filter_queryset(self.get_queryset()).order_by('terminada', '-modified_date')
         page = self.paginate_queryset(eventos)
         if page is not None:
             eventos_serial = self.serializer_class_list(page, many = True)
@@ -49,11 +52,30 @@ class EventoViewSet(ModelViewSet):
         if evento is not None:
             if request.user.is_staff:
                 evento_serial = self.serializer_class(evento)
+                return Response(evento_serial.data)
             else:
                 evento_serial = self.serializer_student_class(evento)
-            return Response(evento_serial.data)
+                participacion = UserComp.objects.filter(evento = evento, user = request.user).first()
+                participacion_serial = UserCompReviewSerializer(participacion).data if participacion is not None else None
+                pregunta = Pregunta.objects.filter(evento = evento, creador = request.user).first()
+                pregunta_serial = PreguntaResueltaSerializer(pregunta).data if pregunta is not None else None
+                return Response({'evento': evento_serial.data, 'participacion': participacion_serial, 'pregunta': pregunta_serial})
+
         return Response({'error': 'No existe un evento con ese id.'}, status=status.HTTP_400_BAD_REQUEST)
 
+    def create(self, request):
+        if request.user.is_staff:
+            tema = request.data.get('tema')
+            idioma = request.data.get('idioma')
+            if Pregunta.objects.filter(tema__nombre = tema, idioma = idioma, estado = 2).count() < NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
+                return Response({"tema": ["No existen suficientes preguntas con el tema e idioma elegido."], "idioma": ["No existen suficientes preguntas con el tema e idioma elegido."]}, status=status.HTTP_400_BAD_REQUEST)
+            evento_serial = self.serializer_class(data = request.data)
+            if evento_serial.is_valid():
+                evento_serial.save()
+                return Response(evento_serial.data, status=status.HTTP_201_CREATED)
+            return Response(evento_serial.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Los alumnos no pueden crear eventos."}, status=status.HTTP_403_FORBIDDEN)
+    
     def destroy(self, request, *args, **kwargs):
         if request.user.is_staff:
             instance = self.get_object()

@@ -48,32 +48,35 @@ const calcularFase = (event) => {
 }
 
 
-const Ranking = ({ ranking }) => {
+const Ranking = ({ ranking, title }) => {
     if (ranking.length == 0) {
-        return <Typography variant="body1" sx={{mt: 2}}>No hay resultados</Typography>
+        return <Typography variant="body1" sx={{ mt: 2 }}>No hay puntuaciones registradas</Typography>
     }
-    else{
+    else {
         return (
+            <>
+            <Typography variant="h5">{title}</Typography>
             <TableContainer sx={{ mt: 2, display: 'flex', justifyContent: 'center', maxHeight: 320 }}>
-            <Table stickyHeader>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Posición</TableCell>
-                        <TableCell>Nombre</TableCell>
-                        <TableCell>Puntuación</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {ranking.map((row, index) => (
-                        <TableRow key={row.id}>
-                            <TableCell>{index + 1}</TableCell>
-                            <TableCell>{row.nombre}</TableCell>
-                            <TableCell>{row.score}</TableCell>
+                <Table stickyHeader>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Posición</TableCell>
+                            <TableCell>Nombre</TableCell>
+                            <TableCell>Puntuación</TableCell>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHead>
+                    <TableBody>
+                        {ranking.map((row, index) => (
+                            <TableRow hover key={index + 1}>
+                                <TableCell>{index + 1}</TableCell>
+                                <TableCell>{row.user}</TableCell>
+                                <TableCell>{row.score}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </TableContainer>
+            </>
         );
     }
 }
@@ -164,135 +167,129 @@ export const EventOverview = (props) => {
     }, [event]);
 
     return (
-        <Card sx={{mt: 3}}>
+        <Card sx={{ mt: 3 }}>
             <CardContent>
-        <Grid
-            container
-            spacing={2}
-            mt={3}
-            sx={{
-                textAlign: 'center'
-            }}
-        >
-            <Grid
-                item
-                xs={12}
-            >
-                <Typography
-                    color="textPrimary"
-                    variant="h4"
-                    style={{ whiteSpace: 'pre-line' }}
-                >
-                    {event.name}
-                </Typography>
-            </Grid>
-
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                <Grid
-                    item
-                    xs={12}
-                    md={6}
-                >
-                    <Stack sx={{ width: '100%' }} spacing={4}>
-                        <Stepper alternativeLabel activeStep={fase} connector={<QontoConnector />}>
-                            {fases.map((label, index) => (
-                                <Step key={index}>
-                                    <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
-                                </Step>
-                            ))}
-                        </Stepper>
-                    </Stack>
-                </Grid>
-            </div>
-
-            <Grid
-                item
-                xs={12}
-                sm={6}
-                mt={1}
-            >
-                <Typography display="inline" variant="h6" color="textPrimary" mr={1}>
-                    Tema:
-                </Typography>
-                <Typography display="inline" variant="body1" color="textSecondary">
-                    {event.tema}
-                </Typography>
-            </Grid>
-
-            <Grid
-                item
-                xs={12}
-                sm={6}
-                display="flex"
-                justifyContent="center"
-                flexDirection="row"
-            >
-                <Typography variant="h6" color="textPrimary" mt={1} mr={1}>
-                    Idioma:
-                </Typography>
-                <Avatar
-                    src={`/assets/flags/${event.idioma}.png`}>
-                </Avatar>
-            </Grid>
-
-            <Grid
-                xs={12}
-            >
                 <Grid
                     container
-                    xs={12}
-                    display="flex"
-                    justifyContent="space-between"
+                    spacing={2}
+                    mt={3}
+                    sx={{
+                        textAlign: 'center'
+                    }}
                 >
-                    <Grid xs={12} md={4} mb={1}>
-                    <Typography variant="body1" color="textPrimary" mr={1}>
-                        Fecha de inicio:
-                    </Typography>
-                    <DistFecha fecha={event.fechaInicio}/>
+                    <Grid
+                        item
+                        xs={12}
+                    >
+                        <Typography
+                            color="textPrimary"
+                            variant="h4"
+                            style={{ whiteSpace: 'pre-line' }}
+                        >
+                            {event.name}
+                        </Typography>
                     </Grid>
-                    <Grid xs={12} md={4} mb={1}>
-                    <Typography  variant="body1" color="textPrimary" mr={1}>
-                        Fecha límite de creación de preguntas:
-                    </Typography>
-                    <DistFecha fecha={event.finFase1}/>
+
+                    <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                        <Grid
+                            item
+                            xs={12}
+                            md={6}
+                        >
+                            <Stack sx={{ width: '100%' }} spacing={4}>
+                                <Stepper alternativeLabel activeStep={fase} connector={<QontoConnector />}>
+                                    {fases.map((label, index) => (
+                                        <Step key={index}>
+                                            <StepLabel StepIconComponent={QontoStepIcon}>{label}</StepLabel>
+                                        </Step>
+                                    ))}
+                                </Stepper>
+                            </Stack>
+                        </Grid>
+                    </div>
+
+                    <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        mt={1}
+                    >
+                        <Typography display="inline" variant="h6" color="textPrimary" mr={1}>
+                            Tema:
+                        </Typography>
+                        <Typography display="inline" variant="body1" color="textSecondary">
+                            {event.tema}
+                        </Typography>
                     </Grid>
-                    <Grid xs={12} md={4} mb={1}>
-                    <Typography  variant="body1" color="textPrimary" mr={1}>
-                        Fecha límite de realización del test:
-                    </Typography>
-                    <DistFecha fecha={event.finFase2}/>
+
+                    <Grid
+                        item
+                        xs={12}
+                        sm={6}
+                        display="flex"
+                        justifyContent="center"
+                        flexDirection="row"
+                    >
+                        <Typography variant="h6" color="textPrimary" mt={1} mr={1}>
+                            Idioma:
+                        </Typography>
+                        <Avatar
+                            src={`/assets/flags/${event.idioma}.png`}>
+                        </Avatar>
                     </Grid>
+
+                    <Grid
+                        xs={12}
+                    >
+                        <Grid
+                            container
+                            xs={12}
+                            display="flex"
+                            justifyContent="space-between"
+                        >
+                            <Grid xs={12} md={4} mb={1}>
+                                <Typography variant="body1" color="textPrimary" mr={1}>
+                                    Fecha de inicio:
+                                </Typography>
+                                <DistFecha fecha={event.fechaInicio} />
+                            </Grid>
+                            <Grid xs={12} md={4} mb={1}>
+                                <Typography variant="body1" color="textPrimary" mr={1}>
+                                    Fecha límite de creación de preguntas:
+                                </Typography>
+                                <DistFecha fecha={event.finFase1} />
+                            </Grid>
+                            <Grid xs={12} md={4} mb={1}>
+                                <Typography variant="body1" color="textPrimary" mr={1}>
+                                    Fecha límite de realización del test:
+                                </Typography>
+                                <DistFecha fecha={event.finFase2} />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    {fase === 4 && (
+                        <>
+                            <Grid
+                                item
+                                xs={12}
+                            >
+                                <Divider />
+                            </Grid>
+                            <Grid
+                                item
+                                xs={12}
+                                textAlign={'center'}
+                            >
+                                {event.ranking ?
+                                <Ranking ranking={event.ranking} title="Clasificación" />
+                                :
+                                <Ranking ranking={event.mejoresJugadores} title="Mejores jugadores" />
+                                }
+                            </Grid>
+                        </>
+                    )}
+
                 </Grid>
-            </Grid>
-            <Grid
-                item
-                xs={12}
-            >
-                <Divider/>
-            </Grid>
-            <Grid
-                item
-                xs={12}
-                textAlign={'center'}
-            >
-                {event.ranking ?
-                <>
-                <Typography variant="h5">
-                    Ranking
-                </Typography>
-                <Ranking ranking={event.ranking}/>
-                </>
-                :
-                <>
-                <Typography variant="h5">
-                    Mejores jugadores
-                </Typography>
-                <Ranking ranking={event.mejoresJugadores}/>
-                </>
-                // TODO: Puntuacion del jugador           
-            }
-            </Grid>
-        </Grid>
             </CardContent>
         </Card>
     );

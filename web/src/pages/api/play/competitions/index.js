@@ -8,39 +8,16 @@ export default async (req, res) => {
 
         if (access === false) {
             return res.status(401).json({
-                error: 'Usuario no autorizado para ver las preguntas'
+                error: 'Usuario no autorizado para ver las participaciones en eventos'
             });
         }
 
         const page = req.query.page ?? 1;
-        const { creador, enunciado, tema, evento, estado, idioma } = req.query;
 
-        let q = '';
-        if (creador) {
-            q += `&creador=${creador}`;
-        }
-        if (enunciado) {
-            q += `&enunciado=${enunciado}`;
-        }
-        if (tema) {
-            q += `&tema=${tema}`;
-        }
-        if (evento) {
-            q += `&evento=${evento}`;
-        }
-        if (idioma) {
-            idioma.split(',').forEach(i => {
-                q += `&idioma=${i}`;
-            });
-        }
-        if (estado) {
-            estado.split(',').forEach(est => {
-                q += `&estado=${est}`;
-            });
-        }
 
         try {
-            const apiRes = await fetch(`${API_URL}/preguntas/preguntas/?page=${page}${q}`, {
+            // TODO: Esto sería solo para el profesor. Crear menú con eventos, y en cada uno pedir a esta petición
+            const apiRes = await fetch(`${API_URL}/partidas/partidas/evento/?page=${page}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -61,7 +38,7 @@ export default async (req, res) => {
             }
         } catch (err) {
             return res.status(500).json({
-                error: 'Algo salió mal al intentar obtener las preguntas'
+                error: 'Algo salió mal al intentar obtener las participaciones en eventos'
             });
         }
     }
@@ -71,23 +48,18 @@ export default async (req, res) => {
 
         if (access === false) {
             return res.status(401).json({
-                error: 'Usuario no autorizado para crear temas'
+                error: 'Usuario no autorizado para crear participaciones en eventos'
             });
         }
 
-        const { enunciado, opciones, tema, idioma, image, evento } = req.body;
+        const { evento } = req.body;
 
         const body = JSON.stringify({
-            evento,
-            enunciado,
-            opciones,
-            tema,
-            idioma,
-            imagen: image === '' ? null : image,
+            evento
         });
 
         try {
-            const apiRes = await fetch(`${API_URL}/preguntas/preguntas/`, {
+            const apiRes = await fetch(`${API_URL}/partidas/partidas/evento/`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
@@ -102,18 +74,8 @@ export default async (req, res) => {
             if (apiRes.status === 201) {
                 return res.status(201).json(data);
             } else {
-                const flattenedResults = {};
-                Object.keys(data.error).forEach((key) => {
-                    flattenedResults[key] = data.error[key][0];
-                });
-                
-                if (flattenedResults['opciones']){
-                    flattenedResults['opcion1'] = flattenedResults['opcion2'] = flattenedResults['opcion3'] = flattenedResults['opcion4'] = flattenedResults['opciones'];
-                    delete flattenedResults['opciones'];
-                }
-                
                 return res.status(apiRes.status).json({
-                    error: flattenedResults
+                    error: data['error'],
                 });
             }
         } catch (err) {

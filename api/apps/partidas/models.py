@@ -90,7 +90,7 @@ class UserComp(models.Model):
         verbose_name_plural = "Participaciones en eventos"
         unique_together = ('evento', 'user')
 
-    partida = models.OneToOneField(Partida, related_name = 'participacion',on_delete = models.CASCADE, verbose_name = "Partida", primary_key = True)
+    partida = models.OneToOneField(Partida, related_name = 'participacion',on_delete = models.CASCADE, verbose_name = "Partida", null = True)
     user = models.ForeignKey(User, related_name = 'participante', on_delete = models.CASCADE, verbose_name = 'Usuario')
     evento = models.ForeignKey(Evento, on_delete = models.CASCADE, verbose_name = "Evento")
     valoracion = models.SmallIntegerField('Valoración', null = True)
@@ -99,7 +99,7 @@ class UserComp(models.Model):
     @property
     def score_f1(self):
         pregunta = Pregunta.objects.get(creador=self.user, evento=self.evento)
-        if pregunta and not Report.objects.filter(pregunta=pregunta, estado=2).exists():
+        if pregunta and not Report.objects.filter(pregunta=pregunta, evento=pregunta.evento, estado=2).exists():
             return 50
         else:
             return 0
@@ -112,9 +112,9 @@ class UserComp(models.Model):
     def score_f3(self):
         # Si terminan la última fase, reciben 20 puntos extra
         if self.valoracion:
-            return self.user.user_reports.filter(evento = self.pk, estado = 2).count() * 15 + 20
+            return self.user.user_reports.filter(evento = self.evento, estado = 2).count() * 15 + 20
         else:
-            return self.user.user_reports.filter(evento = self.pk, estado = 2).count() * 15
+            return self.user.user_reports.filter(evento = self.evento, estado = 2).count() * 15
 
     def __str__(self):
         return f'Participación {self.partida}'

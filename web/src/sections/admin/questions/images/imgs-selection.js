@@ -16,7 +16,7 @@ import ImgsList from './imgs-list';
 import PencilIcon from '@heroicons/react/24/solid/PencilIcon';
 
 export const ImgsSelection = (props) => {
-    const { formik, defaultOption, imageId } = props;
+    const { formik, tema } = props;
     const [items, setItems] = useState([]);
     const [openList, setOpenList] = useState(false);
     const [numberOfResults, setNumberOfResults] = useState(0);
@@ -31,10 +31,13 @@ export const ImgsSelection = (props) => {
 
     useEffect(() => {
         const getImages = async () => {
+            const params = {
+                page: pagina,
+            };
+            if (tema) params.tema = tema;
+
             const res = await axiosAuth.get('/api/questions/images', {
-                params: {
-                    page: pagina
-                }
+                params
             }).then(res => res.data);
             setItems(res.results);
             setNumberOfResults(res.count);

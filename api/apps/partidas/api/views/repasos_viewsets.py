@@ -50,7 +50,7 @@ class PartidaRepasoViewSet(GenericViewSet):
             idioma = request.data.get('idioma', None)
             if tema and idioma:
                 tema = Tema.objects.get(nombre = tema)
-                if Pregunta.objects.filter(tema = tema, idioma = idioma).count() < NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
+                if Pregunta.objects.filter(tema = tema, idioma = idioma, estado = 2).count() < NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
                     return Response({"error": {"tema": "No existen suficientes preguntas con el tema e idioma elegido.", "idioma": "No existen suficientes preguntas con el tema e idioma elegido."}}, status=status.HTTP_400_BAD_REQUEST)
                 partida = Partida(tema = tema, idioma = idioma)
                 partida.save()

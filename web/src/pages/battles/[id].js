@@ -41,18 +41,16 @@ const Page = () => {
     useEffect(() => {
         if (id) {
             const getBattle = async () => {
-                const res = await fetch(`/api/play/battles/${id}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-                if (res.status === 200) {
-                    const data = await res.json();
-                    setBattle(data);
-                    setNotUser(false);
-                } else {
-                    setNotUser(true)
+                try{
+                    const res = await axiosAuth.get(`/api/play/battles/${id}`);
+                    if (res.status === 200) {
+                        setBattle(res.data);
+                        setNotUser(false);
+                    } else {
+                        setNotUser(true)
+                    }
+                }catch(err){
+                    setNotUser(true);
                 }
             }
             getBattle();
@@ -62,14 +60,8 @@ const Page = () => {
 
     const handleStart = () => {
         const getQuestions = async () => {
-            const res = await fetch(`/api/play/battles/${id}/questions`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const data = await res.json();
-            setQuestions(data);
+            const res = await axiosAuth.get(`/api/play/battles/${id}/questions`);
+            setQuestions(res.data);
         };
 
         getQuestions();

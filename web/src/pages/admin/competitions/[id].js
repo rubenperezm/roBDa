@@ -78,7 +78,7 @@ const Page = (props) => {
                     if (err.response.status === 404)
                         router.push('/404', router.asPath);
                     else
-                        router.push('/admin/competitions', router.asPath);
+                        router.push('/admin/competitions');
                 }
             }
             getEvent(id);

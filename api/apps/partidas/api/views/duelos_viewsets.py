@@ -64,7 +64,7 @@ class PartidaDueloViewSet(GenericViewSet):
                     idioma = request.data.get('idioma', None)
                     if not tema or not idioma:
                         return Response({"error": "No se ha especificado el tema o el idioma."}, status=status.HTTP_400_BAD_REQUEST)
-                    if Pregunta.objects.filter(tema__nombre=tema, idioma=idioma).count() < NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
+                    if Pregunta.objects.filter(tema__nombre=tema, idioma=idioma, estado=2).count() < NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
                         return Response({"error": {"tema": "No existen suficientes preguntas con el tema e idioma elegido.", "idioma": "No existen suficientes preguntas con el tema e idioma elegido."}}, status=status.HTTP_400_BAD_REQUEST)
 
                     partida = Partida(tema = Tema.objects.filter(nombre=tema).first(), idioma = idioma)

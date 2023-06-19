@@ -10,45 +10,35 @@ import {
     Card,
     CardActions,
     CardContent,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogContentText,
-    DialogActions,
+    CardHeader,
     Divider,
+    Snackbar,
     TextField,
+    Typography,
     Unstable_Grid2 as Grid
 } from '@mui/material';
-import { TopicsSelection } from './topics/topics-selection';
-import { LangSelection } from './languages/lang-selection';
-import { ImgsSelection } from './images/imgs-selection';
-import { ImageLightbox } from './images/imgs-lightbox';
 
-export const QuestionForm = (props) => {
-    const { 
-        formHandler,
-        question,
-        alertMessage,
-        setMessageAlert,
-        setShowAlert,
-        setEditMode,
+import { ImgsSelection } from 'src/sections/admin/questions/images/imgs-selection';
+import { ImageLightbox } from 'src/sections/admin/questions/images/imgs-lightbox';
+
+
+export const QuestionFormComp = (props) => {
+    const {
+        evento,
         setUpdateFlag,
     } = props;
-    
-    const router = useRouter();
-    const [openDialogDelete, setOpenDialogDelete] = useState(false);
+
     const [image, setImage] = useState(null);
+    const [showAlert, setShowAlert] = useState(false);
 
     const formik = useFormik({
         initialValues: {
-            enunciado: question?.enunciado ?? '',
-            opcion1: question?.opciones[0]?.texto ?? '',
-            opcion2: question?.opciones[1]?.texto ?? '',
-            opcion3: question?.opciones[2]?.texto ?? '',
-            opcion4: question?.opciones[3]?.texto ?? '',
-            tema: question?.tema ?? '',
-            idioma: question?.idioma ?? '',
-            image: question?.imagen?.id ?? '',
+            enunciado: '',
+            opcion1: '',
+            opcion2: '',
+            opcion3: '',
+            opcion4: '',
+            image: '',
 
 
             submit: null
@@ -65,9 +55,9 @@ export const QuestionForm = (props) => {
                 .required('Introduce una opción')
                 .notOneOf(
                     [
-                      Yup.ref('opcion2'),
-                      Yup.ref('opcion3'),
-                      Yup.ref('opcion4')
+                        Yup.ref('opcion2'),
+                        Yup.ref('opcion3'),
+                        Yup.ref('opcion4')
                     ],
                     'Las opciones deben ser diferentes'
                 ),
@@ -77,9 +67,9 @@ export const QuestionForm = (props) => {
                 .required('Introduce una opción')
                 .notOneOf(
                     [
-                      Yup.ref('opcion1'),
-                      Yup.ref('opcion3'),
-                      Yup.ref('opcion4')
+                        Yup.ref('opcion1'),
+                        Yup.ref('opcion3'),
+                        Yup.ref('opcion4')
                     ],
                     'Las opciones deben ser diferentes'
                 ),
@@ -89,9 +79,9 @@ export const QuestionForm = (props) => {
                 .required('Introduce una opción')
                 .notOneOf(
                     [
-                      Yup.ref('opcion2'),
-                      Yup.ref('opcion1'),
-                      Yup.ref('opcion4')
+                        Yup.ref('opcion2'),
+                        Yup.ref('opcion1'),
+                        Yup.ref('opcion4')
                     ],
                     'Las opciones deben ser diferentes'
                 ),
@@ -101,59 +91,38 @@ export const QuestionForm = (props) => {
                 .required('Introduce una opción')
                 .notOneOf(
                     [
-                      Yup.ref('opcion2'),
-                      Yup.ref('opcion3'),
-                      Yup.ref('opcion1')
+                        Yup.ref('opcion2'),
+                        Yup.ref('opcion3'),
+                        Yup.ref('opcion1')
                     ],
                     'Las opciones deben ser diferentes'
                 ),
-            tema: Yup
-                .string()
-                .max(30)
-                .required('Introduce un tema para la pregunta'),
-            idioma: Yup
-                .string()
-                .max(30)
-                .required('Introduce un idioma para la pregunta'),
         }),
         onSubmit:
             async (values, helpers) => {
                 try {
                     const body = {
+                        evento: evento.id,
                         enunciado: values.enunciado,
-                        tema: values.tema,
-                        idioma: values.idioma,
+                        tema: evento.tema,
+                        idioma: evento.idioma,
                         image: values.image,
+                        opciones: [
+                            { texto: values.opcion1, esCorrecta: true },
+                            { texto: values.opcion2, esCorrecta: false },
+                            { texto: values.opcion3, esCorrecta: false },
+                            { texto: values.opcion4, esCorrecta: false },
+                        ],
                     }
 
-                    if (question){
-                        body.opciones = [
-                            {id: question.opciones[0].id, texto: values.opcion1, esCorrecta: true},
-                            {id: question.opciones[1].id, texto: values.opcion2, esCorrecta: false},
-                            {id: question.opciones[2].id, texto: values.opcion3, esCorrecta: false},
-                            {id: question.opciones[3].id, texto: values.opcion4, esCorrecta: false},
-                        ];
-                        await formHandler(question, body);
-                        setUpdateFlag(true);
-                        setEditMode(false);
+                    await axiosAuth.post('/api/questions', body);
+                    await axiosAuth.post('/api/play/competitions', { evento: evento.id})
 
-                    }else{
-                        body.opciones = [
-                            {texto: values.opcion1, esCorrecta: true},
-                            {texto: values.opcion2, esCorrecta: false},
-                            {texto: values.opcion3, esCorrecta: false},
-                            {texto: values.opcion4, esCorrecta: false},
-                        ];
-                        await formHandler(body);
-                    }
-
-                    setMessageAlert(alertMessage);
                     setShowAlert(true);
+                    setUpdateFlag(true);
 
                     helpers.setSubmitting(false);
 
-                    if (!question)
-                        helpers.resetForm();
 
                 } catch (err) {
                     helpers.setStatus({ success: false });
@@ -162,6 +131,14 @@ export const QuestionForm = (props) => {
                 }
             }
     });
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setShowAlert(false);
+    };
+
 
     useEffect(() => {
         const getQuestionImage = async () => {
@@ -173,80 +150,40 @@ export const QuestionForm = (props) => {
             }
         };
 
-        if (formik.values.image) 
+        if (formik.values.image)
             getQuestionImage();
         else
             setImage(null);
 
     }, [formik.values.image]);
 
-    const handleCloseConfirmDelete = useCallback((event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        setOpenDialogDelete(false);
-    }, []);
-
-    const handleConfirmDelete = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-        const deleteQuestion = async () => {
-            try {
-                const res = await axiosAuth.delete(`/api/questions/${question.id}`).then(res => res.data);
-            } catch (error) {
-                console.log(error);
-            }
-        };
-
-        deleteQuestion();
-
-        setOpenDialogDelete(false);
-        setMessageAlert('Pregunta eliminada correctamente');
-        setShowAlert(true);
-
-        router.push('/admin/questions');
-    };
-
 
     return (
         <>
-            {question &&
-                <Dialog // Confirm delete dialog
-                    open={openDialogDelete}
-                    onClose={handleCloseConfirmDelete}
-                    aria-labelledby="alert-confirm-title"
-                    aria-describedby="alert-confirm-description"
-                >
-                    <DialogTitle id="alert-confirm-title">
-                        ¿Estás seguro de que quieres eliminar esta pregunta?
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id="alert-confirm-description">
-                            No se podrán revertir los cambios.
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseConfirmDelete}>Cancelar</Button>
-                        <Button onClick={handleConfirmDelete} autoFocus>
-                            Eliminar
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            }
+            <Snackbar anchorOrigin={{ vertical: "top", horizontal: "center" }} open={showAlert} autoHideDuration={4000} onClose={handleClose}>
+                <Alert onClose={handleClose} variant="filled" severity="success" sx={{ width: "100%" }}>Pregunta creada</Alert>
+            </Snackbar>
             <form
                 autoComplete="off"
                 noValidate
                 onSubmit={formik.handleSubmit}
             >
-                <Card>
+                <Card sx={{mt: 2}}>
+                    <CardHeader 
+                        title="Fase 1: Creación de preguntas" 
+                        subheader="Crea una pregunta para participar en la competición. Recuerda que el tema y el idioma vienen dados en los detalles de la competición."
+                        titleTypographyProps={{ mb: 1 }}    
+                    />
+
                     <CardContent>
                         <Box>
                             <Grid
                                 container
                                 spacing={3}
+                                display="flex"
+                                justifyContent="center"
                             >
-                                {image && 
+                                {image &&
                                     <Grid
                                         xs={12}
                                     >
@@ -257,24 +194,8 @@ export const QuestionForm = (props) => {
                                     xs={12}
                                     md={4}
                                 >
-                                    <ImgsSelection formik={formik}/>
-                                        
-                                </Grid>
-                                <Grid
-                                    xs={12}
-                                    md={4}
-                                >
-                                    <TopicsSelection
-                                        formik={formik}
-                                        defaultOption={!question}
-                                        disabled={!!formik.values.image}
-                                    />
-                                </Grid>
-                                <Grid
-                                    xs={12}
-                                    md={4}
-                                >
-                                    <LangSelection formik={formik} defaultOption={!question}/>
+                                    <ImgsSelection formik={formik} tema={evento.tema} />
+
                                 </Grid>
                                 <Grid
                                     xs={12}
@@ -365,23 +286,14 @@ export const QuestionForm = (props) => {
                                         onChange={formik.handleChange}
                                         value={formik.values.opcion4}
                                     />
-                                </Grid>                               
+                                </Grid>
                             </Grid>
                         </Box>
                     </CardContent>
                     <Divider />
                     <CardActions sx={{ justifyContent: 'flex-end' }}>
-                        {question &&
-                            <Button
-                                color="error"
-                                variant="contained"
-                                onClick={() => setOpenDialogDelete(true)}
-                            >
-                                Eliminar
-                            </Button>
-                        }
                         <Button variant="contained" type="submit">
-                            {question ? "Guardar" : "Crear"}
+                            Crear pregunta
                         </Button>
                     </CardActions>
                 </Card>

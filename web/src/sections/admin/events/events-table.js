@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import NextLink from 'next/link';
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback } from 'react';
 import {
     Avatar,
     Box,
@@ -21,9 +21,10 @@ import {
 import { SeverityPill } from 'src/components/severity-pill';
 import { Scrollbar } from 'src/components/scrollbar';
 import EyeIcon from '@heroicons/react/24/solid/EyeIcon';
+import PlayIcon from '@heroicons/react/24/solid/PlayIcon';
 
 export const EventsTable = (props) => {
-    const { setPagina, pagina, eventos, numberOfResults } = props;
+    const { setPagina, pagina, eventos, numberOfResults, studentView } = props;
 
     const stateColor = (state) => {
         const colors = {
@@ -117,12 +118,12 @@ export const EventsTable = (props) => {
                                                 direction="row"
                                                 spacing={2}
                                             >
-                                                <Tooltip title="Ver competición">
+                                                <Tooltip title={studentView && evento.fase_actual !== 'Finalizada' ? "Ir a competición" : "Ver competición"}>
                                                     <IconButton
                                                         component={NextLink}
-                                                        href={`/admin/competitions/${evento.id}`}>
+                                                        href={studentView ? `/competitions/${evento.id}` : `/admin/competitions/${evento.id}`}>
                                                         <SvgIcon fontSize="small">
-                                                            <EyeIcon />
+                                                            {studentView && evento.fase_actual !== 'Finalizada' ? <PlayIcon /> : <EyeIcon />}
                                                         </SvgIcon>
                                                     </IconButton>
                                                 </Tooltip>

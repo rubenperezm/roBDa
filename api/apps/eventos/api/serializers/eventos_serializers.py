@@ -1,8 +1,11 @@
 from django.utils import timezone
 from rest_framework import serializers
 
+from apps.preguntas.api.serializers.preguntas_serializers import PreguntaResueltaSerializer
+from apps.partidas.api.serializers.user_comps_serializers import UserCompReviewSerializer
+from apps.partidas.models import UserComp
 from apps.eventos.models import Evento
-from apps.preguntas.models import Tema, Report
+from apps.preguntas.models import Pregunta, Tema
 
 class EventoSerializer(serializers.ModelSerializer):
     tema = serializers.SlugRelatedField(
@@ -43,7 +46,7 @@ class EventoSerializer(serializers.ModelSerializer):
         }
 class EventoStudentSerializer(EventoSerializer):
     def to_representation(self, instance):
-        return {
+        data = {
             'id': instance.id,
             'name': instance.name,
             'tema': instance.tema.nombre,
@@ -54,6 +57,9 @@ class EventoStudentSerializer(EventoSerializer):
             'mejoresJugadores': instance.mejores_jugadores,
             'terminada': instance.terminada,
         }
+
+        return data
+    
 class EventoListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evento

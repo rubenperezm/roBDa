@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.db.models import F, Case, When
+from django.db.models import Q, F, Case, When
 from apps.partidas.models import UsuarioPregunta
 from apps.preguntas.models import Opcion, Pregunta, Imagen
 from apps.preguntas.api.serializers.general_serializers import ImagenSerializer
@@ -107,20 +107,19 @@ def preguntas_usercomp(usercomp):
 
         preguntas = Pregunta.objects.exclude(creador = usercomp.user)
         preguntas_evento = preguntas.filter(**filters)
+        otras_preguntas = preguntas.filter(tema = usercomp.evento.tema, idioma = usercomp.evento.idioma, estado = 2)\
+            .exclude(Q(creador = usercomp.user) | Q(evento = usercomp.evento))
 
-        pks = preguntas_evento.values_list('pk', flat = True)
+        pks_evento = preguntas_evento.values_list('pk', flat = True)
+        pks_no_evento = otras_preguntas.values_list('pk', flat = True)
 
-        if len(preguntas) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
-            raise Exception("No existen preguntas suficientes.")
-        # Tomar preguntas del mazo 'bueno'
-        elif len(pks) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO:
-            otras_preguntas =  preguntas.filter(tema = usercomp.evento.tema, idioma = usercomp.evento.idioma, estado = 2)\
-                .exclude(creador = usercomp.user)
-
-            # TODO: Si por ejemplo hay 1000 preguntas en el mazo 'bueno' y 2 creadas,
-            # la selección debe ser esas 2 más 8 aleatorias, no 10 aleatorias
-            pks +=  otras_preguntas.values_list('pk', flat = True)
-   
-        seleccionadas = sample(list(pks), settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO)
+        if (len(pks_evento) + len(pks_no_evento)) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO: # No hay suficientes preguntas en el evento
+            raise Exception("No existen preguntas suficientes.")  
+        elif len(pks_evento) < settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO: # No hay suficientes preguntas en el evento
+            seleccionadas = list(pks_evento)
+            seleccionadas += sample(list(pks_no_evento), settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO - len(pks_evento))
+        else: # Suficientes preguntas en el evento
+            seleccionadas = sample(list(pks_evento), settings.NUMERO_DE_PREGUNTAS_POR_CUESTIONARIO)
+        
         return preguntas_to_JSON(seleccionadas)
 
