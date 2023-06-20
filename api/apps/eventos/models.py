@@ -35,14 +35,14 @@ class Evento(BaseModel):
     
     @property
     def mejores_jugadores(self):
-        partidas = self.usercomp_set.all().order_by('-score').values('user__username', 'score').annotate(user=models.F('user__username'))
+        partidas = self.usercomp_set.all().order_by('-score').values('user__username', 'score').annotate(user=models.F('user__username')).values('user', 'score')
         if len(partidas) < 5:
             return partidas
         return partidas[:5]
     
     @property
     def ranking(self):
-        return self.usercomp_set.all().order_by('-score').values('user__username', 'score').annotate(user=models.F('user__username'))
+        return self.usercomp_set.all().order_by('-score').values('user__username', 'score').annotate(user=models.F('user__username')).values('user', 'score')
 
     @property
     def terminable(self):
