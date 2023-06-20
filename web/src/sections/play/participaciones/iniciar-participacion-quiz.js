@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 
 export const IniciarParticipacionQuiz = (props) => {
-    const { participacion } = props;
+    const { id } = props;
     return (
         <>
             <CardHeader sx={{mb: 2}} title="Fase 2: Cuestionario" subheader="Realiza un cuestionario con preguntas creadas por tus compañeros" titleTypographyProps={{variant: "h5"}}/>
@@ -20,7 +20,7 @@ export const IniciarParticipacionQuiz = (props) => {
                             component={NextLink}
                             variant="contained"
                             fullWidth
-                            href={`/competitions/quiz/${participacion}`}
+                            href={`/competitions/quiz/${id}`}
                         >
                             Realizar cuestionario
                         </Button>

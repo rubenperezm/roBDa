@@ -36,21 +36,35 @@ const Page = () => {
     const { id } = router.query;
     const [questions, setQuestions] = useState(null);
     const [participacion, setParticipacion] = useState(null);
-    const [notUser, setNotUser] = useState(false);
+    const [fechaInicio, setFechaInicio] = useState(null);
+    const [fechaFin, setFechaFin] = useState(null);
+    const [notUser, setNotUser] = useState(true);
+    const [date, setDate] = useState(null);
 
     useEffect(() => {
         if (id) {
             const getParticipacion = async () => {
-                try{
-                    const res = await axiosAuth.get(`/api/play/competitions/${id}`);
+                try {
+                    const res = await axiosAuth.get(`/api/events/${id}`);
                     if (res.status === 200) {
                         console.log(res.data);
-                        setParticipacion(res.data);
-                        setNotUser(false)
-                    }else{
+                        if (res.data.participacion) {
+                            setParticipacion(res.data.participacion);
+                            setFechaInicio(new Date(res.data.evento.finFase1));
+                            setFechaFin(new Date(res.data.evento.finFase2));
+                            setNotUser(false)
+                        }
+                        else {
+                            router.push(`/competitions/${id}`);
+                            setNotUser(true);
+                        }
+
+                    } else {
+                        router.push(`/competitions/${id}`);
                         setNotUser(true);
                     }
-                }catch(err){
+                } catch (err) {
+                    router.push(`/competitions/${id}`);
                     setNotUser(true);
                 }
             }
@@ -58,10 +72,17 @@ const Page = () => {
         }
     }, [id]);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setDate(new Date());
+        }, 1000);
+        console.log(fechaFin)
+        return () => clearInterval(interval);
+    }, []);
 
     const handleStart = () => {
         const getQuestions = async () => {
-            const res = await axiosAuth.put(`/api/play/competitions/${id}`);
+            const res = await axiosAuth.put(`/api/play/competitions/${participacion.id}`);
             setQuestions(res.data);
         };
 
@@ -70,13 +91,13 @@ const Page = () => {
 
     const sendResults = async (responses) => {
         try {
-            await axiosAuth.patch(`/api/play/competitions/${id}`, { respuestas: responses });
+            await axiosAuth.patch(`/api/play/competitions/${participacion.id}`, { respuestas: responses });
         } catch (err) {
             //console.log(err);
         }
     }
 
-    if (!participacion && !notUser) return null;
+    if (notUser) return null;
 
     return (
         <QuizLayout
@@ -84,7 +105,7 @@ const Page = () => {
         >
             {
                 questions ?
-                    <Quiz10 id={id} questions={questions} sendResults={sendResults}/>
+                    <Quiz10 id={id} questions={questions} sendResults={sendResults} endDate={fechaFin}/>
                     :
                     <Container maxWidth="xl">
                         <Stack spacing={3}>
@@ -103,34 +124,28 @@ const Page = () => {
                                                     <ArrowLeftIcon />
                                                 </SvgIcon>
                                             )}
-                                            href={notUser ? 'competitions' : `/competitions/${participacion.evento}`}
+                                            href={`/competitions/${id}`}
                                         >
-                                            { notUser ? "Volver a competiciones" : "Volver a competición" } 
+                                            "Volver a competición"
                                         </Button>
                                     </Stack>
                                 </Grid>
                             </Grid>
                         </Stack>
-
-                        {notUser ?
-                            <Typography variant="body1" sx={{ textAlign: "center", pt: 12 }}>
-                                No tienes permiso para jugar esta partida
-                            </Typography>
-                            :
-                            <Card sx={{ mt: 3 }}>
-                                <CardHeader title="Información de partida" titleTypographyProps={{variant: "h4"}}/>
-                                <CardContent sx={{justifyContent:"center", alignItems:"center"}}>
+                        <Card sx={{ mt: 3 }}>
+                            <CardHeader title="Información de partida" titleTypographyProps={{ variant: "h4" }} />
+                            <CardContent sx={{ justifyContent: "center", alignItems: "center" }}>
                                 <div style={{
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     flexWrap: 'wrap',
                                 }}>
-                                    <QuizIcon sx={{ mb: 2 }}/>
+                                    <QuizIcon sx={{ mb: 2 }} />
                                     <Typography variant="h5" sx={{ ml: 2, mb: 2 }}>
                                         10 preguntas
                                     </Typography>
-                                </div> 
+                                </div>
                                 <div style={{
                                     display: 'flex',
                                     justifyContent: 'center',
@@ -141,7 +156,7 @@ const Page = () => {
                                     <Typography variant="h5" sx={{ ml: 2, mb: 2 }}>
                                         10 puntos por acierto
                                     </Typography>
-                                </div> 
+                                </div>
                                 <div style={{
                                     display: 'flex',
                                     justifyContent: 'center',
@@ -152,11 +167,11 @@ const Page = () => {
                                     <Typography variant="h5" sx={{ ml: 2, mb: 2 }}>
                                         15 minutos
                                     </Typography>
-                                </div> 
-                                </CardContent>
-                                <Divider />
-                                {
-                                    (!participacion.partida &&
+                                </div>
+                            </CardContent>
+                            <Divider />
+                            {
+                                (!participacion.partida && fechaInicio < date && date < fechaFin ?
                                     <CardActions>
                                         <Grid xs={12} container sx={{ justifyContent: "flex-end" }}>
                                             <Grid item xs={12} md={2}>
@@ -164,10 +179,15 @@ const Page = () => {
                                             </Grid>
                                         </Grid>
                                     </CardActions>
-                                    )
-                                }
-                            </Card>
-                        }
+                                    :
+                                    <CardContent sx={{ textAlign: "center" }}>
+                                        <Typography variant="body1">
+                                            No puedes jugar esta partida
+                                        </Typography>
+                                    </CardContent>
+                                )
+                            }
+                        </Card>
                     </Container>
             }
         </QuizLayout>

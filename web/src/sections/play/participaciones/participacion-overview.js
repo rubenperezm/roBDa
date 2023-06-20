@@ -164,7 +164,7 @@ export const ParticipacionOverview = ({ participacion, setParticipacion, pregunt
                                     </CardContent>
                                 </>
                             ) : (
-                                <IniciarParticipacionQuiz participacion={participacion.id} />
+                                <IniciarParticipacionQuiz id={evento.id} />
                             )
                         }
                     </Card>

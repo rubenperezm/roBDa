@@ -106,7 +106,10 @@ class UserComp(models.Model):
     
     @property
     def score_f2(self):
-        return self.partida.preguntas.filter(acierto = True).count() * 10
+        if self.partida:
+            return self.partida.preguntas.filter(acierto = True).count() * 10
+        else:
+            return 0
 
     @property
     def score_f3(self):

@@ -60,7 +60,7 @@ export const ScoreOverview = ({ score1, score2, score3, valoracion }) => {
                     )
                     :
                     (
-                        <Typography variant="body1" sx={{mb: {xs: 3, sm: 5}}}>
+                        <Typography variant="body1" sx={{textAlign: "center", mb: {xs: 3, sm: 5}}}>
                             No has valorado la competición
                         </Typography>
                     )

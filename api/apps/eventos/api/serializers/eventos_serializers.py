@@ -20,7 +20,7 @@ class EventoSerializer(serializers.ModelSerializer):
         if data['fechaInicio'] < data['finFase1'] < data['finFase2']: #< data['finFase3']:
             return data
         raise serializers.ValidationError(
-            {'fechas':'Las fechas deben ser coherentes.'}
+            {'fechaInicio': ['Las fechas deben ser coherentes.']}
         )
     
     def create(self, validated_data):
@@ -28,7 +28,7 @@ class EventoSerializer(serializers.ModelSerializer):
             evento = super().create(validated_data)
             return evento
         raise serializers.ValidationError(
-            {'fechas':'Las fechas deben ser coherentes.'}
+            {'fechaInicio': ['La competición debe empezar en el futuro.']}
         )
 
     def to_representation(self, instance):

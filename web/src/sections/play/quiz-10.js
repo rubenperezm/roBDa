@@ -7,7 +7,7 @@ import axiosAuth from 'src/utils/axiosAuth';
 import { CountDown } from 'src/components/countDown';
 
 export const Quiz10 = (props) => {
-    const { id, questions, sendResults } = props;
+    const { id, questions, sendResults, endDate } = props;
     const [selected, setSelected] = useState(null);
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [responses, setResponses] = useState([]);
@@ -75,19 +75,13 @@ export const Quiz10 = (props) => {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                    <CountDown setFinished={setFinished}/>
+                    <CountDown setFinished={setFinished} endDate={endDate}/>
                 </Grid>
             </Grid>
 
             <QuestionQuiz question={questions[currentQuestion]} selected={selected} setSelected={setSelected} />
 
             <Grid container display="flex" justifyContent="right">
-                {/* <Grid item xs={2} sm={8} md={10}>
-                        <Typography variant="body2">
-                            {currentQuestion + 1} de {questions.length}
-                        </Typography>
-                </Grid> */}
-
                 <Grid item xs={12} sm={4} md={2}>
                     <Button
                         fullWidth

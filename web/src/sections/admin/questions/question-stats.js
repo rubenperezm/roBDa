@@ -111,7 +111,7 @@ export const QuestionStats = (props) => {
     return (
         <Grid container spacing={3}>
             <Grid item xs={12}>
-                <Typography color="textPrimary" variant="h4" sx={{my: 3}}>
+                <Typography color="textPrimary" variant="h4" sx={{my: 3, px: 2}}>
                     Estadísticas
                 </Typography>
             </Grid>
@@ -131,7 +131,7 @@ export const QuestionStats = (props) => {
                     </>
 
                 ) : (
-                    <Grid item xs={12} sx={{ textAlign: "center" }}>
+                    <Grid item xs={12} sx={{ textAlign: "center", mb: 2}}>
                         <Typography color="textPrimary" variant="body1">
                             No hay estadísticas disponibles
                         </Typography>
