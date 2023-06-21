@@ -15,8 +15,10 @@ class Partida(BaseModel):
 
     @property
     def porcentaje_acierto(self):
-        return round(AnswerLogs.objects.filter(partida = self, acierto = True).count() 
-                     / AnswerLogs.objects.filter(partida = self).count(), 2)
+        if self.preguntas.count() == 0:
+            return '-'
+        return str(round(100 * AnswerLogs.objects.filter(partida = self, acierto = True).count() 
+                     / AnswerLogs.objects.filter(partida = self).count(), 2)) + '%'
     
     @property # timeFin de la ultima pregunta menos timeIni de la primera ordenadas cronologicamente
     def tiempo(self):

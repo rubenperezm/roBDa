@@ -49,7 +49,7 @@ class PartidaDueloViewSet(GenericViewSet):
 
     def retrieve(self, request, pk=None):
         duelo = self.get_object()
-        if request.user.is_staff or (duelo.user1 == request.user or duelo.user2 == request.user and duelo.estado != 4):
+        if (request.user.is_staff and duelo.estado == 3 or duelo.estado == 4) or (duelo.user1 == request.user or duelo.user2 == request.user and duelo.estado != 4):
             duelo_serializer = self.serializer_class_retrieve(duelo)
             return Response(duelo_serializer.data)
         return Response({"error": "No tienes acceso a esta partida."}, status=status.HTTP_403_FORBIDDEN)

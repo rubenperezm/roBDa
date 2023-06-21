@@ -65,7 +65,7 @@ class PartidaRepasoViewSet(GenericViewSet):
         repaso = self.get_object()
         if repaso.user == request.user:
             pk_preg = pregunta_aleatoria(repaso.partida)
-            log = AnswerLogs(pregunta=Pregunta.objects.get(pk=pk_preg), partida=repaso.partida)
+            log = AnswerLogs(pregunta=Pregunta.objects.get(pk=pk_preg), partida=repaso.partida, timeIni=timezone.now())
             log.save()
             data = preguntaToJSON(pk_preg, log.pk)
             return Response(data)
@@ -78,6 +78,7 @@ class PartidaRepasoViewSet(GenericViewSet):
         if log.partida.repaso.user == request.user:
             if log.respuesta == None:
                 respuesta = request.data.get('respuesta', None)
+                print(respuesta)
                 correcta = get_object_or_404(Opcion, pregunta = log.pregunta.id, esCorrecta=True)
                 opcion = get_object_or_404(Opcion, pk=respuesta, pregunta=log.pregunta.id)
 
@@ -91,7 +92,7 @@ class PartidaRepasoViewSet(GenericViewSet):
                 data = {
                     "timeFin": timezone.now(),
                     "respuesta": opcion.id,
-                    "acierto": esAcierto(log.pregunta, respuesta),
+                    "acierto": esAcierto(log.pregunta, Opcion.objects.get(pk=respuesta)),
                 }
 
                 UsuarioPregunta.objects.filter(user = request.user, pregunta = log.pregunta).update(historico=F('historico') + VALOR_K*(1 - int(data["acierto"]) - F('historico')))

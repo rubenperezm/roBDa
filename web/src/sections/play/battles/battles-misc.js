@@ -72,7 +72,7 @@ export const ActionsTableBattles = (props) => {
         <Tooltip title="Ver duelo" >
             <IconButton
                 component={NextLink}
-                href={`/battles/${id}`}>
+                href={auth.user.is_staff ? `/admin/stats/battles/${id}` : `/battles/${id}`}>
                 <SvgIcon fontSize="small">
                     <EyeIcon />
                 </SvgIcon>
@@ -90,7 +90,8 @@ export const StateColor = (props) => {
         'En Creacion': 'success',
         'Pendiente': 'warning',
         'Aceptado': retador ? 'info' : 'success',
-        'Finalizado': 'error',
+        'Finalizado': 'primary',
+        'Rechazado': 'error'
     }
 
     const text = {
@@ -98,6 +99,7 @@ export const StateColor = (props) => {
         'Pendiente': 'pendiente',
         'Aceptado': retador ? 'aceptado' : 'su turno',
         'Finalizado': 'finalizado',
+        'Rechazado': 'rechazado'
     }
 
     return (
@@ -118,6 +120,7 @@ export const Score = (props) => {
         'Pendiente': isUser1 ? `${score1}:-` : '-:-',
         'Aceptado': isUser1 ? `${score1}:-` : '-:-',
         'Finalizado': `${score1}:${score2}`,
+        'Rechazado': `${score1}:-`
     }
         
 

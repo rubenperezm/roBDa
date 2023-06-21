@@ -12,6 +12,7 @@ class RepasoSerializer(ModelSerializer):
 
 class RepasoListSerializer(RepasoSerializer):
     partida = PartidaListSerializer()
+    user = StringRelatedField()
     class Meta:
         model = Repaso
         fields = '__all__'

@@ -18,7 +18,7 @@ import { Layout as DashboardLayout } from 'src/layouts/dashboard/layout';
 
 
 export const Layout = (props) => {
-    const { children, title } = props;
+    const { children, title, hideButtons } = props;
 
     return (
         <DashboardLayout>
@@ -42,64 +42,66 @@ export const Layout = (props) => {
                                     {title}
                                 </Typography>
                             </Grid>
-                            <Grid container xs={12}>
-                                <Grid item alignItems="center">
-                                    <Button
-                                        component={NextLink}
-                                        color="inherit"
-                                        startIcon={(
-                                            <SvgIcon fontSize="small">
-                                                <ChartBarIcon />
-                                            </SvgIcon>
-                                        )}
-                                        href="/admin/stats"
-                                    >
-                                        Estadísticas
-                                    </Button>
+                            {!hideButtons &&
+                                <Grid container xs={12}>
+                                    <Grid item alignItems="center">
+                                        <Button
+                                            component={NextLink}
+                                            color="inherit"
+                                            startIcon={(
+                                                <SvgIcon fontSize="small">
+                                                    <ChartBarIcon />
+                                                </SvgIcon>
+                                            )}
+                                            href="/admin/stats"
+                                        >
+                                            Estadísticas
+                                        </Button>
+                                    </Grid>
+                                    <Grid item alignItems="center">
+                                        <Button
+                                            component={NextLink}
+                                            color="inherit"
+                                            startIcon={(
+                                                <SvgIcon fontSize="small">
+                                                    <StarIcon />
+                                                </SvgIcon>
+                                            )}
+                                            href="/admin/stats/study"
+                                        >
+                                            Repasos
+                                        </Button>
+                                    </Grid>
+                                    <Grid item alignItems="center">
+                                        <Button
+                                            component={NextLink}
+                                            color="inherit"
+                                            startIcon={(
+                                                <SvgIcon fontSize="small">
+                                                    <TrophyIcon />
+                                                </SvgIcon>
+                                            )}
+                                            href="/admin/stats/competitions"
+                                        >
+                                            Competiciones
+                                        </Button>
+                                    </Grid>
+                                    <Grid item alignItems="center">
+                                        <Button
+                                            component={NextLink}
+                                            color="inherit"
+                                            startIcon={(
+                                                <SvgIcon fontSize="small">
+                                                    <BoltIcon />
+                                                </SvgIcon>
+                                            )}
+                                            href="/admin/stats/battles"
+                                        >
+                                            Duelos
+                                        </Button>
+                                    </Grid>
                                 </Grid>
-                                <Grid item alignItems="center">
-                                    <Button
-                                        component={NextLink}
-                                        color="inherit"
-                                        startIcon={(
-                                            <SvgIcon fontSize="small">
-                                                <StarIcon />
-                                            </SvgIcon>
-                                        )}
-                                        href="/admin/stats/reviews"
-                                    >
-                                        Repasos
-                                    </Button>
-                                </Grid>
-                                <Grid item alignItems="center">
-                                    <Button
-                                        component={NextLink}
-                                        color="inherit"
-                                        startIcon={(
-                                            <SvgIcon fontSize="small">
-                                                <TrophyIcon />
-                                            </SvgIcon>
-                                        )}
-                                        href="/admin/stats/competitions"
-                                    >
-                                        Competiciones
-                                    </Button>
-                                </Grid>
-                                <Grid item alignItems="center">
-                                    <Button
-                                        component={NextLink}
-                                        color="inherit"
-                                        startIcon={(
-                                            <SvgIcon fontSize="small">
-                                                <BoltIcon />
-                                            </SvgIcon>
-                                        )}
-                                        href="/admin/stats/battles"
-                                    >
-                                        Duelos
-                                    </Button>
-                                </Grid>
-                            </Grid>
+                            }
                         </Grid>
                         {children}
                     </Stack>

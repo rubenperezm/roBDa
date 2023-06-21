@@ -20,7 +20,6 @@ import { DonutDuelo } from './donut-duelo';
 
 
 export const GeneralStats = ({stats}) => {
-    console.log(stats)
     if (!stats) return null;
     return (
         <Card>

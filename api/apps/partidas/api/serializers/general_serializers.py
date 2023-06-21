@@ -35,6 +35,6 @@ class PartidaListSerializer(ModelSerializer):
             'id': instance.id,
             'idioma': instance.get_idioma_display() if instance.idioma else 'Esp Ing',
             'tema': instance.tema.nombre if instance.tema else 'Todos',
-            'porcentajeAcierto': instance.porcentaje_aciertos,
+            'porcentajeAcierto': instance.porcentaje_acierto,
             'tiempo': instance.tiempo,
         }
