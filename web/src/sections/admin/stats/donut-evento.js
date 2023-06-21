@@ -75,13 +75,13 @@ export const DonutEvento = (props) => {
         if(!data) return;
 
         const dataEvento = data.filter(d => d.evento === (evento === 'Fuera de evento' ? null : evento));
-        const pendientes = dataEvento.filter(d => d.estado === 1).length > 0 ? dataEvento.filter(d => d.estado === 1)[0].numero : 0;
-        const validados = dataEvento.filter(d => d.estado === 2).length > 0 ? dataEvento.filter(d => d.estado === 2)[0].numero : 0;
-        const rechazados = dataEvento.filter(d => d.estado === 3).length > 0 ? dataEvento.filter(d => d.estado === 3)[0].numero : 0;
+        const pendientes = dataEvento.filter(d => d.estado === 1);
+        const validados = dataEvento.filter(d => d.estado === 2);
+        const rechazados = dataEvento.filter(d => d.estado === 3);
 
 
-        setChartSeries([pendientes, validados, rechazados])
-    }, [evento]);
+        setChartSeries([pendientes.length > 0 ? pendientes[0].numero : 0, validados.length > 0 ? validados[0].numero : 0, rechazados.length > 0 ? rechazados[0].numero : 0 ])
+    }, [evento, data]);
 
     if(!eventos || !chartSeries) return null;
 

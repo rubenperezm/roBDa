@@ -29,11 +29,11 @@ def estadisticas(request):
         preguntas = Pregunta.objects.values('tema__nombre', 'idioma').annotate(tema=F('tema__nombre'), numero=Count('pk')).values('tema', 'idioma', 'numero')
 
         # STATS LAST MONTH
-        last_month = timezone.now() - timezone.timedelta(days = 30)
+        #last_month = timezone.now() - timezone.timedelta(days = 30)
         # Partidas, preguntas y reports del último mes
-        partidas_mes = Partida.objects.filter(created_date__gte=last_month).annotate(fecha=TruncDate('created_date')).values('fecha').annotate(numero=Count('pk'))
-        preguntas_mes = Pregunta.objects.filter(created_date__gte=last_month).annotate(fecha=TruncDate('created_date')).values('fecha').annotate(numero=Count('pk'))
-        reports_mes = Report.objects.filter(created_date__gte=last_month).annotate(fecha=TruncDate('created_date')).values('fecha').annotate(numero=Count('pk'))
+        #partidas_mes = Partida.objects.filter(created_date__gte=last_month).annotate(fecha=TruncDate('created_date')).values('fecha').annotate(numero=Count('pk'))
+        #preguntas_mes = Pregunta.objects.filter(created_date__gte=last_month).annotate(fecha=TruncDate('created_date')).values('fecha').annotate(numero=Count('pk'))
+        #reports_mes = Report.objects.filter(created_date__gte=last_month).annotate(fecha=TruncDate('created_date')).values('fecha').annotate(numero=Count('pk'))
 
         # Desglose de acierto por tema e idioma
         n_logs = AnswerLogs.objects.values('partida__tema__nombre', 'partida__idioma', 'acierto').annotate(tema=F('partida__tema__nombre'), idioma=F('partida__idioma'), numero=Count('pk')).values('tema', 'idioma', 'acierto', 'numero')
@@ -44,7 +44,7 @@ def estadisticas(request):
         # Media de preguntas por repaso
         preguntas_repasos_media = Repaso.objects.values('pk').annotate(preguntas_len=(Count(F('partida__preguntas')))).aggregate(media=Avg(F('preguntas_len')))
         # Desglose de aciertos en repasos
-        n_logs_repasos = Repaso.objects.values('partida__preguntas__acierto').annotate(veces=F('partida__preguntas__acierto'), numero=Count('pk')).values('veces', 'numero')
+        n_logs_repasos = Repaso.objects.values('partida__preguntas__acierto').annotate(acierto=F('partida__preguntas__acierto'), numero=Count('pk')).values('acierto', 'numero')
 
         # STATS EVENTOS
         # Desglose de eventos totales
@@ -54,13 +54,13 @@ def estadisticas(request):
         # Media de puntos de cada evento
         media_puntos = UserComp.objects.values('evento__name').annotate(evento=F('evento__name'), media=Avg('score')).values('evento', 'media')
         # Número de preguntas creadas por evento
-        preguntas_creadas = Pregunta.objects.values('evento__name').annotate(evento=F('evento__name'), numero=Count('pk')).values('evento', 'numero')
+        preguntas_creadas = Pregunta.objects.values('evento__name').filter(evento__name__isnull=False).annotate(evento=F('evento__name'), numero=Count('pk')).values('evento', 'numero')
 
         # STATS DUELOS
         # Desglose de duelos por tema e idioma
         n_duelos = Duelos.objects.values('partidaUser1__tema__nombre', 'partidaUser1__idioma').annotate(tema=F('partidaUser1__tema__nombre'), idioma=F('partidaUser1__idioma'), numero=Count('pk')).values('tema', 'idioma', 'numero')
         # Desglose de duelos por estado
-        estado_duelos = Report.objects.values('estado').annotate(numero=Count('pk'))
+        estado_duelos = Duelos.objects.values('estado').annotate(numero=Count('pk'))
 
         return Response({
             'usuarios': n_users,
@@ -74,9 +74,9 @@ def estadisticas(request):
             'reports': reports,
             'preguntas_totales': n_total_preguntas,
             'preguntas': preguntas,
-            'partidas_mes': partidas_mes,
-            'preguntas_mes': preguntas_mes,
-            'reports_mes': reports_mes,
+            #'partidas_mes': partidas_mes,
+            #'preguntas_mes': preguntas_mes,
+            #'reports_mes': reports_mes,
             'porcentaje_acierto': n_logs,
             'repasos_totales': n_repasos,
             'media_preguntas_repaso': preguntas_repasos_media['media'],
