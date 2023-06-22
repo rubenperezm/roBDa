@@ -6,6 +6,25 @@ import { createEmotionCache } from 'src/utils/create-emotion-cache';
 const Favicon = () => (
   <>
     <link
+      rel="manifest"
+      href="manifest.json"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/apple-touch-icon.png"
+    />
+    <link
+      rel="android-chrome-192x192"
+      sizes="192x192"
+      href="/android-chrome-192x192.png"
+    />
+    <link
+      rel="android-chrome-512x512"
+      sizes="512x512"
+      href="/android-chrome-512x512.png"
+    />
+    <link
       rel="icon"
       href="/favicon.ico"
     />
@@ -20,6 +39,10 @@ const Favicon = () => (
       type="image/png"
       sizes="16x16"
       href="/favicon-16x16.png"
+    />
+    <meta 
+      name="theme-color" 
+      content="#ffffff" 
     />
   </>
 );

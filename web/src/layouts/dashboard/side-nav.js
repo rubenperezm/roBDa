@@ -75,9 +75,8 @@ export const SideNav = (props) => {
             component={NextLink}
             href="/"
             sx={{
-              display: 'inline-flex',
-              height: 32,
-              width: 32
+              display: 'flex',
+              justifyContent: 'center'
             }}
           >
             <Logo />
@@ -104,14 +103,16 @@ export const SideNav = (props) => {
                 direction="row"
                 spacing={2}
               >
-                <Tooltip sx={{ color: "common.white" }}>
+                <Tooltip sx={{ color: "common.white" }} title={auth.user && auth.user.is_staff ? 'Profesor' : 'Estudiante'}>
                   <SvgIcon fontSize="medium">
                     {(auth.user && auth.user.is_staff) ? <AcademicCapIcon /> : <UserIcon />}
                   </SvgIcon>
                 </Tooltip>
                 <Typography
+                  maxWidth={150}
                   color="common.white"
                   variant="subtitle1"
+                  noWrap
                 >
                   {auth.user && auth.user.username}
                 </Typography>
