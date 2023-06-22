@@ -169,7 +169,7 @@ export const QuestionForm = (props) => {
                 const res = await axiosAuth.get(`/api/questions/images/${formik.values.image}`).then(res => res.data);
                 setImage(res.path);
             } catch (error) {
-                console.log(error);
+                //console.log(error);
             }
         };
 
@@ -195,7 +195,7 @@ export const QuestionForm = (props) => {
             try {
                 const res = await axiosAuth.delete(`/api/questions/${question.id}`).then(res => res.data);
             } catch (error) {
-                console.log(error);
+                //console.log(error);
             }
         };
 

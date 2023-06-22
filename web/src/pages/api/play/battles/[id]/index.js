@@ -31,7 +31,6 @@ export default async (req, res) => {
                 return res.status(apiRes.status).json(data);
             }
         } catch (err) {
-            console.log(err);
             return res.status(500).json({
                 error: err
             });

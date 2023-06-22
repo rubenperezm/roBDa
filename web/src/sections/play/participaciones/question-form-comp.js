@@ -146,7 +146,7 @@ export const QuestionFormComp = (props) => {
                 const res = await axiosAuth.get(`/api/questions/images/${formik.values.image}`).then(res => res.data);
                 setImage(res.path);
             } catch (error) {
-                console.log(error);
+                //console.log(error);
             }
         };
 

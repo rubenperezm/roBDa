@@ -22,12 +22,12 @@ class PartidaEventoViewSet(GenericViewSet):
 
     def get_queryset(self, pk=None):
         if pk is None:
-            return self.model.objects.all()
-        return self.model.objects.filter(id=pk).first()
+            return self.model.objects.filter(evento__terminada=True)
+        return self.model.objects.filter(id=pk, evento__terminada=True).first()
 
     def list(self, request):
         if request.user.is_staff:
-            usercomps = self.filter_queryset(self.get_queryset()).order_by("-modified_date")
+            usercomps = self.filter_queryset(self.get_queryset()).order_by("-evento", "-score")
             page = self.paginate_queryset(usercomps)
             if page is not None:
                 usercomps_serial = self.serializer_class_list(page, many = True)
@@ -40,6 +40,10 @@ class PartidaEventoViewSet(GenericViewSet):
         usercomp = self.get_object()
         if request.user.is_staff or usercomp.user == request.user:
             usercomp_serializer = self.serializer_class_retrieve(usercomp)
+            preg = Pregunta.objects.filter(evento = usercomp.evento, creador = usercomp.user).first()
+            if preg:
+                preg_serializer = self.pregunta_serializer(preg)
+                return Response({"participacion": usercomp_serializer.data, "pregunta": preg_serializer.data})
             return Response(usercomp_serializer.data)
         return Response({"error": "No tienes acceso al informe de esta partida."}, status=status.HTTP_403_FORBIDDEN)
 

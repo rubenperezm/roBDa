@@ -132,7 +132,7 @@ export const EventForm = (props) => {
             try {
                 const res = await axiosAuth.delete(`/api/events/${event.id}`).then(res => res.data);
             } catch (error) {
-                console.log(error);
+                //console.log(error);
             }
         };
 

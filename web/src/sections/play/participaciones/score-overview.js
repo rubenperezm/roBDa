@@ -13,7 +13,7 @@ export const ScoreOverview = ({ score1, score2, score3, valoracion }) => {
         <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
                 <Typography variant="h5" sx={{mb: 3}}>
-                    Mi puntuación
+                    Puntuación
                 </Typography>
                 <div style={{
                     display: 'flex',
@@ -52,7 +52,7 @@ export const ScoreOverview = ({ score1, score2, score3, valoracion }) => {
             </Grid>
             <Grid item xs={12} sm={6}>
                 <Typography variant="h5" sx={{mb: {xs: 3, sm: 5}}}>
-                    Mi valoración
+                    Valoración
                 </Typography>
                 {
                     valoracion ? (
@@ -61,7 +61,7 @@ export const ScoreOverview = ({ score1, score2, score3, valoracion }) => {
                     :
                     (
                         <Typography variant="body1" sx={{textAlign: "center", mb: {xs: 3, sm: 5}}}>
-                            No has valorado la competición
+                            No se ha valorado la competición
                         </Typography>
                     )
                 }

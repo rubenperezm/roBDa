@@ -47,7 +47,6 @@ const Page = () => {
                 try {
                     const res = await axiosAuth.get(`/api/events/${id}`);
                     if (res.status === 200) {
-                        console.log(res.data);
                         if (res.data.participacion) {
                             setParticipacion(res.data.participacion);
                             setFechaInicio(new Date(res.data.evento.finFase1));
@@ -76,7 +75,6 @@ const Page = () => {
         const interval = setInterval(() => {
             setDate(new Date());
         }, 1000);
-        console.log(fechaFin)
         return () => clearInterval(interval);
     }, []);
 

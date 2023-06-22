@@ -1,8 +1,6 @@
 import PropTypes from 'prop-types';
 import NextLink from 'next/link';
 import { useCallback } from 'react';
-import { intervalToDuration, formatDuration } from 'date-fns';
-import { es } from 'date-fns/locale';
 import {
     Avatar,
     Box,
@@ -23,14 +21,14 @@ import {
 import { Scrollbar } from 'src/components/scrollbar';
 import EyeIcon from '@heroicons/react/24/solid/EyeIcon';
 
-export const StudyTable = (props) => {
-    const { setPagina, pagina, studies, numberOfResults } = props;
+export const ParticipationsTable = (props) => {
+    const { setPagina, pagina, participations, numberOfResults } = props;
 
     const onPageChange = useCallback((event, newPage) => {
         setPagina(newPage);
     }, []);
 
-    if (studies.length === 0){
+    if (participations.length === 0) {
         return (
             <Card>
                 <Box sx={{ p: 3, textAlign: 'center' }}>
@@ -38,7 +36,7 @@ export const StudyTable = (props) => {
                         color="textPrimary"
                         variant="body"
                     >
-                        No hay repasos que mostrar
+                        No hay participaciones que mostrar
                     </Typography>
                 </Box>
             </Card>
@@ -56,16 +54,10 @@ export const StudyTable = (props) => {
                                     Usuario
                                 </TableCell>
                                 <TableCell>
-                                    Tema
+                                    Evento
                                 </TableCell>
                                 <TableCell>
-                                    Idioma
-                                </TableCell>
-                                <TableCell>
-                                    Tiempo
-                                </TableCell>
-                                <TableCell>
-                                    Porcentaje de acierto
+                                    Puntuación
                                 </TableCell>
                                 <TableCell>
                                     Acciones
@@ -73,28 +65,20 @@ export const StudyTable = (props) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {studies.map((study) => {
+                            {participations.map((participation) => {
                                 return (
                                     <TableRow
                                         hover
-                                        key={study.partida.id}
+                                        key={participation.id}
                                     >
                                         <TableCell>
-                                            {study.user}
+                                            {participation.user}
                                         </TableCell>
                                         <TableCell>
-                                            {study.partida.tema}
+                                            {participation.evento}
                                         </TableCell>
                                         <TableCell>
-                                            <Avatar
-                                                src={`/assets/flags/${study.partida.idioma}.png`}>
-                                            </Avatar>
-                                        </TableCell>
-                                        <TableCell>
-                                            { study.partida.tiempo > 0 ? formatDuration(intervalToDuration({ start: 0, end: study.partida.tiempo * 1000}), { locale: es }) : '-' }
-                                        </TableCell>
-                                        <TableCell>
-                                            {study.partida.porcentajeAcierto}
+                                            {participation.score}
                                         </TableCell>
                                         <TableCell>
                                             <Stack
@@ -105,7 +89,7 @@ export const StudyTable = (props) => {
                                                 <Tooltip title="Ver repaso">
                                                     <IconButton
                                                         component={NextLink}
-                                                        href={`/admin/stats/study/${study.partida.id}`}>
+                                                        href={`/admin/stats/competitions/${participation.id}`}>
                                                         <SvgIcon fontSize="small">
                                                             <EyeIcon />
                                                         </SvgIcon>
@@ -132,9 +116,9 @@ export const StudyTable = (props) => {
     );
 };
 
-StudyTable.propTypes = {
+ParticipationsTable.propTypes = {
     numberOfResults: PropTypes.number,
-    studies: PropTypes.array,
+    participations: PropTypes.array,
     setPagina: PropTypes.func,
     pagina: PropTypes.number,
 };

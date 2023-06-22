@@ -21,16 +21,18 @@ export const ReportList = (props) => {
 
     if (reports.length === 0) {
         return (
-            <Box>
-                <Typography variant="h4" p={2}>
+            <Grid container spacing={3}>
+                <Grid item xs={12}>
+                <Typography variant="h4" px={2} my={3}>
                     Lista de reportes
                 </Typography>
-                <div style={{ textAlign: 'center' }}>
-                    <Typography variant="body">
-                        No hay reportes para esta pregunta
+                </Grid>
+                <Grid item xs={12} sx={{ textAlign: "center", my: 2}}>
+                    <Typography color="textPrimary" variant="body1">
+                        No hay reportes disponibles
                     </Typography>
-                </div>
-            </Box>
+                </Grid>
+            </Grid>
         );
     }
 

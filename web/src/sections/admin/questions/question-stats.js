@@ -33,6 +33,7 @@ const useChartOptions = (labels) => {
         legend: {
             //show: false
             fontSize: '16px',
+            position: 'bottom',
         },
         plotOptions: {
             pie: {
@@ -127,7 +128,7 @@ export const QuestionStats = (props) => {
                     </>
 
                 ) : (
-                    <Grid item xs={12} sx={{ textAlign: "center", mb: 2}}>
+                    <Grid item xs={12} sx={{ textAlign: "center", my: 2}}>
                         <Typography color="textPrimary" variant="body1">
                             No hay estadísticas disponibles
                         </Typography>

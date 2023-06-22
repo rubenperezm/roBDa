@@ -92,7 +92,7 @@ export const TopicForm = (props) => {
             try {
                 const res = await axiosAuth.delete(`/api/questions/topics/${topic.id}`).then(res => res.data);
             } catch (error) {
-                console.log(error);
+                //console.log(error);
             }
         };
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axiosAuth from 'src/utils/axiosAuth';
 import { withAuthorization } from 'src/hocs/with-authorization';
 import { Layout as StatsLayout } from 'src/layouts/stats/layout';
-import { StudyTable } from 'src/sections/play/study/study-table'
+import { ParticipationsTable } from 'src/sections/play/participaciones/participations-table'
 
 
 const Page = () => {
@@ -11,8 +11,8 @@ const Page = () => {
     const [numberOfResults, setNumberOfResults] = useState(0);
 
     useEffect(() => {
-        const getStudies = async () => {
-            const res = await axiosAuth.get('/api/play/study/', {
+        const getBattles = async () => {
+            const res = await axiosAuth.get('/api/stats/competitions/', {
                 params: {
                     page: pagina + 1
                 }
@@ -20,19 +20,19 @@ const Page = () => {
             setItems(res.results);
             setNumberOfResults(res.count);
         };
-        getStudies();
+        getBattles();
     }, [pagina]);
 
 
     return (
         <StatsLayout
-            title="Repasos"
+            title="Competiciones"
         >
-            <StudyTable
+            <ParticipationsTable
                 setPagina={setPagina}
                 pagina={pagina}
                 numberOfResults={numberOfResults}
-                studies={items}
+                participations={items}
             />
         </StatsLayout>
     );

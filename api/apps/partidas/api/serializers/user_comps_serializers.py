@@ -12,13 +12,12 @@ class UserCompSerializer(ModelSerializer):
         fields = '__all__'
 
 class UserCompListSerializer(UserCompSerializer):
-    partida = PartidaListSerializer()
     user = StringRelatedField()
     evento = StringRelatedField()
     
     class Meta:
         model = UserComp
-        fields = ('partida', 'user', 'evento', 'score')
+        fields = ('id', 'user', 'evento', 'score')
 
 
 class UserCompReviewSerializer(UserCompSerializer):

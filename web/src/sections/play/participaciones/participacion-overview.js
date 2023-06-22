@@ -198,7 +198,6 @@ export const ParticipacionOverview = ({ participacion, setParticipacion, pregunt
             )
         }
     } else {
-        console.log(participacion)
         if (participacion) {
             return (
                 <Card sx={{ mt: 2 }}>
@@ -212,18 +211,18 @@ export const ParticipacionOverview = ({ participacion, setParticipacion, pregunt
                         />
                         <Divider />
                         <Typography variant="h5" sx={{ my: 3 }}>
-                            Mi pregunta creada
+                            Pregunta creada
                         </Typography>
                         <QuestionQuiz question={pregunta} solved />
                         <Divider />
                         <Typography variant="h5" sx={{ my: 3 }}>
-                            Mi partida
+                            Partida
                         </Typography>
                         {participacion.partida ? (
                             <PartidaReview partida={participacion.partida} />
                         ) : (
                             <Typography variant="body1" sx={{ mb: 2, textAlign: "center" }}>
-                                No has jugado tu partida
+                                No se ha jugado la partida
                             </Typography>
                         )}
                     </CardContent>

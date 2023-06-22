@@ -78,16 +78,8 @@ class PartidaRepasoViewSet(GenericViewSet):
         if log.partida.repaso.user == request.user:
             if log.respuesta == None:
                 respuesta = request.data.get('respuesta', None)
-                print(respuesta)
                 correcta = get_object_or_404(Opcion, pregunta = log.pregunta.id, esCorrecta=True)
                 opcion = get_object_or_404(Opcion, pk=respuesta, pregunta=log.pregunta.id)
-
-                # val = request.data.get('valoracion', 0)
-
-                # if val != 0:
-                #     log.pregunta.valoracionAcumulada += val
-                #     log.pregunta.nValorada += 1
-                #     log.pregunta.save()
                     
                 data = {
                     "timeFin": timezone.now(),

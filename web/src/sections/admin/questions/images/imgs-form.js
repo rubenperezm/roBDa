@@ -91,7 +91,7 @@ export const ImgsForm = (props) => {
             try {
                 const res = await axiosAuth.delete(`/api/questions/images/${image.id}`).then(res => res.data);
             } catch (error) {
-                console.log(error);
+                //console.log(error);
             }
         };
 

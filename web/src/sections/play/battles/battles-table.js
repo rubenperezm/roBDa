@@ -104,15 +104,6 @@ export const BattlesTable = (props) => {
                                                 direction="row"
                                                 spacing={2}
                                             >
-                                                {/* <Tooltip title="Ver duelo">
-                                                    <IconButton
-                                                        component={NextLink}
-                                                        href={`/battles/${battle.id}`}>
-                                                        <SvgIcon fontSize="small">
-                                                            <EyeIcon />
-                                                        </SvgIcon>
-                                                    </IconButton>
-                                                </Tooltip> */}
                                                 <ActionsTableBattles 
                                                     id={battle.id} 
                                                     estado={battle.estado} 
