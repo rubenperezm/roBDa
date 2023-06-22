@@ -41,7 +41,6 @@ def estadisticas(request):
         # STATS REPASOS
         # Número de repasos totales por tema e idioma
         n_repasos = Repaso.objects.values('partida__tema__nombre', 'partida__idioma').annotate(tema=F('partida__tema__nombre'), idioma=F('partida__idioma'), numero=Count('pk')).values('tema', 'idioma', 'numero')
-        print(n_repasos)
         # Media de preguntas por repaso
         preguntas_repasos_media = Repaso.objects.values('pk').annotate(preguntas_len=(Count(F('partida__preguntas')))).aggregate(media=Avg(F('preguntas_len')))
         # Desglose de aciertos en repasos
