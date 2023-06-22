@@ -41,6 +41,7 @@ def estadisticas(request):
         # STATS REPASOS
         # Número de repasos totales por tema e idioma
         n_repasos = Repaso.objects.values('partida__tema__nombre', 'partida__idioma').annotate(tema=F('partida__tema__nombre'), idioma=F('partida__idioma'), numero=Count('pk')).values('tema', 'idioma', 'numero')
+        print(n_repasos)
         # Media de preguntas por repaso
         preguntas_repasos_media = Repaso.objects.values('pk').annotate(preguntas_len=(Count(F('partida__preguntas')))).aggregate(media=Avg(F('preguntas_len')))
         # Desglose de aciertos en repasos
@@ -65,9 +66,9 @@ def estadisticas(request):
         return Response({
             'usuarios': n_users,
             'tiempo_jugado': {
-                'horas': tiempo['total'].seconds // 3600,
-                'minutos': (tiempo['total'].seconds % 3600) // 60,
-                'segundos': ((tiempo['total'].seconds % 3600) % 60) // 60,
+                'horas': tiempo['total'].seconds // 3600 if tiempo['total'] else 0,
+                'minutos': (tiempo['total'].seconds % 3600) // 60 if tiempo['total'] else 0,
+                'segundos': ((tiempo['total'].seconds % 3600) % 60) // 60 if tiempo['total'] else 0,
             },
             'partidas_totales': n_total_partidas,
             'reports_totales': n_total_reports,

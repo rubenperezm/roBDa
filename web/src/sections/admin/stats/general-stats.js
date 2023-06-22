@@ -171,7 +171,7 @@ export const GeneralStats = ({stats}) => {
                                             </TableRow>
                                         </TableHead>
                                         <TableBody>
-                                            {stats?.preguntas.map((row, index) => (
+                                            {stats?.repasos_totales.map((row, index) => (
                                                 <TableRow hover key={index + 1}>
                                                     <TableCell>{row.tema}</TableCell>
                                                     <TableCell>{row.idioma === 1 ? 'Español' : 'Inglés'}</TableCell>
