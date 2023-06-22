@@ -81,7 +81,7 @@ const Page = () => (
                         </Grid>
                         <Card>
                             <CardContent>
-                                <Image src="/assets/logo_uca.png" alt="Logo de la Universidad de Cádiz" width={500} height={180}/>
+                                <Image src="/assets/logo_uca.png" alt="Logo de la Universidad de Cádiz" width={250} height={100}/>
                                 <Divider />
                                 <Typography variant="body1" paragraph mt={3}>
                                     ROBDA es una plataforma web interactiva de la Universidad de Cádiz que permite a los usuarios responder cuestionarios de tipo test enfocados en teoría de bases de datos. Se trata de una aplicación colaborativa en la que los propios alumnos tienen la oportunidad de contribuir al desarrollo de preguntas y reportar cualquier problema que encuentren en los distintos modos de juegos diseñados para hacer el aprendizaje mucho más ameno. Con esta combinación de características, ROBDA busca fomentar la participación activa de los usuarios, brindando un entorno educativo dinámico y en constante crecimiento.
