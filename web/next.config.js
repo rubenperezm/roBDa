@@ -10,5 +10,5 @@ module.exports = process.env.NODE_ENV === 'development' ?
       register: true,
       skipWaiting: true
 
-    },
+    }
   });
