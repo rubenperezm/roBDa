@@ -8,7 +8,7 @@ module.exports = process.env.NODE_ENV === 'development' ?
     pwa: {
       dest: 'public',
       register: true,
-      skipWaiting: true,
+      skipWaiting: true
 
     },
   });
