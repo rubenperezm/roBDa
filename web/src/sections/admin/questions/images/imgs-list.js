@@ -49,7 +49,7 @@ export default function ImgsList(props) {
                         src={API_URL + new URL(item.path).pathname}
                         alt={item.nombre}
                         loading="lazy"
-                        style={{ height: '100%', width: '100%', objectFit: 'fill'}}                        
+                        style={{ height: '80%', maxHeight: '80%', minHeight: '80%', width: '100%', objectFit: 'fill'}}                        
                     />
                     <ImageListItemBar
                         sx={{ 
