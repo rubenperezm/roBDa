@@ -8,6 +8,7 @@ import { Box } from "@mui/material";
 export const ImageLightbox = (props) => {
     const { imagePath } = props;
     const [open, setOpen] = useState(false);
+    const img = imagePath.startsWith('http') ? API_URL + new URL(imagePath).pathname : API_URL + imagePath
 
     return (
         <>
@@ -20,7 +21,7 @@ export const ImageLightbox = (props) => {
 
             <Box
                 component="img"
-                src={imagePath.startsWith('http') ? API_URL + new URL(imagePath).pathname : API_URL + imagePath}
+                src={img}
                 onClick={() => setOpen(true)}
                 sx={{
                     height: 'auto',
@@ -42,7 +43,7 @@ export const ImageLightbox = (props) => {
                 close={() => setOpen(false)}
                 controller={{ closeOnBackdropClick: true }}
                 slides={[
-                    { src: imagePath },
+                    { src: img },
                 ]}
 
                 carousel={{ finite: true }}
