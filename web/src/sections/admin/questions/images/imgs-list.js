@@ -1,5 +1,5 @@
-import NextLink from 'next/link';
 import { useRouter } from 'next/router';
+import { API_URL } from 'src/config';
 import {
     ImageList,
     ImageListItem,
@@ -46,7 +46,7 @@ export default function ImgsList(props) {
                         }: () => router.push(`/admin/questions/images/${item.id}`)}
                 >
                     <img
-                        src={item.path}
+                        src={API_URL + new URL(item.path).getPath()}
                         alt={item.nombre}
                         loading="lazy"
                         style={{ height: '100%', width: '100%', objectFit: 'fill'}}                        
