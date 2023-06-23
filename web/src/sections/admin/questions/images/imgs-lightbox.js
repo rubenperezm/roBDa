@@ -20,7 +20,7 @@ export const ImageLightbox = (props) => {
 
             <Box
                 component="img"
-                src={imagePath.startsWith('http') ? API_URL + new URL(imagePath).getPath() : API_URL + imagePath}
+                src={imagePath.startsWith('http') ? API_URL + new URL(imagePath).pathname : API_URL + imagePath}
                 onClick={() => setOpen(true)}
                 sx={{
                     height: 'auto',

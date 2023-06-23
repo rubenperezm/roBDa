@@ -46,7 +46,7 @@ export default function ImgsList(props) {
                         }: () => router.push(`/admin/questions/images/${item.id}`)}
                 >
                     <img
-                        src={API_URL + new URL(item.path).getPath()}
+                        src={API_URL + new URL(item.path).pathname}
                         alt={item.nombre}
                         loading="lazy"
                         style={{ height: '100%', width: '100%', objectFit: 'fill'}}                        
