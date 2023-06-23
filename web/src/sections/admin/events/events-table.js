@@ -32,7 +32,7 @@ export const EventsTable = (props) => {
             'Creación preguntas': 'warning',
             'En juego': 'success',
             'Esperando corrección del profesor': 'error',
-            'Finalizada': 'error',
+            'Finalizada': 'secondary',
         };
         return colors[state];
     };

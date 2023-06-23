@@ -6,7 +6,7 @@ import {
     Unstable_Grid2 as Grid
 } from '@mui/material';
 import { ImageLightbox } from './images/imgs-lightbox';
-import { API_URL } from 'src/config';
+
 export const QuestionQuiz = (props) => {
     const { question, solved, selected, setSelected } = props;
 
@@ -41,8 +41,7 @@ export const QuestionQuiz = (props) => {
                     item
                     xs={12}
                 >
-                    {/* TODO: Ver que ocurre en caso de no funcionar el proxy inverso*/}
-                    <ImageLightbox imagePath={`${API_URL}${question.imagen.path}`} />
+                    <ImageLightbox imagePath={question.imagen.path} />
                 </Grid>
             }
             {question.opciones.map((opcion) => (

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/styles.css";
+import { API_URL } from 'src/config';
 import { Box } from "@mui/material";
 
 export const ImageLightbox = (props) => {
@@ -19,7 +20,7 @@ export const ImageLightbox = (props) => {
 
             <Box
                 component="img"
-                src={imagePath}
+                src={imagePath.startsWith('http') ? imagePath : `${API_URL}${imagePath}`}
                 onClick={() => setOpen(true)}
                 sx={{
                     height: 'auto',

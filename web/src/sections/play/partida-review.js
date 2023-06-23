@@ -19,7 +19,7 @@ import { QuestionQuiz } from '../admin/questions/question-quiz';
 import { ReportReview } from './reports/report-review';
 
 export const PartidaReview = (props) => {
-    const { partida, lecturerView, showReportButton, toggleReportada } = props; // TODO: Ver si con reports nos podemos ahorrar lecturerView
+    const { partida, showReportButton, toggleReportada } = props;
     const [currentQuestion, setCurrentQuestion] = useState(0);
 
     const tiempoDeCuestionario = (fecha) => {

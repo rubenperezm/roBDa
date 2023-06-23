@@ -16,7 +16,6 @@ export default async (req, res) => {
 
 
         try {
-            // TODO: Esto sería solo para el profesor. Crear menú con eventos, y en cada uno pedir a esta petición
             const apiRes = await fetch(`${API_URL}/partidas/partidas/evento/?page=${page}`, {
                 method: 'GET',
                 headers: {

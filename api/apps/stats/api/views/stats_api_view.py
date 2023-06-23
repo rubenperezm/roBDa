@@ -62,12 +62,13 @@ def estadisticas(request):
         # Desglose de duelos por estado
         estado_duelos = Duelos.objects.values('estado').annotate(numero=Count('pk'))
 
+        print(tiempo)
         return Response({
             'usuarios': n_users,
             'tiempo_jugado': {
-                'horas': tiempo['total'].seconds // 3600 if tiempo['total'] else 0,
-                'minutos': (tiempo['total'].seconds % 3600) // 60 if tiempo['total'] else 0,
-                'segundos': ((tiempo['total'].seconds % 3600) % 60) // 60 if tiempo['total'] else 0,
+                'horas': tiempo['total'].seconds // 3600 if tiempo['total'] is not None else 0,
+                'minutos': (tiempo['total'].seconds // 60 ) % 60 if tiempo['total'] is not None else 0,
+                'segundos': tiempo['total'].seconds % 60 if tiempo['total'] is not None else 0,
             },
             'partidas_totales': n_total_partidas,
             'reports_totales': n_total_reports,

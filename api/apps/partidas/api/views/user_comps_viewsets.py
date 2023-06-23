@@ -84,7 +84,7 @@ class PartidaEventoViewSet(GenericViewSet):
         uc = self.get_object()
         if uc.user != request.user:
             return Response({"error": "La partida seleccionada no pertenece al usuario."}, status=status.HTTP_403_FORBIDDEN)
-        if uc.partida.preguntas.filter(timeIni__isnull=False).exists(): # TODO: Añadir un plazo para cerrar partida abandonada?
+        if uc.partida.preguntas.filter(timeIni__isnull=False).exists():
             return Response({"error": "La partida ya ha sido jugada."}, status=status.HTTP_400_BAD_REQUEST)
         respuestas = request.data.get('respuestas')
         if respuestas:
