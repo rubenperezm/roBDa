@@ -34,7 +34,7 @@ const Page = () => {
                         <Grid container spacing={2}>
                             <Grid item xs={12}>
                                 <Typography variant="h4">
-                                    Crear tema
+                                    Crear imagen
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sm={9} md={10}>
