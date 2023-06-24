@@ -82,7 +82,7 @@ class PartidaEventoViewSet(GenericViewSet):
 
     # Recibe las respuestas de las preguntas de la partida
     def partial_update(self, request, pk=None):
-        uc = self.get_object()
+        uc = get_object_or_404(UserComp, pk=pk)
         if uc.user != request.user:
             return Response({"error": "La partida seleccionada no pertenece al usuario."}, status=status.HTTP_403_FORBIDDEN)
         if uc.partida.preguntas.filter(timeIni__isnull=False).exists():
