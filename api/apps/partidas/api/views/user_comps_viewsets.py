@@ -64,7 +64,8 @@ class PartidaEventoViewSet(GenericViewSet):
 
     # Crea la partida, los AnswerLogs y devuelve las preguntas
     def update(self, request, pk=None):
-        usercomp = self.get_object()
+        usercomp = get_object_or_404(UserComp, pk=pk)
+        print(usercomp)
         if usercomp.user == request.user:
             if usercomp.partida == None:
                 preguntas = preguntas_usercomp(usercomp)
