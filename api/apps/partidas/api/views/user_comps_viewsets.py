@@ -37,7 +37,7 @@ class PartidaEventoViewSet(GenericViewSet):
         return Response({"error": "Listado no disponible para el alumnado."}, status=status.HTTP_403_FORBIDDEN)
 
     def retrieve(self, request, pk=None):
-        usercomp = self.get_object()
+        usercomp = get_object_or_404(UserComp, pk=pk)
         if request.user.is_staff or usercomp.user == request.user:
             usercomp_serializer = self.serializer_class_retrieve(usercomp)
             preg = Pregunta.objects.filter(evento = usercomp.evento, creador = usercomp.user).first()
