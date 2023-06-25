@@ -60,7 +60,7 @@ const useChartOptions = (labels) => {
 
 export const DonutEvento = (props) => {
     const { data } = props;
-    const [evento, setEvento] = useState('Fuera de evento');
+    const [evento, setEvento] = useState(null);
     const [chartSeries, setChartSeries] = useState(null);
     const [eventos, setEventos] = useState(null);
     const labels = ['Pendiente', 'Validado', 'Rechazado'];
@@ -68,8 +68,13 @@ export const DonutEvento = (props) => {
 
     useEffect(() => {
         if(!data) return;
-        setEventos([...new Set(data.map(d => d.evento !== null ? d.evento : 'Fuera de evento'))])
+        setEventos([...new Set(data.map(d => d.evento !== null ? d.evento : 'Fuera de evento'))]);
     }, [data]);
+
+    useEffect(() => {
+        if(!eventos) return;
+        setEvento(eventos[0]);
+    }, [eventos]);
 
     useEffect(() => {
         if(!data) return;

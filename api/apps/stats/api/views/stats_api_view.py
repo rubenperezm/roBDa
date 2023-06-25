@@ -16,7 +16,7 @@ def estadisticas(request):
         # Numero de alumnos registrados
         n_users = User.objects.filter(is_staff = False).count()
         # Tiempo jugado (solo cuenta el tiempo de las preguntas respondidas)
-        tiempo = AnswerLogs.objects.aggregate(total=Sum(F('modified_date') - F('created_date'), output_field = DurationField()))
+        tiempo = AnswerLogs.objects.filter(timeFin__isnull=False).aggregate(total=Sum(F('timeFin') - F('timeIni'), output_field = DurationField()))
         # Número de partidas totales
         n_total_partidas = Partida.objects.count()
         # Número de reportes totales

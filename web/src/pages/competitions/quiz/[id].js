@@ -124,7 +124,7 @@ const Page = () => {
                                             )}
                                             href={`/competitions/${id}`}
                                         >
-                                            "Volver a competición"
+                                            Volver a competición
                                         </Button>
                                     </Stack>
                                 </Grid>
