@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 
-from apps.preguntas.api.serializers.preguntas_serializers import PreguntaSerializer
+from apps.preguntas.api.serializers.preguntas_serializers import PreguntaResueltaSerializer
 from apps.partidas.models import AnswerLogs, Evento, Partida, UserComp
 from apps.preguntas.models import Pregunta, Opcion
 from apps.partidas.api.serializers.user_comps_serializers import *
@@ -17,7 +17,7 @@ class PartidaEventoViewSet(GenericViewSet):
     serializer_class = UserCompSerializer
     serializer_class_retrieve = UserCompReviewSerializer
     serializer_class_list = UserCompListSerializer
-    pregunta_serializer = PreguntaSerializer
+    pregunta_serializer = PreguntaResueltaSerializer
     model = UserComp
 
     def get_queryset(self, pk=None):

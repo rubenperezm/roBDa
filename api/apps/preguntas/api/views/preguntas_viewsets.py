@@ -168,16 +168,16 @@ class reportar(APIView):
                 "motivo": request.data.get("motivo", None),
                 "descripcion": request.data.get("descripcion", None),
             }
-            
-            if log.pregunta.evento.fase_actual == "En juego":
-                data["evento"] = log.pregunta.evento.id
-            else:
-                return Response(
-                    {
-                        "error": "No se pueden reportar preguntas fuera de la segunda fase."
-                    },
-                    status=status.HTTP_403_FORBIDDEN,
-                )
+            if log.pregunta.evento:
+                if log.pregunta.evento.fase_actual == "En juego":
+                    data["evento"] = log.pregunta.evento.id
+                elif not log.pregunta.evento.terminada:
+                    return Response(
+                        {
+                            "error": "No se pueden reportar preguntas fuera de la segunda fase."
+                        },
+                        status=status.HTTP_403_FORBIDDEN,
+                    )
 
             report_serial = ReportSerializer(data=data)
             if report_serial.is_valid():
