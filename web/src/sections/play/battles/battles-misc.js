@@ -90,7 +90,7 @@ export const StateColor = (props) => {
         'En Creacion': 'success',
         'Pendiente': 'warning',
         'Aceptado': retador ? 'info' : 'success',
-        'Finalizado': 'primary',
+        'Finalizado': 'secondary',
         'Rechazado': 'error'
     }
 
